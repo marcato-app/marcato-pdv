@@ -549,17 +549,33 @@ datalist{}
       <div class="tab2" data-atab="criar">Criar conta</div>
     </div>
     <div id="atab-entrar">
-      <div class="field" style="margin-bottom:10px;"><label>E-mail</label><input type="email" id="loginEmail" style="width:100%;"></div>
-      <div class="field" style="margin-bottom:14px;"><label>Senha</label><input type="password" id="loginSenha" style="width:100%;"></div>
+      <div class="field" style="margin-bottom:10px;"><label>E-mail</label><input type="email" id="loginEmail" style="width:100%;" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false"></div>
+      <div class="field" style="margin-bottom:8px;"><label>Senha</label><input type="password" id="loginSenha" style="width:100%;" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false"></div>
+      <div style="text-align:right; margin-bottom:14px;"><span id="btnEsqueciSenha" style="font-size:11.5px; color:var(--brand); cursor:pointer; font-weight:600;">Esqueci minha senha</span></div>
       <button class="btn-teal" id="btnLogin" style="width:100%;">Entrar</button>
     </div>
     <div id="atab-criar" class="hide">
-      <div class="field" style="margin-bottom:10px;"><label>E-mail</label><input type="email" id="cadEmail" style="width:100%;"></div>
-      <div class="field" style="margin-bottom:14px;"><label>Senha (mínimo 6 caracteres)</label><input type="password" id="cadSenha" style="width:100%;"></div>
+      <div class="field" style="margin-bottom:10px;"><label>E-mail</label><input type="email" id="cadEmail" style="width:100%;" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false"></div>
+      <div class="field" style="margin-bottom:14px;"><label>Senha (mínimo 6 caracteres)</label><input type="password" id="cadSenha" style="width:100%;" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false"></div>
       <button class="btn-teal" id="btnCriarConta" style="width:100%;">Criar conta</button>
     </div>
     <div id="authStatus" style="font-size:12px; color:var(--warn); margin-top:12px; min-height:16px;"></div>
     <div style="text-align:center; margin-top:22px; font-size:10.5px; color:var(--ink-soft);">Sistema desenvolvido por <b style="color:var(--ink); font-weight:800;">Identidade<span style="color:var(--brand);">Vision</span></b></div>
+  </div>
+</div>
+
+<!-- ================= DEFINIR NOVA SENHA (link de recuperação) ================= -->
+<div id="recoveryScreen" class="auth-screen hide">
+  <div class="auth-card">
+    <div class="brand" style="justify-content:center; padding-bottom:18px;">
+      <div class="dot"></div>
+      <div><b style="color:var(--ink);">Marcato PDV</b></div>
+    </div>
+    <div style="font-weight:700; margin-bottom:4px;">Defina uma nova senha</div>
+    <div style="font-size:12px; color:var(--ink-soft); margin-bottom:16px;">Escolha uma senha nova pra sua conta.</div>
+    <div class="field" style="margin-bottom:14px;"><label>Nova senha (mínimo 6 caracteres)</label><input type="password" id="novaSenhaRecuperacao" style="width:100%;" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false"></div>
+    <button class="btn-teal" id="btnSalvarNovaSenha" style="width:100%;">Salvar nova senha</button>
+    <div id="recoveryStatus" style="font-size:12px; color:var(--warn); margin-top:12px; min-height:16px;"></div>
   </div>
 </div>
 
@@ -5550,6 +5566,18 @@ document.getElementById('btnLogin').addEventListener('click', async ()=>{
   await iniciarSessao(data.session);
 });
 
+document.getElementById('btnEsqueciSenha').addEventListener('click', async ()=>{
+  const email = document.getElementById('loginEmail').value.trim();
+  const statusEl = document.getElementById('authStatus');
+  if(!email){ statusEl.style.color = 'var(--warn)'; statusEl.textContent = 'Digite seu e-mail no campo acima primeiro.'; return; }
+  statusEl.style.color = 'var(--warn)';
+  statusEl.textContent = 'Enviando...';
+  const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin });
+  if(error){ statusEl.textContent = 'Erro: ' + error.message; return; }
+  statusEl.style.color = 'var(--green-dark)';
+  statusEl.textContent = 'Se esse e-mail tiver uma conta, enviamos um link pra redefinir a senha.';
+});
+
 document.getElementById('btnCriarConta').addEventListener('click', async ()=>{
   const email = document.getElementById('cadEmail').value.trim();
   const senha = document.getElementById('cadSenha').value;
@@ -5940,9 +5968,32 @@ document.addEventListener('keydown', (e)=>{
   if(el) el.value = new Date().toISOString().slice(0,10);
 })();
 
+let sessaoRecuperacaoPendente = null;
+sb.auth.onAuthStateChange((event, session) => {
+  if(event === 'PASSWORD_RECOVERY'){
+    sessaoRecuperacaoPendente = session;
+    document.getElementById('authScreen').style.display = 'none';
+    document.getElementById('onboardingScreen').classList.add('hide');
+    document.getElementById('recoveryScreen').classList.remove('hide');
+  }
+});
+
+document.getElementById('btnSalvarNovaSenha').addEventListener('click', async ()=>{
+  const novaSenha = document.getElementById('novaSenhaRecuperacao').value;
+  const statusEl = document.getElementById('recoveryStatus');
+  if(novaSenha.length < 6){ statusEl.style.color = 'var(--warn)'; statusEl.textContent = 'A senha precisa ter pelo menos 6 caracteres.'; return; }
+  statusEl.style.color = 'var(--warn)';
+  statusEl.textContent = 'Salvando...';
+  const { error } = await sb.auth.updateUser({ password: novaSenha });
+  if(error){ statusEl.textContent = 'Erro: ' + error.message; return; }
+  statusEl.textContent = '';
+  document.getElementById('recoveryScreen').classList.add('hide');
+  await iniciarSessao(sessaoRecuperacaoPendente);
+});
+
 (async function initApp(){
   const { data: { session } } = await sb.auth.getSession();
-  if(session){
+  if(session && !sessaoRecuperacaoPendente){
     await iniciarSessao(session);
   }
 })();
