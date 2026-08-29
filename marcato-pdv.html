@@ -659,6 +659,28 @@ datalist{}
   .msub-profile-meta b{ display:block; font-size:14.5px; font-weight:600; }
   .msub-profile-meta span{ display:block; font-size:11.5px; color:var(--ink-soft); margin-top:1px; }
   .msub-footer{ text-align:center; font-size:10.5px; color:var(--ink-soft); opacity:.75; margin-top:16px; }
+
+  /* ---- Tabelas viram lista de cards no celular (Clientes, Fluxo de Caixa, Boletos) ---- */
+  table.tabela-cards-mobile{ min-width:0 !important; }
+  table.tabela-cards-mobile thead{ display:none; }
+  table.tabela-cards-mobile, table.tabela-cards-mobile tbody{ display:block; width:100%; }
+  table.tabela-cards-mobile tr{
+    display:block; background:var(--card); border:1px solid var(--line); border-radius:var(--radius-sm);
+    padding:4px 14px; margin-bottom:10px; box-shadow:var(--shadow-sm);
+  }
+  table.tabela-cards-mobile td{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    padding:9px 0; border-bottom:1px solid var(--line); text-align:right;
+  }
+  table.tabela-cards-mobile tr td:last-child{ border-bottom:none; }
+  table.tabela-cards-mobile td.hide-col{ display:none; }
+  table.tabela-cards-mobile td::before{
+    content:attr(data-label); font-weight:600; color:var(--ink-soft); text-align:left;
+    font-family:'Poppins',sans-serif; font-size:10.5px; text-transform:uppercase; letter-spacing:.04em; flex-shrink:0;
+  }
+  table.tabela-cards-mobile td:empty::before, table.tabela-cards-mobile td[data-label=""]::before{ content:none; }
+  table.tabela-cards-mobile td[data-label=""]{ justify-content:flex-end; padding-top:2px; }
+  .panel:has(table.tabela-cards-mobile){ overflow-x:visible; padding:14px; }
 }
 @media (max-width:480px){
   .kpis{grid-template-columns:1fr !important;}
@@ -1013,7 +1035,7 @@ datalist{}
             </div>
           </div>
         </div>
-        <table data-tabela-cols="vendas">
+        <table data-tabela-cols="vendas" class="tabela-cards-mobile">
           <thead><tr><th>Data</th><th data-col="pix">Pix</th><th data-col="cartao">Cartão</th><th data-col="dinheiro">Dinheiro</th><th>Total</th><th></th></tr></thead>
           <tbody id="tblVendas"></tbody>
         </table>
@@ -1115,7 +1137,7 @@ datalist{}
           </div>
         </div>
         <div style="max-height:360px; overflow-y:auto; border-top:1px solid var(--line); margin-top:8px;">
-          <table data-tabela-cols="boletos">
+          <table data-tabela-cols="boletos" class="tabela-cards-mobile">
             <thead><tr><th>Beneficiário</th><th>Valor</th><th data-col="dataDoc">Data do documento</th><th data-col="vencimento">Vencimento</th><th data-col="status">Status</th><th></th></tr></thead>
             <tbody id="tblBoletos"></tbody>
           </table>
@@ -1155,7 +1177,7 @@ datalist{}
           </div>
         </div>
 
-        <table data-tabela-cols="clientes">
+        <table data-tabela-cols="clientes" class="tabela-cards-mobile">
           <thead><tr><th>Nome</th><th data-col="tipo">Tipo</th><th data-col="telefone">Telefone</th><th data-col="email">E-mail</th><th></th></tr></thead>
           <tbody id="tblClientes"></tbody>
         </table>
@@ -2312,7 +2334,7 @@ function renderVendas(){
   filtrados.forEach(v=>{
     const total = v.pix+v.cartao+v.dinheiro;
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${fmtData(v.data)}</td><td data-col="pix">${money(v.pix)}</td><td data-col="cartao">${money(v.cartao)}</td><td data-col="dinheiro">${money(v.dinheiro)}</td><td><b>${money(total)}</b></td><td><span class="rm" onclick="removerVenda('${v.id}')">remover</span></td>`;
+    tr.innerHTML = `<td data-label="Data">${fmtData(v.data)}</td><td data-col="pix" data-label="Pix">${money(v.pix)}</td><td data-col="cartao" data-label="Cartão">${money(v.cartao)}</td><td data-col="dinheiro" data-label="Dinheiro">${money(v.dinheiro)}</td><td data-label="Total"><b>${money(total)}</b></td><td data-label=""><span class="rm" onclick="removerVenda('${v.id}')">remover</span></td>`;
     tbody.appendChild(tr);
   });
   aplicarColunasVisiveis('vendas');
@@ -2432,9 +2454,9 @@ function renderBoletos(){
   const ordenado = [...filtrados].sort((a,b)=> a.vencimento < b.vencimento ? -1 : 1);
   ordenado.forEach(b=>{
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td style="font-family:'Inter',sans-serif;">${b.beneficiario}</td><td>${money(b.valor)}</td><td data-col="dataDoc">${fmtData(b.dataDocumento)}</td><td data-col="vencimento">${fmtData(b.vencimento)}</td>
-      <td data-col="status"><span class="tag ${b.status}" style="cursor:pointer;" onclick="togglePago('${b.id}')">${b.status}</span></td>
-      <td><span class="rm" onclick="removerBoleto('${b.id}')">remover</span></td>`;
+    tr.innerHTML = `<td style="font-family:'Inter',sans-serif;" data-label="Beneficiário">${b.beneficiario}</td><td data-label="Valor">${money(b.valor)}</td><td data-col="dataDoc" data-label="Data do documento">${fmtData(b.dataDocumento)}</td><td data-col="vencimento" data-label="Vencimento">${fmtData(b.vencimento)}</td>
+      <td data-col="status" data-label="Status"><span class="tag ${b.status}" style="cursor:pointer;" onclick="togglePago('${b.id}')">${b.status}</span></td>
+      <td data-label=""><span class="rm" onclick="removerBoleto('${b.id}')">remover</span></td>`;
     tbody.appendChild(tr);
   });
   // datalist de beneficiários já usados
@@ -2588,7 +2610,7 @@ function renderClientes(){
   const tipoLabel = {varejo:'Varejo', atacado:'Atacado'};
   filtrados.forEach(c=>{
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td style="font-family:'Inter',sans-serif;">${c.nome}</td><td data-col="tipo">${tipoLabel[c.tipoCliente]||'—'}</td><td data-col="telefone">${c.telefone||'—'}</td><td data-col="email">${c.email||'—'}</td><td><span class="rm" onclick="removerCliente('${c.id}')">remover</span></td>`;
+    tr.innerHTML = `<td style="font-family:'Inter',sans-serif;" data-label="Nome">${c.nome}</td><td data-col="tipo" data-label="Tipo">${tipoLabel[c.tipoCliente]||'—'}</td><td data-col="telefone" data-label="Telefone">${c.telefone||'—'}</td><td data-col="email" data-label="E-mail">${c.email||'—'}</td><td data-label=""><span class="rm" onclick="removerCliente('${c.id}')">remover</span></td>`;
     tbody.appendChild(tr);
   });
   aplicarColunasVisiveis('clientes');
