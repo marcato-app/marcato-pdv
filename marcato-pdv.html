@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Marcato PDV</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
   --brand:#6C3CE9; --brand-2:#8B5CF6; --brand-dark:#4B21B8; --brand-glow: rgba(108,60,233,0.16);
@@ -449,33 +449,38 @@ datalist{}
 }
 .mobile-topbar{ display:none; }
 .sidebar-backdrop{ display:none; }
+.mobile-tabbar{ display:none; }
 @media (max-width:780px){
+  /* ---- Paleta mobile (Marcato) — sobrescreve os tokens só no celular ---- */
+  :root{
+    --bg-app:#F5F4F0; --card:#FFFFFF; --card-2:#F1EDFB;
+    --ink:#1F1E1C; --ink-soft:#6B6A66; --ink-dim:#9A988F; --line:#DDDBD3; --line-2:#CFCCC1;
+    --warn:#B3261E; --warn-soft:#FBEAEA;
+    --green-dark:#27500A; --green-glow:#EAF3DE;
+    --tint-neutral:#EEEDE7;
+    --radius:14px; --radius-sm:12px;
+    --shadow-sm:0 3px 10px rgba(0,0,0,.09);
+    --shadow-md:0 8px 20px rgba(0,0,0,.13);
+  }
+  html.tema-escuro{
+    --bg-app:#0A0A09; --card:#151410; --card-2:#1B1912;
+    --ink:#F3F1EB; --ink-soft:#928D7C; --ink-dim:#615D4F; --line:#232219; --line-2:#312F23;
+    --warn:#FF7A6B; --warn-soft:#301A17;
+    --green-dark:#7BD9A0; --green-glow:#152417;
+    --tint-neutral:#1E1C15;
+    --shadow-sm:0 3px 10px rgba(0,0,0,.3);
+    --shadow-md:0 8px 20px rgba(0,0,0,.4);
+  }
+  body{ font-family:'Poppins',sans-serif; }
+  .kpi .v, .mini-kpi .v, .hero-card .v, td, .terminal-tabela td, .terminal-stat-row .v{ font-family:'Poppins',sans-serif; }
+
   .app{flex-direction:column;}
-
-  .mobile-topbar{
-    display:flex; align-items:center; gap:12px; position:sticky; top:0; z-index:45;
-    background:var(--bg-dark); color:#EAF5F3; padding:12px 16px;
-  }
-  .mobile-topbar button{
-    background:rgba(255,255,255,0.08); border:none; color:#fff; border-radius:8px;
-    width:34px; height:34px; font-size:18px; line-height:1; flex-shrink:0;
-  }
-  .mobile-topbar b{ font-size:15px; font-weight:800; }
-
-  .sidebar-backdrop.visivel{
-    display:block; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:98;
-  }
-
-  .sidebar{
-    position:fixed; top:0; left:0; height:100vh; width:250px; z-index:99;
-    transform:translateX(-100%); transition:transform .22s ease; box-shadow:2px 0 16px rgba(0,0,0,0.2);
-    overflow-y:auto;
-  }
-  .sidebar.aberta{ transform:translateX(0); }
-  #navSair{ margin-top:0; }
+  .mobile-topbar{ display:none; }
+  .sidebar-backdrop{ display:none; }
+  .sidebar{ display:none; }
   .hide-mobile{ display:none !important; }
 
-  main{ padding:16px 14px 50px; max-width:100%; }
+  main{ padding:16px 14px 108px; max-width:100%; }
   .topbar{ flex-direction:column; align-items:flex-start; gap:10px; }
   .topbar h1{ font-size:19px; }
 
@@ -484,6 +489,11 @@ datalist{}
 
   .app.modo-caixa main{ padding:0; }
   .app.modo-caixa .terminal-panel{ border-radius:0; border-left:none; border-right:none; }
+  .app.modo-caixa .mobile-tabbar{ display:none; }
+  /* Sem barra de abas nem teclado físico (Esc) no celular durante o modo caixa —
+     esse botão precisa continuar visível, é a única saída. */
+  .app.modo-caixa #btnSairModoCaixa{ display:inline-flex !important; margin:12px 14px 0; }
+  .app.modo-caixa #btnSairModoCaixa .mono{ display:none; }
 
   .terminal-panel{ padding:0; overflow:visible; }
   .terminal-tabela th:first-child, .terminal-tabela td:first-child{ display:none; }
@@ -504,12 +514,75 @@ datalist{}
 
   .formrow{ gap:8px; }
   .field{ flex:1 1 100%; }
-  input, select{ min-width:0; width:100%; }
+  input, select{ min-width:0; width:100%; font-family:'Poppins',sans-serif; }
 
-  button{ padding:11px 15px; }
-  .btn-sm{ padding:7px 10px; }
+  button{ padding:12px 18px; border-radius:999px; font-family:'Poppins',sans-serif; }
+  .btn-sm{ padding:8px 14px; }
 
   .auth-card, .modal-card{ padding:22px 18px; }
+  .auth-card, .modal-card, .panel, .kpi, .mini-kpi, .hero-card{ border-radius:var(--radius); }
+
+  /* ---- Barra de abas inferior ---- */
+  .mobile-tabbar{
+    display:block; position:fixed; left:12px; right:12px; bottom:calc(10px + env(safe-area-inset-bottom)); z-index:120;
+  }
+  .mtabbar-track{
+    display:flex; align-items:center; gap:4px; border-radius:999px; border:1px solid var(--line);
+    background:var(--card); padding:6px; box-shadow:var(--shadow-md);
+  }
+  .mtab-item{
+    flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+    padding:7px 0; border:none; background:none; cursor:pointer; -webkit-tap-highlight-color:transparent;
+  }
+  .mtab-item .mtab-ico svg{ width:20px; height:20px; stroke:var(--ink-soft); fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .mtab-item .mtab-txt{ font-size:10.5px; font-weight:500; color:var(--ink-soft); }
+  .mtab-item.active .mtab-ico, .mtab-item.active .mtab-txt{ opacity:0; }
+
+  .mtab-float{
+    position:absolute; top:-22px; left:0; width:56px; display:flex; flex-direction:column; align-items:center; gap:3px;
+    transition:transform .32s cubic-bezier(.34,1.56,.64,1); pointer-events:none;
+  }
+  .mtab-circle{
+    width:56px; height:56px; border-radius:50%; background:linear-gradient(155deg, var(--brand), var(--brand-dark));
+    border:3px solid var(--bg-app); display:flex; align-items:center; justify-content:center;
+    box-shadow:0 6px 16px -2px var(--brand-glow); transition:transform .12s ease;
+  }
+  .mtab-circle svg{ width:24px; height:24px; stroke:#fff; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .mtab-circle.pressed{ transform:scale(.88); }
+  .mtab-float-label{ font-size:10px; font-weight:600; color:var(--brand); }
+
+  /* ---- Submenus (Financeiro / Mais) ---- */
+  .mobile-submenu{ position:fixed; inset:0; z-index:150; }
+  .msub-backdrop{ position:absolute; inset:0; background:rgba(0,0,0,.45); }
+  .msub-sheet{
+    position:absolute; left:0; right:0; bottom:0; max-height:82vh; overflow-y:auto;
+    background:var(--bg-app); border-radius:20px 20px 0 0; padding:18px 16px calc(22px + env(safe-area-inset-bottom));
+    animation:msubSobe .22s ease;
+  }
+  @keyframes msubSobe{ from{ transform:translateY(26px); opacity:.3; } to{ transform:translateY(0); opacity:1; } }
+  .msub-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+  .msub-head b{ font-size:17px; font-weight:700; }
+  .msub-close{
+    width:30px; height:30px; border-radius:50%; border:none; background:var(--tint-neutral);
+    color:var(--ink-soft); font-size:13px; display:flex; align-items:center; justify-content:center; padding:0;
+  }
+  .msub-card{
+    background:var(--card); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden;
+    box-shadow:var(--shadow-sm);
+  }
+  .msub-item{
+    display:flex; align-items:center; gap:12px; padding:14px; border-bottom:1px solid var(--line);
+    font-size:14px; font-weight:500; color:var(--ink); cursor:pointer;
+  }
+  .msub-item:last-child{ border-bottom:none; }
+  .msub-ico{ width:32px; height:32px; border-radius:9px; background:var(--tint-neutral); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .msub-ico svg{ width:15px; height:15px; stroke:var(--ink-soft); fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .msub-tema-val{ margin-left:auto; font-size:12.5px; color:var(--brand); font-weight:600; }
+  .msub-profile{ display:flex; align-items:center; gap:11px; padding:8px 4px 16px; }
+  .msub-avatar{ width:40px; height:40px; border-radius:12px; background:linear-gradient(155deg, var(--brand), var(--brand-dark)); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .msub-profile-meta b{ display:block; font-size:14.5px; font-weight:600; }
+  .msub-profile-meta span{ display:block; font-size:11.5px; color:var(--ink-soft); margin-top:1px; }
+  .msub-footer{ text-align:center; font-size:10.5px; color:var(--ink-soft); opacity:.75; margin-top:16px; }
 }
 @media (max-width:480px){
   .kpis{grid-template-columns:1fr !important;}
@@ -1705,6 +1778,67 @@ datalist{}
     </section>
 
   </main>
+
+  <!-- ================= NAVEGAÇÃO MOBILE (barra de abas) ================= -->
+  <nav class="mobile-tabbar" id="mobileTabbar">
+    <div class="mtabbar-track" id="mtabbarTrack">
+      <button class="mtab-item" data-mtab="painel"><span class="mtab-ico"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect></svg></span><span class="mtab-txt">Painel</span></button>
+      <button class="mtab-item" data-mtab="pdv"><span class="mtab-ico"><svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg></span><span class="mtab-txt">Vender</span></button>
+      <button class="mtab-item" data-mtab="clientes"><span class="mtab-ico"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></span><span class="mtab-txt">Clientes</span></button>
+      <button class="mtab-item" data-mtab="financeiro"><span class="mtab-ico"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg></span><span class="mtab-txt">Financeiro</span></button>
+      <button class="mtab-item" data-mtab="mais"><span class="mtab-ico"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6"></circle><circle cx="12" cy="12" r="1.6"></circle><circle cx="19" cy="12" r="1.6"></circle></svg></span><span class="mtab-txt">Mais</span></button>
+    </div>
+    <div class="mtab-float" id="mtabFloat">
+      <div class="mtab-circle" id="mtabCircle"></div>
+    </div>
+  </nav>
+
+  <!-- ================= SUBMENU: FINANCEIRO ================= -->
+  <div class="mobile-submenu hide" id="submenuFinanceiro">
+    <div class="msub-backdrop" data-close-submenu></div>
+    <div class="msub-sheet">
+      <div class="msub-head"><b>Financeiro</b><button class="msub-close" data-close-submenu>✕</button></div>
+      <div class="msub-card">
+        <div class="msub-item" data-view="fluxo"><span class="msub-ico"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg></span><span>Fluxo de Caixa</span></div>
+        <div class="msub-item" data-view="despesas"><span class="msub-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><line x1="8" y1="12" x2="16" y2="12"></line></svg></span><span>Despesas Fixas</span></div>
+        <div class="msub-item" data-view="boletos"><span class="msub-ico"><svg viewBox="0 0 24 24"><line x1="3" y1="4" x2="3" y2="20" stroke-width="2"></line><line x1="6.5" y1="4" x2="6.5" y2="20" stroke-width="1"></line><line x1="9" y1="4" x2="9" y2="20" stroke-width="3"></line><line x1="13" y1="4" x2="13" y2="20" stroke-width="1"></line><line x1="16" y1="4" x2="16" y2="20" stroke-width="2"></line></svg></span><span>Boletos</span></div>
+        <div class="msub-item hide" data-view="compras" id="msubCompras"><span class="msub-ico"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg></span><span>Compras e Entradas</span></div>
+        <div class="msub-item hide" data-view="vendafornecedor" id="msubVendaFornecedor"><span class="msub-ico"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"></path></svg></span><span>Venda Fornecedor</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= SUBMENU: MAIS ================= -->
+  <div class="mobile-submenu hide" id="submenuMais">
+    <div class="msub-backdrop" data-close-submenu></div>
+    <div class="msub-sheet">
+      <div class="msub-head"><b>Mais</b><button class="msub-close" data-close-submenu>✕</button></div>
+
+      <div class="msub-profile" id="msubProfile">
+        <div class="msub-avatar"><svg viewBox="0 0 24 24" width="16" height="16" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V8l9-5 9 5v13"></path><path d="M9 21v-7h6v7"></path></svg></div>
+        <div class="msub-profile-meta"><b id="empresaLogadaMobile"></b><span id="operadorAtualLabelMobile">Operando: dono(a)</span></div>
+      </div>
+
+      <div class="msub-card">
+        <div class="msub-item hide" data-view="orcamentos" id="msubOrcamentos"><span class="msub-ico"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg></span><span>Orçamentos</span></div>
+        <div class="msub-item hide" data-view="assistencia" id="msubAssistencia"><span class="msub-ico"><svg viewBox="0 0 24 24"><circle cx="7" cy="7" r="3"></circle><line x1="9.1" y1="9.1" x2="16.5" y2="16.5"></line><circle cx="18.5" cy="18.5" r="3"></circle></svg></span><span>Assistência Técnica</span></div>
+        <div class="msub-item hide" data-view="testes" id="msubTestes"><span class="msub-ico"><svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg></span><span>Testes de Aparelho</span></div>
+        <div class="msub-item hide" data-view="calculadora" id="msubCalculadora"><span class="msub-ico"><svg viewBox="0 0 24 24"><line x1="19" y1="5" x2="5" y2="19"></line><circle cx="6.5" cy="6.5" r="2.5"></circle><circle cx="17.5" cy="17.5" r="2.5"></circle></svg></span><span>Calculadora</span></div>
+        <div class="msub-item" data-view="config"><span class="msub-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><line x1="12" y1="1.5" x2="12" y2="4.5"></line><line x1="12" y1="19.5" x2="12" y2="22.5"></line><line x1="1.5" y1="12" x2="4.5" y2="12"></line><line x1="19.5" y1="12" x2="22.5" y2="12"></line></svg></span><span>Configurações</span></div>
+      </div>
+
+      <div class="msub-card" style="margin-top:12px;">
+        <div class="msub-item" id="msubTema">
+          <span class="msub-ico"><svg viewBox="0 0 24 24"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path><line x1="12" y1="2" x2="12" y2="12"></line></svg></span>
+          <span>Tema</span>
+          <span class="msub-tema-val" id="msubTemaVal">Claro</span>
+        </div>
+        <div class="msub-item" id="msubSair"><span class="msub-ico"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg></span><span>Sair</span></div>
+      </div>
+
+      <div class="msub-footer">Sistema por Identidade<span style="color:var(--brand);">Vision</span></div>
+    </div>
+  </div>
 </div>
 
 <div class="modal-overlay hide" id="modalOverlay">
@@ -1903,15 +2037,18 @@ async function carregarDados(){
 }
 
 /* ===================== NAVEGAÇÃO ===================== */
+function irParaView(viewName){
+  document.querySelectorAll('.navitem[data-view]').forEach(i=>i.classList.toggle('active', i.dataset.view===viewName));
+  document.querySelectorAll('main > section').forEach(s=>s.classList.add('hide'));
+  const el = document.getElementById('view-'+viewName);
+  if(el) el.classList.remove('hide');
+  atualizarModoCaixa();
+  fecharMenuMobile();
+  if(typeof fecharSubmenuMobile==='function') fecharSubmenuMobile();
+  if(typeof atualizarTabbarMobile==='function') atualizarTabbarMobile(viewName);
+}
 document.querySelectorAll('.navitem[data-view]').forEach(item=>{
-  item.addEventListener('click', ()=>{
-    document.querySelectorAll('.navitem[data-view]').forEach(i=>i.classList.remove('active'));
-    item.classList.add('active');
-    document.querySelectorAll('main > section').forEach(s=>s.classList.add('hide'));
-    document.getElementById('view-'+item.dataset.view).classList.remove('hide');
-    atualizarModoCaixa();
-    fecharMenuMobile();
-  });
+  item.addEventListener('click', ()=> irParaView(item.dataset.view));
 });
 
 /* ---- Menu mobile (hambúrguer): abre/fecha a sidebar como gaveta ---- */
@@ -1925,6 +2062,97 @@ function fecharMenuMobile(){
 }
 document.getElementById('btnAbrirMenuMobile').addEventListener('click', abrirMenuMobile);
 document.getElementById('sidebarBackdrop').addEventListener('click', fecharMenuMobile);
+
+/* ===================== BARRA DE ABAS MOBILE ===================== */
+const MTABS = ['painel','pdv','clientes','financeiro','mais'];
+const MTAB_ICONS = {
+  painel: '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect></svg>',
+  pdv: '<svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>',
+  clientes: '<svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>',
+  financeiro: '<svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>',
+  mais: '<svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.6"></circle><circle cx="12" cy="12" r="1.6"></circle><circle cx="19" cy="12" r="1.6"></circle></svg>',
+};
+const MTAB_LABELS = { painel:'Painel', pdv:'Vender', clientes:'Clientes', financeiro:'Financeiro', mais:'Mais' };
+const VIEW_PARA_MTAB = {
+  painel:'painel', pdv:'pdv', clientes:'clientes',
+  fluxo:'financeiro', despesas:'financeiro', boletos:'financeiro', compras:'financeiro', vendafornecedor:'financeiro',
+  orcamentos:'mais', assistencia:'mais', testes:'mais', calculadora:'mais', config:'mais',
+};
+
+function posicaoDoTab(mtabId){
+  const track = document.getElementById('mtabbarTrack');
+  const item = track.querySelector(`.mtab-item[data-mtab="${mtabId}"]`);
+  if(!track || !item) return 0;
+  return item.offsetLeft + item.offsetWidth/2 - 28; // 28 = metade do círculo (56px)
+}
+
+function atualizarTabbarMobile(viewName){
+  const mtabId = VIEW_PARA_MTAB[viewName] || 'painel';
+  document.querySelectorAll('.mtab-item[data-mtab]').forEach(el=>{
+    el.classList.toggle('active', el.dataset.mtab===mtabId);
+  });
+  const floatEl = document.getElementById('mtabFloat');
+  const circleEl = document.getElementById('mtabCircle');
+  const labelEl = document.querySelector('.mtab-float-label');
+  if(!floatEl || !circleEl) return;
+  floatEl.style.transform = `translateX(${posicaoDoTab(mtabId)}px)`;
+  circleEl.innerHTML = MTAB_ICONS[mtabId] || '';
+  let label = floatEl.querySelector('.mtab-float-label');
+  if(!label){ label = document.createElement('span'); label.className = 'mtab-float-label'; floatEl.appendChild(label); }
+  label.textContent = MTAB_LABELS[mtabId] || '';
+}
+
+function abrirSubmenuMobile(id){
+  fecharSubmenuMobile();
+  const el = document.getElementById('submenu'+id);
+  if(el) el.classList.remove('hide');
+}
+function fecharSubmenuMobile(){
+  document.querySelectorAll('.mobile-submenu').forEach(el=>el.classList.add('hide'));
+}
+
+document.querySelectorAll('.mtab-item[data-mtab]').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const id = btn.dataset.mtab;
+    const circleEl = document.getElementById('mtabCircle');
+    if(circleEl){
+      circleEl.classList.add('pressed');
+      setTimeout(()=>circleEl.classList.remove('pressed'), 110);
+    }
+    if(id==='painel' || id==='pdv' || id==='clientes'){
+      irParaView(id);
+    } else if(id==='financeiro'){
+      abrirSubmenuMobile('Financeiro');
+      atualizarTabbarMobile('fluxo');
+    } else if(id==='mais'){
+      abrirSubmenuMobile('Mais');
+      atualizarTabbarMobile('config');
+    }
+  });
+});
+
+document.querySelectorAll('.msub-item[data-view]').forEach(item=>{
+  item.addEventListener('click', ()=> irParaView(item.dataset.view));
+});
+
+document.querySelectorAll('[data-close-submenu]').forEach(el=>{
+  el.addEventListener('click', fecharSubmenuMobile);
+});
+
+const btnMsubTema = document.getElementById('msubTema');
+if(btnMsubTema){
+  btnMsubTema.addEventListener('click', ()=>{
+    alternarTema();
+    document.getElementById('msubTemaVal').textContent = document.documentElement.classList.contains('tema-escuro') ? 'Escuro' : 'Claro';
+  });
+}
+const btnMsubSair = document.getElementById('msubSair');
+if(btnMsubSair) btnMsubSair.addEventListener('click', sairDaConta);
+
+window.addEventListener('resize', ()=>{
+  const ativo = document.querySelector('.navitem[data-view].active');
+  if(ativo) atualizarTabbarMobile(ativo.dataset.view);
+});
 
 document.querySelectorAll('.tab2[data-btab]').forEach(tab=>{
   tab.addEventListener('click', ()=>{
@@ -5176,10 +5404,20 @@ function alternarTema(){
   }
 }
 
+function exibirNomeEmpresa(nome){
+  ['empresaLogada','empresaLogadaMobile'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.textContent = nome;
+  });
+}
+
 /* ---- Troca de operador (quem está vendendo agora) ---- */
 function renderSeletorOperador(){
-  const el = document.getElementById('operadorAtualLabel');
-  if(el) el.textContent = operadorAtual ? `Operando: ${operadorAtual}` : 'Operando: dono(a)';
+  const texto = operadorAtual ? `Operando: ${operadorAtual}` : 'Operando: dono(a)';
+  ['operadorAtualLabel','operadorAtualLabelMobile'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.textContent = texto;
+  });
 }
 function trocarOperador(){
   const ativos = funcionarios.filter(f=>f.ativo);
@@ -5289,7 +5527,7 @@ document.getElementById('btnSalvarEmpresaConfig').addEventListener('click', asyn
     segmentoAtual = row.segmento;
     aplicarCorMarca(row.cor_pdf);
     aplicarTerminologiaSegmento(segmentoAtual);
-    document.getElementById('empresaLogada').textContent = row.razao_social || row.email || '';
+    exibirNomeEmpresa(row.razao_social || row.email || '');
     logoArquivoLocal = null;
     statusEl.style.color = 'var(--green-dark)';
     statusEl.textContent = '✓ Dados salvos';
@@ -5596,10 +5834,11 @@ document.getElementById('btnCriarConta').addEventListener('click', async ()=>{
   await iniciarSessao(data.session);
 });
 
-document.getElementById('navSair').addEventListener('click', async ()=>{
+async function sairDaConta(){
   await sb.auth.signOut();
   location.reload();
-});
+}
+document.getElementById('navSair').addEventListener('click', sairDaConta);
 
 let segmentoAtual = 'mercado';
 const TERMOS_SEGMENTO = {
@@ -5864,10 +6103,14 @@ async function iniciarSessao(session){
 
   aplicarTerminologiaSegmento(segmentoAtual);
   renderConfigEmpresa();
-  document.getElementById('empresaLogada').textContent = empresa.razao_social || empresa.email || '';
+  exibirNomeEmpresa(empresa.razao_social || empresa.email || '');
   document.getElementById('appShell').classList.remove('hide');
   atualizarBannerAssinatura(acesso);
   carregarDados();
+  requestAnimationFrame(()=>{
+    const ativo = document.querySelector('.navitem[data-view].active');
+    if(typeof atualizarTabbarMobile==='function') atualizarTabbarMobile(ativo ? ativo.dataset.view : 'painel');
+  });
 }
 
 /* ---- Cadastro inicial da empresa (CNPJ + busca automática) ---- */
@@ -5917,7 +6160,7 @@ document.getElementById('btnSalvarEmpresa').addEventListener('click', async ()=>
 
   aplicarTerminologiaSegmento(segmentoAtual);
   renderConfigEmpresa();
-  document.getElementById('empresaLogada').textContent = razaoSocial || email;
+  exibirNomeEmpresa(razaoSocial || email);
   document.getElementById('appShell').classList.remove('hide');
   atualizarBannerAssinatura(acesso);
   carregarDados();
