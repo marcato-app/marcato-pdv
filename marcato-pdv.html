@@ -740,9 +740,23 @@ datalist{}
   .terminal-stat-row{ flex:1 1 50%; border-bottom:1px solid var(--line) !important; padding:14px 16px; }
   .terminal-stat-row .v{ font-size:21px; }
   .terminal-mascote{ flex:1 1 100%; height:110px; order:3; }
-  .terminal-shortcuts{ flex:1 1 100%; order:4; grid-template-columns:1fr 1fr; font-size:12.5px; gap:6px 10px; padding:14px 16px; }
-  .terminal-shortcuts .item{ padding:8px 6px; font-size:12.5px; }
+  .terminal-shortcuts{ flex:1 1 100%; order:4; grid-template-columns:1fr 1fr; font-size:12.5px; gap:8px 10px; padding:14px 16px; }
+  .terminal-shortcuts .item{ padding:12px 10px; font-size:13px; justify-content:center; border:1px solid var(--line); background:var(--card); border-radius:12px; min-height:44px; font-weight:600; }
   .terminal-shortcuts b{ font-size:11px; padding:3px 7px; }
+  /* Buscar em destaque no topo, ocupando as duas colunas */
+  .terminal-shortcuts .item.busca{ order:1; grid-column:1/-1; background:var(--brand-glow); border-color:var(--brand); color:var(--brand-dark); min-height:52px; font-size:14.5px; }
+  html.tema-escuro .terminal-shortcuts .item.busca{ color:var(--brand); }
+  .terminal-shortcuts .item.busca b{ background:var(--brand); }
+  /* Pagamento: 3 botões grandes e coloridos, cada um numa linha própria */
+  .terminal-shortcuts .item.pagamento{ order:2; grid-column:1/-1; min-height:52px; font-size:14.5px; color:#fff; border:none; }
+  .terminal-shortcuts .item.pagamento b{ background:rgba(255,255,255,.28); color:#fff; }
+  .terminal-shortcuts .item.pagamento.dinheiro{ background:linear-gradient(135deg, var(--green), var(--green-dark)); }
+  .terminal-shortcuts .item.pagamento.cartao{ background:linear-gradient(135deg, var(--blue), #2758C4); }
+  .terminal-shortcuts .item.pagamento.pix{ background:linear-gradient(135deg, var(--brand), var(--brand-dark)); }
+  /* Ações intermediárias: Qtd/Desconto/Avulso/Preço em grade 2x2 */
+  .terminal-shortcuts .item:not(.busca):not(.pagamento):not(.secundario){ order:3; }
+  /* Secundárias: Sair/Caixa/Produtos/Config — menores e discretas, no final */
+  .terminal-shortcuts .item.secundario{ order:4; padding:8px 6px; font-size:11.5px; min-height:0; background:none; border-style:dashed; color:var(--ink-soft); font-weight:500; }
   .terminal-tabela-wrap{ max-height:42vh; }
   .terminal-footer{ flex-wrap:wrap; gap:4px 10px; }
 
@@ -812,6 +826,22 @@ datalist{}
   .msub-ico{ width:32px; height:32px; border-radius:9px; background:var(--tint-neutral); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
   .msub-ico svg{ width:15px; height:15px; stroke:var(--ink-soft); fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
   .msub-tema-val{ margin-left:auto; font-size:12.5px; color:var(--brand); font-weight:600; }
+  /* ---- Financeiro/Mais viram tela de cards em vez de lista ---- */
+  .msub-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .msub-grid .msub-item{
+    flex-direction:column; justify-content:center; text-align:center; gap:9px;
+    background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px 6px 14px;
+    box-shadow:var(--shadow-sm); font-size:11.5px; font-weight:600; line-height:1.25;
+  }
+  .msub-grid .msub-item.hide{ display:none; }
+  .msub-grid .msub-ico{ width:44px; height:44px; border-radius:13px; }
+  .msub-grid .msub-ico svg{ width:19px; height:19px; }
+  .msub-grid .msub-item:nth-of-type(6n+1) .msub-ico{ background:var(--brand-glow); } .msub-grid .msub-item:nth-of-type(6n+1) .msub-ico svg{ stroke:var(--brand); }
+  .msub-grid .msub-item:nth-of-type(6n+2) .msub-ico{ background:var(--green-glow); } .msub-grid .msub-item:nth-of-type(6n+2) .msub-ico svg{ stroke:var(--green-dark); }
+  .msub-grid .msub-item:nth-of-type(6n+3) .msub-ico{ background:var(--orange-glow); } .msub-grid .msub-item:nth-of-type(6n+3) .msub-ico svg{ stroke:var(--orange); }
+  .msub-grid .msub-item:nth-of-type(6n+4) .msub-ico{ background:var(--blue-glow); } .msub-grid .msub-item:nth-of-type(6n+4) .msub-ico svg{ stroke:var(--blue); }
+  .msub-grid .msub-item:nth-of-type(6n+5) .msub-ico{ background:var(--warn-soft); } .msub-grid .msub-item:nth-of-type(6n+5) .msub-ico svg{ stroke:var(--warn); }
+  .msub-grid .msub-item:nth-of-type(6n+6) .msub-ico{ background:var(--tint-neutral); } .msub-grid .msub-item:nth-of-type(6n+6) .msub-ico svg{ stroke:var(--ink-soft); }
   .msub-profile{ display:flex; align-items:center; gap:11px; padding:8px 4px 16px; }
   .msub-avatar{ width:40px; height:40px; border-radius:12px; background:linear-gradient(155deg, var(--brand), var(--brand-dark)); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
   .msub-profile-meta b{ display:block; font-size:14.5px; font-weight:600; }
@@ -1879,23 +1909,23 @@ datalist{}
                   <div class="terminal-mascote-face terminal-mascote-logo" id="terminalMascoteLogo">M</div>
                 </div>
                 <div class="terminal-shortcuts">
-                  <span class="item" onclick="sairModoCaixa()"><b>Esc</b>Sair</span>
-                  <span class="item" onclick="abrirBuscaAdicionar()"><b>F1</b>Buscar</span>
+                  <span class="item secundario" onclick="sairModoCaixa()"><b>Esc</b>Sair</span>
+                  <span class="item busca" onclick="abrirBuscaAdicionar()"><b>F1</b>Buscar</span>
                   <span class="item" onclick="abrirMultiplicadorQtd()"><b>F2</b>Qtd</span>
                   <span class="item" onclick="abrirDescontoModal()"><b>F3</b>Desconto</span>
                   <span class="item" onclick="abrirValorManual()"><b>F4</b>Avulso</span>
-                  <span class="item" onclick="abrirPagamentoDinheiro()"><b>F5</b>Dinheiro</span>
-                  <span class="item" onclick="abrirPagamentoCartao()"><b>F6</b>Cartão</span>
-                  <span class="item" onclick="finalizarVendaComForma('pix')"><b>F7</b>Pix</span>
+                  <span class="item pagamento dinheiro" onclick="abrirPagamentoDinheiro()"><b>F5</b>Dinheiro</span>
+                  <span class="item pagamento cartao" onclick="abrirPagamentoCartao()"><b>F6</b>Cartão</span>
+                  <span class="item pagamento pix" onclick="finalizarVendaComForma('pix')"><b>F7</b>Pix</span>
                   <span class="item" onclick="abrirConsultaPreco()"><b>F8</b>Preço</span>
-                  <span class="item" onclick="acionarMovimentoCaixa()"><b>F10</b>Caixa</span>
-                  <span class="item" onclick="irParaProdutos()"><b>F11</b>Produtos</span>
-                  <span class="item" onclick="document.querySelector('.navitem[data-view=&quot;config&quot;]').click()"><b>F12</b>Config</span>
+                  <span class="item secundario" onclick="acionarMovimentoCaixa()"><b>F10</b>Caixa</span>
+                  <span class="item secundario" onclick="irParaProdutos()"><b>F11</b>Produtos</span>
+                  <span class="item secundario" onclick="document.querySelector('.navitem[data-view=&quot;config&quot;]').click()"><b>F12</b>Config</span>
                 </div>
               </div>
 
               <div class="terminal-tabela-wrap">
-                <table class="terminal-tabela">
+                <table class="terminal-tabela tabela-cards-mobile">
                   <thead><tr><th>Cód</th><th>Descrição</th><th>Qtd</th><th>Vl. Unit</th><th>Vl. Total</th><th></th></tr></thead>
                   <tbody id="carrinhoLista"></tbody>
                 </table>
@@ -2108,6 +2138,17 @@ datalist{}
       </div>
 
       <div class="panel" style="margin-bottom:16px;">
+        <h3>Metas financeiras</h3>
+        <div class="desc">Usadas na Calculadora de meta de lucro do Painel e no Simulador de boleto — preenche uma vez aqui e não precisa mais digitar toda hora.</div>
+        <div class="formrow" style="align-items:center;">
+          <div class="field"><label>Meta de lucro mensal (R$)</label><input type="number" step="0.01" id="cfgMetaLucro" placeholder="Ex: 10000" style="min-width:160px;"></div>
+          <div class="field"><label>Meta de venda mensal (R$)</label><input type="number" step="0.01" id="cfgMetaVenda" placeholder="Ex: 50000" style="min-width:160px;"></div>
+        </div>
+        <button class="btn-teal" id="btnSalvarMetasConfig">Salvar metas</button>
+        <div id="cfgMetasStatus" style="font-size:12px; margin-top:8px; min-height:16px;"></div>
+      </div>
+
+      <div class="panel" style="margin-bottom:16px;">
         <h3>Senha do dono/gerente</h3>
         <div class="desc">PIN de 4 dígitos exigido pra cancelar item de venda ou registrar movimento de caixa (atalho F10) no PDV. Não compartilhe com funcionários.</div>
         <div class="formrow">
@@ -2159,7 +2200,7 @@ datalist{}
     <div class="msub-backdrop" data-close-submenu></div>
     <div class="msub-sheet">
       <div class="msub-head"><b>Financeiro</b><button class="msub-close" data-close-submenu>✕</button></div>
-      <div class="msub-card">
+      <div class="msub-grid">
         <div class="msub-item" data-view="fluxo"><span class="msub-ico"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg></span><span>Fluxo de Caixa</span></div>
         <div class="msub-item" data-view="despesas"><span class="msub-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><line x1="8" y1="12" x2="16" y2="12"></line></svg></span><span>Despesas Fixas</span></div>
         <div class="msub-item" data-view="boletos"><span class="msub-ico"><svg viewBox="0 0 24 24"><line x1="3" y1="4" x2="3" y2="20" stroke-width="2"></line><line x1="6.5" y1="4" x2="6.5" y2="20" stroke-width="1"></line><line x1="9" y1="4" x2="9" y2="20" stroke-width="3"></line><line x1="13" y1="4" x2="13" y2="20" stroke-width="1"></line><line x1="16" y1="4" x2="16" y2="20" stroke-width="2"></line></svg></span><span>Boletos</span></div>
@@ -2169,7 +2210,7 @@ datalist{}
     </div>
   </div>
 
-  <!-- ================= SUBMENU: MAIS ================= -->
+  <!-- ================= SUBMENU: MAIS ================= (era assim antes de virar cards) -->
   <div class="mobile-submenu hide" id="submenuMais">
     <div class="msub-backdrop" data-close-submenu></div>
     <div class="msub-sheet">
@@ -2180,7 +2221,7 @@ datalist{}
         <div class="msub-profile-meta"><b id="empresaLogadaMobile"></b><span id="operadorAtualLabelMobile">Operando: dono(a)</span></div>
       </div>
 
-      <div class="msub-card">
+      <div class="msub-grid">
         <div class="msub-item hide" data-view="orcamentos" id="msubOrcamentos"><span class="msub-ico"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg></span><span>Orçamentos</span></div>
         <div class="msub-item hide" data-view="assistencia" id="msubAssistencia"><span class="msub-ico"><svg viewBox="0 0 24 24"><circle cx="7" cy="7" r="3"></circle><line x1="9.1" y1="9.1" x2="16.5" y2="16.5"></line><circle cx="18.5" cy="18.5" r="3"></circle></svg></span><span>Assistência Técnica</span></div>
         <div class="msub-item hide" data-view="testes" id="msubTestes"><span class="msub-ico"><svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg></span><span>Testes de Aparelho</span></div>
@@ -5814,27 +5855,27 @@ function renderCarrinho(){
       const tr = document.createElement('tr');
       if(item.unidade==='kg'){
         tr.innerHTML = `
-          <td>${codigo}</td>
-          <td>${item.nome} ⚖</td>
-          <td>${item.qtd.toFixed(3)}kg</td>
-          <td>${money(item.preco)}</td>
-          <td>${money(item.preco*item.qtd)}</td>
-          <td class="acao">
+          <td data-label="Cód">${codigo}</td>
+          <td data-label="Descrição">${item.nome} ⚖</td>
+          <td data-label="Qtd">${item.qtd.toFixed(3)}kg</td>
+          <td data-label="Vl. Unit">${money(item.preco)}</td>
+          <td data-label="Vl. Total">${money(item.preco*item.qtd)}</td>
+          <td class="acao" data-label="">
             <button class="btn-ghost btn-sm" onclick="repesarLinha('${item.linhaId}')" title="Repesar">⚖</button>
             <span class="rm" onclick="pedirCancelarItem('${item.linhaId}')" style="color:var(--warn);">✕</span>
           </td>`;
       } else {
         tr.innerHTML = `
-          <td>${codigo}</td>
-          <td>${item.nome}${item.manual?' <span class="tag pendente">avulso</span>':''}</td>
-          <td class="acao">
+          <td data-label="Cód">${codigo}</td>
+          <td data-label="Descrição">${item.nome}${item.manual?' <span class="tag pendente">avulso</span>':''}</td>
+          <td class="acao" data-label="Qtd">
             <button class="btn-ghost btn-sm" onclick="alterarQtd('${item.linhaId}',-1)">−</button>
             <span>${item.qtd}</span>
             <button class="btn-ghost btn-sm" onclick="alterarQtd('${item.linhaId}',1)">+</button>
           </td>
-          <td>${money(item.preco)}</td>
-          <td>${money(item.preco*item.qtd)}</td>
-          <td class="acao"><span class="rm" onclick="pedirCancelarItem('${item.linhaId}')" style="color:var(--warn);">✕</span></td>`;
+          <td data-label="Vl. Unit">${money(item.preco)}</td>
+          <td data-label="Vl. Total">${money(item.preco*item.qtd)}</td>
+          <td class="acao" data-label=""><span class="rm" onclick="pedirCancelarItem('${item.linhaId}')" style="color:var(--warn);">✕</span></td>`;
       }
       tbody.appendChild(tr);
     });
@@ -6305,6 +6346,8 @@ function renderConfigEmpresa(){
   set('cfgEndereco', empresaAtual.endereco);
   set('cfgSegmento', empresaAtual.segmento || 'mercado');
   set('cfgCorPdf', empresaAtual.cor_pdf || '#6C3CE9');
+  set('cfgMetaLucro', empresaAtual.meta_lucro_mensal || '');
+  set('cfgMetaVenda', empresaAtual.meta_venda_mensal || '');
   const preview = document.getElementById('cfgLogoPreview');
   if(preview){
     if(empresaAtual.logo_url){ preview.src = empresaAtual.logo_url; preview.style.display = 'block'; }
@@ -6365,6 +6408,43 @@ document.getElementById('btnSalvarEmpresaConfig').addEventListener('click', asyn
     statusEl.textContent = 'Erro ao salvar: ' + e.message;
   }
 });
+
+document.getElementById('btnSalvarMetasConfig').addEventListener('click', async ()=>{
+  const statusEl = document.getElementById('cfgMetasStatus');
+  if(!empresaAtual){ return; }
+  const metaLucro = parseFloat(document.getElementById('cfgMetaLucro').value) || 0;
+  const metaVenda = parseFloat(document.getElementById('cfgMetaVenda').value) || 0;
+  statusEl.style.color = 'var(--ink-soft)';
+  statusEl.textContent = 'Salvando...';
+  try{
+    const { data: row, error } = await sb.from('empresas').update({
+      meta_lucro_mensal: metaLucro||null, meta_venda_mensal: metaVenda||null
+    }).eq('id', empresaAtual.id).select().single();
+    if(error) throw error;
+    empresaAtual = row;
+    statusEl.style.color = 'var(--green-dark)';
+    statusEl.textContent = '✓ Metas salvas';
+    preencherMetasSalvas();
+  }catch(e){
+    console.error('Erro ao salvar metas:', e);
+    statusEl.style.color = 'var(--warn)';
+    statusEl.textContent = 'Erro ao salvar: ' + e.message;
+  }
+});
+// Preenche automaticamente os campos de meta (Painel e Simulador de boleto) com o que
+// já está salvo no cadastro da empresa, só se o campo ainda estiver vazio — assim não
+// sobrescreve algo que a pessoa já digitou na hora.
+function preencherMetasSalvas(){
+  if(!empresaAtual) return;
+  const metaLucro = empresaAtual.meta_lucro_mensal;
+  const metaVenda = empresaAtual.meta_venda_mensal;
+  const campoMetaLucroPainel = document.getElementById('metaLucro');
+  if(campoMetaLucroPainel && !campoMetaLucroPainel.value && metaLucro){ campoMetaLucroPainel.value = metaLucro; atualizarMetaLucro(); }
+  const campoSimLucro = document.getElementById('simMetaLucro');
+  const campoSimVenda = document.getElementById('simMetaVenda');
+  if(campoSimLucro && !campoSimLucro.value && metaLucro) campoSimLucro.value = metaLucro;
+  if(campoSimVenda && !campoSimVenda.value && metaVenda) campoSimVenda.value = metaVenda;
+}
 
 document.getElementById('btnSalvarSenhaGerente').addEventListener('click', async ()=>{
   const statusEl = document.getElementById('cfgSenhaStatus');
@@ -6931,6 +7011,7 @@ async function iniciarSessao(session){
 
   aplicarTerminologiaSegmento(segmentoAtual);
   renderConfigEmpresa();
+  preencherMetasSalvas();
   exibirNomeEmpresa(empresa.razao_social || empresa.email || '');
   document.getElementById('appShell').classList.remove('hide');
   atualizarBannerAssinatura(acesso);
