@@ -20,7 +20,7 @@ async function enviarEmail(env, destinatario, assunto, corpo) {
       method: "POST",
       headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, "content-type": "application/json" },
       body: JSON.stringify({
-        from: "Marcato PDV <onboarding@resend.dev>",
+        from: "Marcato PDV <contato@marcatoapp.com.br>",
         to: [destinatario],
         subject: assunto,
         text: corpo
