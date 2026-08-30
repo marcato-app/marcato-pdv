@@ -6770,7 +6770,7 @@ document.getElementById('btnCriarConta').addEventListener('click', async ()=>{
   if(senha.length < 6){ statusEl.textContent = 'A senha precisa ter pelo menos 6 caracteres.'; return; }
   statusEl.style.color = 'var(--warn)';
   statusEl.textContent = 'Criando conta...';
-  const { data, error } = await sb.auth.signUp({email, password:senha});
+  const { data, error } = await sb.auth.signUp({email, password:senha, options:{ emailRedirectTo: location.origin }});
   if(error){ statusEl.textContent = 'Erro: ' + error.message; return; }
   if(!data.session){
     statusEl.style.color = 'var(--green-dark)';
