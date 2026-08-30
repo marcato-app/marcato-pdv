@@ -1207,15 +1207,10 @@ datalist{}
     <!-- ================= FLUXO DE CAIXA ================= -->
     <section id="view-fluxo" class="hide">
       <div class="topbar">
-        <div><h1>Visão Geral</h1><p>Suas entradas e saídas em um só lugar</p></div>
+        <div><h1>Financeiro</h1><p>Entradas e saídas do seu caixa</p></div>
       </div>
 
-      <div class="chip-row" id="chipsPeriodoFinanceiro">
-        <div class="chip" data-periodo="hoje">Hoje</div>
-        <div class="chip" data-periodo="semana">Esta semana</div>
-        <div class="chip active" data-periodo="mes">Este mês</div>
-        <div class="chip" data-periodo="personalizado"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>Personalizado</div>
-      </div>
+      <button class="btn-primary" style="width:100%; margin-bottom:16px; padding:14px;" onclick="abrirModalNovoLancamento()">+ Novo Lançamento</button>
 
       <div class="month-nav">
         <button onclick="mudarMesFinanceiro(-1)"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
@@ -1223,61 +1218,27 @@ datalist{}
         <button onclick="mudarMesFinanceiro(1)"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
       </div>
 
-      <div class="resumo-head">
-        <div class="section-title-lg" style="margin:0;">Resumo do período</div>
-        <div class="eye" id="btnOcultarValoresFinanceiro" onclick="alternarOcultarValoresFinanceiro()">
-          <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-        </div>
-      </div>
-      <div class="resumo-grid">
-        <div class="resumo-card">
-          <span class="icone tint-green"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg></span>
-          <div class="v" id="finEntradas">R$ 0,00</div>
-          <div class="k">Entradas</div><div class="sub" id="finEntradasSub">vs. mês anterior</div>
-        </div>
-        <div class="resumo-card">
-          <span class="icone tint-warn"><svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg></span>
-          <div class="v" id="finSaidas">R$ 0,00</div>
-          <div class="k">Saídas</div><div class="sub" id="finSaidasSub">vs. mês anterior</div>
-        </div>
-        <div class="resumo-card">
-          <span class="icone tint-brand"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg></span>
-          <div class="v" id="finSaldo">R$ 0,00</div>
-          <div class="k">Saldo Final</div><div class="sub" id="finSaldoSub">vs. mês anterior</div>
-        </div>
-        <div class="resumo-card">
-          <span class="icone tint-orange"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></span>
-          <div class="v" id="finRepresentatividade">—</div>
-          <div class="k">Saídas vs. Entradas</div><div class="sub">representatividade</div>
-        </div>
-      </div>
-
-      <div class="panel" style="margin-top:6px;">
-        <h3>Entradas × Saídas — período</h3>
-        <div class="desc" style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
-          <span style="display:flex; align-items:center; gap:6px;"><span style="width:9px; height:9px; border-radius:50%; background:var(--brand); display:inline-block;"></span>Entradas</span>
-          <span style="display:flex; align-items:center; gap:6px;"><span style="width:9px; height:9px; border-radius:50%; background:var(--orange); display:inline-block;"></span>Saídas</span>
-        </div>
-        <div class="chart-wrap" id="wrapFinanceiroChart"><canvas id="chartFinanceiro"></canvas></div>
-      </div>
-
-      <div class="section-title-lg">Últimos lançamentos</div>
-      <div id="listaUltimosLancamentos"></div>
-      <div class="ver-todas-link" onclick="document.getElementById('chipsPeriodoFinanceiro').scrollIntoView({behavior:'smooth'})">Ver todas as movimentações <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
-
-      <button class="btn-primary" style="width:100%; margin:16px 0 24px; padding:14px;" onclick="abrirModalNovoLancamento()">+ Novo Lançamento</button>
-
-      <div class="section-label">Lançamentos detalhados</div>
-
       <div class="panel">
-        <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
-          <button class="btn-teal" onclick="abrirModalNovaVenda()">+ Adicionar venda do dia</button>
-        </div>
+        <h3>Vendas por dia — mês selecionado</h3>
+        <div class="desc">Total vendido (Pix + Cartão + Dinheiro) em cada dia do mês</div>
+        <div class="chart-wrap" id="wrapFinDiaChart"><canvas id="chartFinDia"></canvas></div>
+      </div>
 
-        <div class="formrow" style="margin-bottom:4px; align-items:center;">
-          <div class="field"><label>Mês</label><input type="month" id="filtroMesVenda" style="min-width:150px;"></div>
+      <div class="panel" style="margin-top:16px;">
+        <h3>Formas de pagamento</h3>
+        <div class="desc">Comparação entre Pix, Cartão e Dinheiro no mês selecionado</div>
+        <div class="chart-wrap" id="wrapFinFormaChart"><canvas id="chartFinForma"></canvas></div>
+      </div>
+
+      <div class="section-title-lg">Vendas do mês</div>
+      <div id="listaVendasFinanceiro"></div>
+
+      <!-- Tabela antiga: fica oculta, só existe pra não quebrar a lógica de renderVendas()/filtros já existente -->
+      <div class="hide">
+        <div class="formrow">
+          <div class="field"><label>Mês</label><input type="month" id="filtroMesVenda"></div>
           <button class="btn-ghost btn-sm" id="btnLimparFiltroVenda">Limpar filtros</button>
-          <div class="col-menu-wrap" style="margin-left:auto;">
+          <div class="col-menu-wrap">
             <button type="button" class="btn-ghost btn-sm" onclick="toggleMenuColunas('vendas')">Colunas ▾</button>
             <div class="col-menu hide" id="colMenu-vendas">
               <label><input type="checkbox" data-col="pix" onchange="alternarColuna('vendas','pix',this.checked)"> Pix</label>
@@ -1286,11 +1247,11 @@ datalist{}
             </div>
           </div>
         </div>
-        <table data-tabela-cols="vendas" class="tabela-cards-mobile">
+        <table data-tabela-cols="vendas">
           <thead><tr><th>Data</th><th data-col="pix">Pix</th><th data-col="cartao">Cartão</th><th data-col="dinheiro">Dinheiro</th><th>Total</th><th></th></tr></thead>
           <tbody id="tblVendas"></tbody>
         </table>
-        <div class="empty hide" id="emptyVendas"><b>Nenhuma venda lançada ainda</b>Adicione o total vendido por dia acima.</div>
+        <div class="empty hide" id="emptyVendas"><b>Nenhuma venda lançada ainda</b></div>
       </div>
     </section>
 
@@ -1300,16 +1261,14 @@ datalist{}
         <div><h1>Despesas Fixas</h1><p>Água, luz, aluguel, funcionários e outras contas recorrentes</p></div>
       </div>
 
-      <div class="panel">
-        <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
-          <button class="btn-teal" onclick="abrirModalNovaDespesa()">+ Adicionar despesa</button>
-        </div>
+      <button class="btn-primary" style="width:100%; margin-bottom:16px; padding:14px;" onclick="abrirModalNovoLancamento('saida')">+ Novo Lançamento</button>
 
-        <table>
-          <thead><tr><th>Descrição</th><th>Valor</th><th>Vence dia</th><th></th></tr></thead>
-          <tbody id="tblDespesas"></tbody>
-        </table>
-        <div class="empty hide" id="emptyDespesas"><b>Nenhuma despesa cadastrada</b>Cadastre as contas fixas do mês acima.</div>
+      <div id="listaDespesasCards"></div>
+
+      <!-- Tabela antiga: fica oculta, só existe pra não quebrar a lógica de renderDespesas() já existente -->
+      <div class="hide">
+        <table><tbody id="tblDespesas"></tbody></table>
+        <div class="empty hide" id="emptyDespesas"></div>
       </div>
     </section>
 
@@ -1321,15 +1280,31 @@ datalist{}
 
       <div class="panel panel-tool">
         <h3>🧮 Simulador de boleto</h3>
-        <div class="desc">Antes de fechar um pedido a prazo: informa o valor e o prazo (em dias) que o fornecedor deu, e eu calculo em que dia isso vence e se cabe no seu caixa.</div>
+        <div class="desc">Informe o pedido e, se quiser, sua meta pra eu calcular o teto de boleto por dia — e ver se esse pedido (à vista ou parcelado) cabe no caixa.</div>
         <div class="formrow">
           <div class="field"><label>Valor do pedido (R$)</label><input type="number" step="0.01" id="simValorBoleto" placeholder="0,00" style="max-width:160px;"></div>
-          <div class="field"><label>Prazo (dias)</label><input type="number" id="simPrazoBoleto" placeholder="Ex: 30" style="max-width:120px;"></div>
+          <div class="field"><label>Parcelamento</label>
+            <select id="simParcelamento" style="min-width:170px;">
+              <option value="1x">Só no prazo (1x)</option>
+              <option value="2x">2x — 7 e 14 dias</option>
+              <option value="4x">4x — 7, 14, 21 e 28 dias</option>
+              <option value="custom">Personalizado (dias)</option>
+            </select>
+          </div>
+          <div class="field" id="campoPrazoUnico"><label>Prazo (dias)</label><input type="number" id="simPrazoBoleto" placeholder="Ex: 30" style="max-width:120px;"></div>
+          <div class="field hide" id="campoPrazoCustom"><label>Dias (separados por vírgula)</label><input type="text" id="simPrazoCustom" placeholder="Ex: 10, 20, 30" style="max-width:170px;"></div>
         </div>
+        <div class="formrow">
+          <div class="field"><label>Meta de lucro mensal (R$) <span style="text-transform:none; font-weight:400;">opcional</span></label><input type="number" step="0.01" id="simMetaLucro" placeholder="Ex: 10000" style="max-width:160px;"></div>
+          <div class="field"><label>Meta de venda mensal (R$) <span style="text-transform:none; font-weight:400;">opcional</span></label><input type="number" step="0.01" id="simMetaVenda" placeholder="Ex: 50000" style="max-width:160px;"></div>
+        </div>
+        <div class="desc" style="margin:0 0 4px;">Sem preencher a meta, uso a média de venda diária já lançada no Fluxo de Caixa como teto de segurança (~30% da média/dia).</div>
         <div id="simResultadoBoleto" style="margin-top:6px;"></div>
       </div>
 
-      <div class="panel" style="margin-top:16px;">
+      <button class="btn-primary" style="width:100%; margin:16px 0;" onclick="toggleFormBoleto()">+ Adicionar boleto</button>
+
+      <div class="panel hide" id="painelFormBoleto">
         <div class="tabs2">
           <div class="tab2 active" data-btab="manual">Manual</div>
           <div class="tab2" data-btab="foto">Upload de foto</div>
@@ -1366,34 +1341,46 @@ datalist{}
         </div>
       </div>
 
+      <div class="panel" style="margin-top:8px;">
+        <h3>Boletos por beneficiário</h3>
+        <div class="desc">Total em boletos por fornecedor (mês selecionado no filtro abaixo)</div>
+        <div class="chart-wrap" id="wrapBoletosBenef"><canvas id="chartBoletosBenef"></canvas></div>
+      </div>
+
       <div class="panel" style="margin-top:16px;">
-        <div class="formrow" style="margin-bottom:4px;">
-          <div class="field"><label>Status</label>
-            <select id="filtroStatusBoleto" style="min-width:130px;">
-              <option value="">Todos</option>
-              <option value="pendente">Pendente</option>
-              <option value="pago">Pago</option>
-            </select>
-          </div>
-          <div class="field"><label>Beneficiário</label><input type="text" id="filtroBenefBoleto" placeholder="Buscar por nome..." style="min-width:180px;"></div>
-          <div class="field"><label>Mês de vencimento</label><input type="month" id="filtroMesBoleto" style="min-width:150px;"></div>
-          <button class="btn-ghost btn-sm" id="btnLimparFiltroBoleto">Limpar filtros</button>
-          <div class="col-menu-wrap" style="margin-left:auto;">
-            <button type="button" class="btn-ghost btn-sm" onclick="toggleMenuColunas('boletos')">Colunas ▾</button>
-            <div class="col-menu hide" id="colMenu-boletos">
-              <label><input type="checkbox" data-col="dataDoc" onchange="alternarColuna('boletos','dataDoc',this.checked)"> Data do documento</label>
-              <label><input type="checkbox" data-col="vencimento" onchange="alternarColuna('boletos','vencimento',this.checked)"> Vencimento</label>
-              <label><input type="checkbox" data-col="status" onchange="alternarColuna('boletos','status',this.checked)"> Status</label>
-            </div>
+        <h3>Vencimentos por dia do mês</h3>
+        <div class="desc">Concentração de vencimentos — dias em vermelho estão acima da média</div>
+        <div class="chart-wrap" id="wrapBoletosDiaMes"><canvas id="chartBoletosDiaMes"></canvas></div>
+      </div>
+
+      <div class="section-title-lg">Boletos cadastrados</div>
+      <div class="formrow" style="margin-bottom:4px;">
+        <div class="field"><label>Status</label>
+          <select id="filtroStatusBoleto" style="min-width:130px;">
+            <option value="">Todos</option>
+            <option value="pendente">Pendente</option>
+            <option value="pago">Pago</option>
+          </select>
+        </div>
+        <div class="field"><label>Beneficiário</label><input type="text" id="filtroBenefBoleto" placeholder="Buscar por nome..." style="min-width:180px;"></div>
+        <div class="field"><label>Mês de vencimento</label><input type="month" id="filtroMesBoleto" style="min-width:150px;"></div>
+        <button class="btn-ghost btn-sm" id="btnLimparFiltroBoleto">Limpar filtros</button>
+      </div>
+      <div id="listaBoletosCards"></div>
+
+      <!-- Tabela antiga: fica oculta, só existe pra não quebrar a lógica de renderBoletos()/filtros já existente -->
+      <div class="hide">
+        <div class="col-menu-wrap">
+          <div class="col-menu hide" id="colMenu-boletos">
+            <label><input type="checkbox" data-col="dataDoc" onchange="alternarColuna('boletos','dataDoc',this.checked)"> Data do documento</label>
+            <label><input type="checkbox" data-col="vencimento" onchange="alternarColuna('boletos','vencimento',this.checked)"> Vencimento</label>
+            <label><input type="checkbox" data-col="status" onchange="alternarColuna('boletos','status',this.checked)"> Status</label>
           </div>
         </div>
-        <div style="max-height:360px; overflow-y:auto; border-top:1px solid var(--line); margin-top:8px;">
-          <table data-tabela-cols="boletos" class="tabela-cards-mobile">
-            <thead><tr><th>Beneficiário</th><th>Valor</th><th data-col="dataDoc">Data do documento</th><th data-col="vencimento">Vencimento</th><th data-col="status">Status</th><th></th></tr></thead>
-            <tbody id="tblBoletos"></tbody>
-          </table>
-        </div>
-        <div class="empty hide" id="emptyBoletos"><b>Nenhum boleto encontrado</b>Ajuste os filtros, ou use o formulário acima pra cadastrar.</div>
+        <table data-tabela-cols="boletos">
+          <tbody id="tblBoletos"></tbody>
+        </table>
+        <div class="empty hide" id="emptyBoletos"></div>
       </div>
     </section>
 
@@ -2680,6 +2667,25 @@ function renderDespesas(){
     tr.innerHTML = `<td style="font-family:'Inter',sans-serif;">${d.nome}</td><td>${money(d.valor)}</td><td>${d.dia ? 'Dia '+d.dia : '—'}</td><td><span class="rm" onclick="removerDespesa('${d.id}')">remover</span></td>`;
     tbody.appendChild(tr);
   });
+
+  const cards = document.getElementById('listaDespesasCards');
+  if(!cards) return;
+  if(despesas.length===0){
+    cards.innerHTML = '<div class="empty"><b>Nenhuma despesa cadastrada</b>Toque em "+ Novo Lançamento" acima pra cadastrar.</div>';
+  } else {
+    cards.innerHTML = despesas.map(d=>`
+      <div class="lancamento-item">
+        <span class="icone saida"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg></span>
+        <div class="corpo">
+          <div class="titulo">${d.nome}</div>
+          <div class="meta"><span class="tag">${d.dia ? 'Vence dia '+d.dia : 'Sem vencimento fixo'}</span></div>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div class="valor saida">${money(d.valor)}</div>
+          <span class="rm" onclick="removerDespesa('${d.id}')" style="font-size:15px;">🗑</span>
+        </div>
+      </div>`).join('');
+  }
 }
 
 /* ===================== BOLETOS ===================== */
@@ -2756,6 +2762,82 @@ function renderBoletos(){
   const unicos = [...new Set(boletos.map(b=>b.beneficiario))];
   dl.innerHTML = unicos.map(n=>`<option value="${n}">`).join('');
   aplicarColunasVisiveis('boletos');
+
+  // ---- Lista em cards (substitui a tabela crua) ----
+  const cards = document.getElementById('listaBoletosCards');
+  if(cards){
+    if(ordenado.length===0){
+      cards.innerHTML = '<div class="empty"><b>Nenhum boleto encontrado</b>Ajuste os filtros, ou toque em "+ Adicionar boleto" acima.</div>';
+    } else {
+      cards.innerHTML = ordenado.map(b=>`
+        <div class="lancamento-item">
+          <span class="icone saida"><svg viewBox="0 0 24 24"><line x1="3" y1="4" x2="3" y2="20"></line><line x1="9" y1="4" x2="9" y2="20"></line><line x1="15" y1="4" x2="15" y2="20"></line><line x1="21" y1="4" x2="21" y2="20"></line></svg></span>
+          <div class="corpo">
+            <div class="titulo">${b.beneficiario}</div>
+            <div class="meta"><span class="tag ${b.status}" style="cursor:pointer;" onclick="togglePago('${b.id}')">${b.status}</span><span class="data">Vence ${fmtData(b.vencimento)}</span></div>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div class="valor saida">${money(b.valor)}</div>
+            <span class="rm" onclick="removerBoleto('${b.id}')" style="font-size:15px;">🗑</span>
+          </div>
+        </div>`).join('');
+    }
+  }
+
+  // ---- Gráficos de análise (mês do filtro, ou mês atual se filtro vazio) ----
+  const mesGrafico = fMes || mesAtualISO();
+  const corBrand = getComputedStyle(document.documentElement).getPropertyValue('--brand').trim() || '#6C3CE9';
+  const boletosMesGrafico = boletos.filter(b=>b.vencimento && b.vencimento.startsWith(mesGrafico));
+
+  const porBenef = {};
+  boletosMesGrafico.forEach(b=>{ porBenef[b.beneficiario] = (porBenef[b.beneficiario]||0) + b.valor; });
+  const benefs = Object.entries(porBenef).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const wrapBenef = document.getElementById('wrapBoletosBenef');
+  if(wrapBenef){
+    if(benefs.length===0){
+      wrapBenef.innerHTML = '<div class="empty"><b>Sem boletos nesse mês</b></div>';
+    } else if(typeof Chart === 'undefined'){
+      wrapBenef.innerHTML = '<div class="empty"><b>Gráfico indisponível</b></div>';
+    } else {
+      if(!document.getElementById('chartBoletosBenef')){ wrapBenef.innerHTML = '<canvas id="chartBoletosBenef"></canvas>'; }
+      const ctx = document.getElementById('chartBoletosBenef').getContext('2d');
+      if(chartBoletosBenef) chartBoletosBenef.destroy();
+      chartBoletosBenef = new Chart(ctx, {
+        type:'bar',
+        data:{ labels: benefs.map(f=>f[0]), datasets:[{ data: benefs.map(f=>f[1]), backgroundColor:corBrand, borderRadius:4, maxBarThickness:22 }] },
+        options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false,
+          scales:{ x:{grid:{color:corGradeGrafico()}, ticks:{callback:v=>moneyCompacta(v)}}, y:{grid:{display:false}} },
+          plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label: ctx => money(ctx.raw) } } } }
+      });
+    }
+  }
+
+  const [anoG, mesG] = mesGrafico.split('-').map(Number);
+  const diasNoMesGrafico = new Date(Date.UTC(anoG, mesG, 0)).getUTCDate();
+  const porDiaMes = new Array(diasNoMesGrafico).fill(0);
+  boletosMesGrafico.forEach(b=>{ const dia = +b.vencimento.slice(8,10); if(dia>=1 && dia<=diasNoMesGrafico) porDiaMes[dia-1] += b.valor; });
+  const comValor = porDiaMes.filter(v=>v>0);
+  const mediaDiaMes = comValor.length ? comValor.reduce((s,v)=>s+v,0)/comValor.length : 0;
+  const wrapDiaMes = document.getElementById('wrapBoletosDiaMes');
+  if(wrapDiaMes){
+    if(comValor.length===0){
+      wrapDiaMes.innerHTML = '<div class="empty"><b>Sem boletos nesse mês</b></div>';
+    } else if(typeof Chart === 'undefined'){
+      wrapDiaMes.innerHTML = '<div class="empty"><b>Gráfico indisponível</b></div>';
+    } else {
+      if(!document.getElementById('chartBoletosDiaMes')){ wrapDiaMes.innerHTML = '<canvas id="chartBoletosDiaMes"></canvas>'; }
+      const ctx = document.getElementById('chartBoletosDiaMes').getContext('2d');
+      if(chartBoletosDiaMes) chartBoletosDiaMes.destroy();
+      chartBoletosDiaMes = new Chart(ctx, {
+        type:'bar',
+        data:{ labels: porDiaMes.map((_,i)=>String(i+1)), datasets:[{ data: porDiaMes, borderRadius:3, maxBarThickness:16,
+          backgroundColor: porDiaMes.map(v=> v > mediaDiaMes*1.5 ? '#DD6B55' : corBrand) }] },
+        options:{ responsive:true, maintainAspectRatio:false,
+          scales:{ x:{grid:{display:false}}, y:{grid:{color:corGradeGrafico()}, ticks:{callback:v=>moneyCompacta(v)}} },
+          plugins:{ legend:{display:false}, tooltip:{ callbacks:{ title: items => `Dia ${items[0].label}`, label: ctx => money(ctx.raw) } } } }
+      });
+    }
+  }
 }
 ['filtroStatusBoleto','filtroMesBoleto'].forEach(id=>document.getElementById(id).addEventListener('change', renderBoletos));
 document.getElementById('filtroBenefBoleto').addEventListener('input', renderBoletos);
@@ -2766,7 +2848,10 @@ document.getElementById('btnLimparFiltroBoleto').addEventListener('click', ()=>{
   renderBoletos();
 });
 
-/* ---- Simulador de boleto: valor + prazo em dias -> data de vencimento + cabe no caixa? ---- */
+/* ---- Simulador de boleto: valor + parcelamento -> datas de vencimento + cabe no caixa? ---- */
+function toggleFormBoleto(){
+  document.getElementById('painelFormBoleto').classList.toggle('hide');
+}
 function tetoDiarioSeguroDoMes(mesISO){
   const vendasDoMes = vendas.filter(v=>v.data && v.data.startsWith(mesISO));
   const totalDoMes = vendasDoMes.reduce((s,v)=>s+v.pix+v.cartao+v.dinheiro,0);
@@ -2776,45 +2861,81 @@ function tetoDiarioSeguroDoMes(mesISO){
   // baixa só porque o mês ainda não aconteceu, e não porque o ritmo de venda é baixo.
   return (totalDoMes/vendasDoMes.length) * 0.3; // mesma heurística de ~30% da venda média diária usada no Painel
 }
+// Quando o usuário informa meta de lucro + meta de venda mensal, o teto diário vem
+// da mesma conta da "Calculadora de meta de lucro" do Painel: venda meta − despesas
+// fixas − lucro que ele quer guardar, dividido pelos dias do mês de vencimento.
+function tetoDiarioPorMeta(mesISO, metaLucro, metaVenda){
+  const despesasFixas = despesas.reduce((s,d)=>s+d.valor,0);
+  const tetoMensal = metaVenda - despesasFixas - metaLucro;
+  const [ano, mes] = mesISO.split('-').map(Number);
+  const diasNoMes = new Date(Date.UTC(ano, mes, 0)).getUTCDate();
+  return { tetoMensal, tetoDiario: tetoMensal/diasNoMes };
+}
+document.getElementById('simParcelamento').addEventListener('change', ()=>{
+  const modo = document.getElementById('simParcelamento').value;
+  document.getElementById('campoPrazoUnico').classList.toggle('hide', modo!=='1x');
+  document.getElementById('campoPrazoCustom').classList.toggle('hide', modo!=='custom');
+  simularBoleto();
+});
+function diasDoParcelamento(){
+  const modo = document.getElementById('simParcelamento').value;
+  if(modo==='2x') return [7,14];
+  if(modo==='4x') return [7,14,21,28];
+  if(modo==='custom'){
+    return document.getElementById('simPrazoCustom').value.split(',').map(s=>parseInt(s.trim())).filter(n=>n>0);
+  }
+  const prazo = parseInt(document.getElementById('simPrazoBoleto').value);
+  return prazo>0 ? [prazo] : [];
+}
 function simularBoleto(){
   const resEl = document.getElementById('simResultadoBoleto');
   const valor = parseFloat(document.getElementById('simValorBoleto').value);
-  const prazo = parseInt(document.getElementById('simPrazoBoleto').value);
-  if(!valor || valor<=0 || !prazo || prazo<=0){ resEl.innerHTML = ''; return; }
+  const dias = diasDoParcelamento();
+  if(!valor || valor<=0 || dias.length===0){ resEl.innerHTML = ''; return; }
 
-  const dataVenc = new Date();
-  dataVenc.setDate(dataVenc.getDate() + prazo);
-  const vencISO = dataVenc.toISOString().slice(0,10);
-  const mesVenc = vencISO.slice(0,7);
+  const metaLucro = parseFloat(document.getElementById('simMetaLucro').value) || 0;
+  const metaVenda = parseFloat(document.getElementById('simMetaVenda').value) || 0;
+  const usaMeta = metaLucro>0 && metaVenda>0;
+  const valorParcela = valor/dias.length;
 
-  const jaComprometidoNoDia = boletos.filter(b=>b.vencimento===vencISO && b.status==='pendente').reduce((s,b)=>s+b.valor,0);
-  const totalComNovo = jaComprometidoNoDia + valor;
+  let totalComprometidoMes = 0, tetoMensalUsado = null, mesUsadoMeta = null;
+  const linhas = dias.map(prazo=>{
+    const dataVenc = new Date();
+    dataVenc.setDate(dataVenc.getDate() + prazo);
+    const vencISO = dataVenc.toISOString().slice(0,10);
+    const mesVenc = vencISO.slice(0,7);
+    const jaComprometidoNoDia = boletos.filter(b=>b.vencimento===vencISO && b.status==='pendente').reduce((s,b)=>s+b.valor,0);
+    const totalComNovo = jaComprometidoNoDia + valorParcela;
+    totalComprometidoMes += valorParcela;
 
-  let teto = tetoDiarioSeguroDoMes(mesVenc);
-  let tetoDeQualMes = mesVenc;
-  if(teto===null){ // ainda não tem venda lançada no mês do vencimento — usa o mês atual como estimativa
-    teto = tetoDiarioSeguroDoMes(mesAtualISO());
-    tetoDeQualMes = mesAtualISO();
-  }
+    let teto, origemTeto;
+    if(usaMeta){
+      const r = tetoDiarioPorMeta(mesVenc, metaLucro, metaVenda);
+      teto = r.tetoDiario; tetoMensalUsado = r.tetoMensal; mesUsadoMeta = mesVenc;
+      origemTeto = `meta de lucro/venda de ${fmtMes(mesVenc)}`;
+    } else {
+      teto = tetoDiarioSeguroDoMes(mesVenc);
+      if(teto===null){ teto = tetoDiarioSeguroDoMes(mesAtualISO()); origemTeto = `venda média de ${fmtMes(mesAtualISO())}`; }
+      else origemTeto = `venda média de ${fmtMes(mesVenc)}`;
+    }
 
-  const dataFmt = fmtData(vencISO);
-  let veredito;
-  if(teto===null){
-    veredito = `<div class="desc" style="margin:0;">Ainda não tenho vendas lançadas pra estimar um teto seguro — cadastre ao menos uma venda no Fluxo de Caixa pra esse cálculo funcionar.</div>`;
-  } else if(totalComNovo <= teto){
-    veredito = `<div class="desc" style="background:var(--green-glow); color:var(--green-dark); padding:10px 12px; border-radius:8px; margin:0;">✅ Cabe — esse dia ficaria com ${money(totalComNovo)} em boleto, dentro do teto seguro de ${money(teto)}/dia.</div>`;
-  } else {
-    veredito = `<div class="desc" style="background:var(--warn-soft); color:var(--warn); padding:10px 12px; border-radius:8px; margin:0;">⚠️ Passa do teto seguro — esse dia ficaria com ${money(totalComNovo)} em boleto, acima do teto de ${money(teto)}/dia (baseado na venda média de ${fmtMes(tetoDeQualMes)}).</div>`;
-  }
+    const cabe = teto!==null && totalComNovo<=teto;
+    const semDados = teto===null;
+    return `<div class="lancamento-item">
+      <span class="icone ${semDados?'saida':(cabe?'entrada':'saida')}"><svg viewBox="0 0 24 24">${semDados?'<circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line>':(cabe?'<polyline points="20 6 9 17 4 12"></polyline>':'<line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>')}</svg></span>
+      <div class="corpo">
+        <div class="titulo">${fmtData(vencISO)} <span class="tag" style="background:var(--tint-neutral);">${prazo} dias</span></div>
+        <div class="meta"><span class="data">${semDados ? 'Sem dados pra estimar teto ainda' : `Teto ${money(teto)}/dia — ${origemTeto}`}</span></div>
+      </div>
+      <div class="valor ${semDados?'':(cabe?'entrada':'saida')}">${money(valorParcela)}</div>
+    </div>`;
+  }).join('');
 
-  resEl.innerHTML = `
-    <div class="kpis" style="grid-template-columns:repeat(2,1fr); margin-bottom:10px;">
-      <div class="kpi"><div class="k">Vence em</div><div class="v">${dataFmt}</div><div class="sub">daqui a ${prazo} dia${prazo>1?'s':''}</div></div>
-      <div class="kpi"><div class="k">Já tem de boleto nesse dia</div><div class="v">${money(jaComprometidoNoDia)}</div><div class="sub">antes desse pedido</div></div>
-    </div>
-    ${veredito}`;
+  const resumoMeta = usaMeta ? `<div class="desc" style="margin:10px 0 0;">Teto mensal pela meta: <b>${money(tetoMensalUsado)}</b> (venda meta − despesas fixas − lucro desejado, em ${fmtMes(mesUsadoMeta)}) — esse pedido comprometeria <b>${money(totalComprometidoMes)}</b> desse teto.</div>` : '';
+
+  resEl.innerHTML = `<div class="desc" style="margin:0 0 10px;">${dias.length>1?`Parcelado em ${dias.length}x de ${money(valorParcela)}`:`À vista em ${money(valorParcela)}`}</div>${linhas}${resumoMeta}`;
 }
-['simValorBoleto','simPrazoBoleto'].forEach(id=>{
+['simValorBoleto','simPrazoBoleto','simPrazoCustom','simMetaLucro','simMetaVenda'].forEach(id=>{
   document.getElementById(id).addEventListener('input', simularBoleto);
 });
 
@@ -4379,7 +4500,7 @@ function iniciarMenuColunas(tabela){
 ['clientes','boletos','vendas','compras','vendasFornecedor','produtos'].forEach(iniciarMenuColunas);
 
 /* ===================== PAINEL: KPIs + GRÁFICOS ===================== */
-let chartFluxo, chartFornecedor, chartBoletosDia, chartCategoria, chartGaugeComprometido, chartFinanceiro;
+let chartFluxo, chartFornecedor, chartBoletosDia, chartCategoria, chartGaugeComprometido, chartFinDia, chartFinForma, chartBoletosBenef, chartBoletosDiaMes;
 let ultimoTotalVendasPainel = 0, ultimoTotalDespesasPainel = 0, ultimoDiasNoMesPainel = 30;
 let ultimoDiasComVendaPainel = 0, ultimoProjecaoVendasPainel = 0;
 
@@ -4501,8 +4622,6 @@ function renderEstoqueBaixoPainel(){
 
 /* ===================== FINANCEIRO — VISÃO GERAL ===================== */
 let mesSelecionadoFinanceiro = mesAtualISO();
-let periodoFinanceiro = 'mes';
-let valoresFinanceiroOcultos = false;
 
 function mudarMesFinanceiro(delta){
   const [ano, mes] = mesSelecionadoFinanceiro.split('-').map(Number);
@@ -4510,115 +4629,104 @@ function mudarMesFinanceiro(delta){
   mesSelecionadoFinanceiro = d.toISOString().slice(0,7);
   renderFinanceiroDashboard();
 }
-function alternarOcultarValoresFinanceiro(){
-  valoresFinanceiroOcultos = !valoresFinanceiroOcultos;
-  renderFinanceiroDashboard();
-}
-document.getElementById('chipsPeriodoFinanceiro').addEventListener('click', (e)=>{
-  const chip = e.target.closest('.chip');
-  if(!chip) return;
-  document.querySelectorAll('#chipsPeriodoFinanceiro .chip').forEach(c=>c.classList.remove('active'));
-  chip.classList.add('active');
-  periodoFinanceiro = chip.dataset.periodo;
-  renderFinanceiroDashboard();
-});
-function intervaloPeriodoFinanceiro(){
-  const hoje = new Date();
-  const hojeISO = hoje.toISOString().slice(0,10);
-  if(periodoFinanceiro==='hoje') return {ini:hojeISO, fim:hojeISO};
-  if(periodoFinanceiro==='semana'){
-    const diaSemana = hoje.getDay();
-    const ini = new Date(hoje); ini.setDate(hoje.getDate()-diaSemana);
-    return {ini: ini.toISOString().slice(0,10), fim: hojeISO};
-  }
-  return {ini: mesSelecionadoFinanceiro+'-01', fim: mesSelecionadoFinanceiro+'-31'};
-}
 function renderFinanceiroDashboard(){
-  const nomeMes = new Date(Date.UTC(...mesSelecionadoFinanceiro.split('-').map(Number), 1)).toLocaleDateString('pt-BR', {month:'long', year:'numeric', timeZone:'UTC'});
+  const [anoSel, mesSel] = mesSelecionadoFinanceiro.split('-').map(Number);
+  const nomeMes = new Date(Date.UTC(anoSel, mesSel-1, 1)).toLocaleDateString('pt-BR', {month:'long', year:'numeric', timeZone:'UTC'});
   document.getElementById('labelMesFinanceiro').textContent = nomeMes;
 
-  const vendasMes = vendas.filter(v=>v.data && v.data.startsWith(mesSelecionadoFinanceiro));
-  const entradasMes = vendasMes.reduce((s,v)=>s+v.pix+v.cartao+v.dinheiro,0);
-  const boletosMes = boletos.filter(b=>b.vencimento && b.vencimento.startsWith(mesSelecionadoFinanceiro));
-  const totalBoletosMes = boletosMes.reduce((s,b)=>s+b.valor,0);
-  const totalDespesasMes = despesas.reduce((s,d)=>s+d.valor,0);
-  const saidasMes = totalBoletosMes + totalDespesasMes;
-  const saldoMes = entradasMes - saidasMes;
-  const representatividade = entradasMes>0 ? Math.round(saidasMes/entradasMes*100) : 0;
+  const vendasMes = vendas.filter(v=>v.data && v.data.startsWith(mesSelecionadoFinanceiro)).sort((a,b)=> a.data<b.data?1:-1);
+  const diasNoMes = new Date(Date.UTC(anoSel, mesSel, 0)).getUTCDate();
 
-  const oculto = valoresFinanceiroOcultos ? '••••••' : null;
-  document.getElementById('finEntradas').textContent = oculto || money(entradasMes);
-  document.getElementById('finSaidas').textContent = oculto || money(saidasMes);
-  document.getElementById('finSaldo').textContent = oculto || money(saldoMes);
-  document.getElementById('finSaldo').className = 'v ' + (saldoMes>=0 ? 'ok' : 'warn');
-  document.getElementById('finRepresentatividade').textContent = oculto || (representatividade+'%');
-  document.getElementById('finEntradasSub').textContent = `${vendasMes.length} lançamento(s) no mês`;
-  document.getElementById('finSaidasSub').textContent = `${despesas.length} despesa(s) + ${boletosMes.length} boleto(s)`;
-
-  // ---- Últimos lançamentos: junta vendas (entrada) + despesas/boletos (saída) ----
-  const {ini, fim} = intervaloPeriodoFinanceiro();
-  const lancamentos = [];
-  vendas.forEach(v=>{
-    const total = v.pix+v.cartao+v.dinheiro;
-    if(total>0 && v.data>=ini && v.data<=fim) lancamentos.push({tipo:'entrada', titulo:'Venda do dia', categoria:'Vendas', data:v.data, valor:total});
-  });
-  boletos.forEach(b=>{
-    if(b.vencimento && b.vencimento>=ini && b.vencimento<=fim) lancamentos.push({tipo:'saida', titulo:b.beneficiario, categoria:'Boleto', data:b.vencimento, valor:b.valor});
-  });
-  lancamentos.sort((a,b)=> a.data<b.data?1:-1);
-  const listaEl = document.getElementById('listaUltimosLancamentos');
-  if(lancamentos.length===0){
-    listaEl.innerHTML = '<div class="empty"><b>Nenhum lançamento no período</b>Ajuste os filtros acima ou adicione um lançamento.</div>';
-  } else {
-    listaEl.innerHTML = lancamentos.slice(0,8).map(l=>`
-      <div class="lancamento-item">
-        <span class="icone ${l.tipo}"><svg viewBox="0 0 24 24">${l.tipo==='entrada' ? '<line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline>' : '<line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline>'}</svg></span>
-        <div class="corpo">
-          <div class="titulo">${l.titulo}</div>
-          <div class="meta"><span class="tag">${l.categoria}</span><span class="data">${fmtData(l.data)}</span></div>
-        </div>
-        <div class="valor ${l.tipo}">${l.tipo==='entrada'?'+':'-'} ${money(l.valor)}</div>
-      </div>`).join('');
-  }
-
-  // ---- Gráfico: entradas x saídas por semana do mês ----
-  const wrap = document.getElementById('wrapFinanceiroChart');
+  // ---- Gráfico 1: vendas por dia do mês ----
+  const wrapDia = document.getElementById('wrapFinDiaChart');
   if(typeof Chart === 'undefined'){
-    wrap.innerHTML = '<div class="empty"><b>Gráfico indisponível</b>A biblioteca de gráficos não carregou — recarregue a página.</div>';
+    wrapDia.innerHTML = '<div class="empty"><b>Gráfico indisponível</b>A biblioteca de gráficos não carregou — recarregue a página.</div>';
   } else {
-    if(!document.getElementById('chartFinanceiro')){ wrap.innerHTML = '<canvas id="chartFinanceiro"></canvas>'; }
-    const semanas = [0,0,0,0,0], semanasSaida = [0,0,0,0,0];
-    vendasMes.forEach(v=>{ const dia = +v.data.slice(8,10); const s = Math.min(4, Math.floor((dia-1)/7)); semanas[s]+= v.pix+v.cartao+v.dinheiro; });
-    boletosMes.forEach(b=>{ const dia = +b.vencimento.slice(8,10); const s = Math.min(4, Math.floor((dia-1)/7)); semanasSaida[s]+= b.valor; });
+    if(!document.getElementById('chartFinDia')){ wrapDia.innerHTML = '<canvas id="chartFinDia"></canvas>'; }
+    const totalPorDia = new Array(diasNoMes).fill(0);
+    vendasMes.forEach(v=>{ const dia = +v.data.slice(8,10); if(dia>=1 && dia<=diasNoMes) totalPorDia[dia-1] += v.pix+v.cartao+v.dinheiro; });
     const corBrand = getComputedStyle(document.documentElement).getPropertyValue('--brand').trim() || '#6C3CE9';
-    const corLaranja = getComputedStyle(document.documentElement).getPropertyValue('--orange').trim() || '#F5821F';
-    const ctx = document.getElementById('chartFinanceiro').getContext('2d');
-    if(chartFinanceiro) chartFinanceiro.destroy();
-    chartFinanceiro = new Chart(ctx, {
+    const ctx = document.getElementById('chartFinDia').getContext('2d');
+    if(chartFinDia) chartFinDia.destroy();
+    chartFinDia = new Chart(ctx, {
       type:'bar',
-      data:{
-        labels:['Sem 1','Sem 2','Sem 3','Sem 4','Sem 5'],
-        datasets:[
-          {type:'bar', label:'Entradas', data:semanas, backgroundColor:corBrand, borderRadius:4, maxBarThickness:20},
-          {type:'line', label:'Saídas', data:semanasSaida, borderColor:corLaranja, backgroundColor:corLaranja, tension:.35, pointRadius:3}
-        ]
-      },
+      data:{ labels: Array.from({length:diasNoMes},(_,i)=>String(i+1)), datasets:[{label:'Vendido', data:totalPorDia, backgroundColor:corBrand, borderRadius:3, maxBarThickness:16}] },
       options:{ responsive:true, maintainAspectRatio:false,
         scales:{ x:{grid:{display:false}}, y:{grid:{color:corGradeGrafico()}, ticks:{callback:v=>moneyCompacta(v)}} },
-        plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label: ctx => `${ctx.dataset.label}: ${money(ctx.raw)}` } } } }
+        plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label: ctx => money(ctx.raw) } } } }
     });
+  }
+
+  // ---- Gráfico 2: comparação de formas de pagamento ----
+  const wrapForma = document.getElementById('wrapFinFormaChart');
+  if(typeof Chart === 'undefined'){
+    wrapForma.innerHTML = '<div class="empty"><b>Gráfico indisponível</b>A biblioteca de gráficos não carregou — recarregue a página.</div>';
+  } else {
+    if(!document.getElementById('chartFinForma')){ wrapForma.innerHTML = '<canvas id="chartFinForma"></canvas>'; }
+    const totalPix = vendasMes.reduce((s,v)=>s+v.pix,0);
+    const totalCartao = vendasMes.reduce((s,v)=>s+v.cartao,0);
+    const totalDinheiro = vendasMes.reduce((s,v)=>s+v.dinheiro,0);
+    const corBrand = getComputedStyle(document.documentElement).getPropertyValue('--brand').trim() || '#6C3CE9';
+    const corVerde = getComputedStyle(document.documentElement).getPropertyValue('--green-dark').trim() || '#0E9E76';
+    const corLaranja = getComputedStyle(document.documentElement).getPropertyValue('--orange').trim() || '#F5821F';
+    const ctx = document.getElementById('chartFinForma').getContext('2d');
+    if(chartFinForma) chartFinForma.destroy();
+    chartFinForma = new Chart(ctx, {
+      type:'doughnut',
+      data:{ labels:['Pix','Cartão','Dinheiro'], datasets:[{data:[totalPix,totalCartao,totalDinheiro], backgroundColor:[corBrand,corLaranja,corVerde], borderWidth:0}] },
+      options:{ responsive:true, maintainAspectRatio:false, cutout:'62%',
+        plugins:{ legend:{position:'bottom', labels:{boxWidth:10, font:{size:11}, usePointStyle:true, pointStyle:'circle'}}, tooltip:{ callbacks:{ label: ctx => `${ctx.label}: ${money(ctx.raw)}` } } } }
+    });
+  }
+
+  // ---- Lista de vendas do mês ----
+  const lista = document.getElementById('listaVendasFinanceiro');
+  if(vendasMes.length===0){
+    lista.innerHTML = '<div class="empty"><b>Nenhuma venda lançada nesse mês</b>Toque em "+ Novo Lançamento" acima pra adicionar.</div>';
+  } else {
+    lista.innerHTML = vendasMes.map(v=>{
+      const total = v.pix+v.cartao+v.dinheiro;
+      const partes = [];
+      if(v.pix>0) partes.push('Pix '+money(v.pix));
+      if(v.cartao>0) partes.push('Cartão '+money(v.cartao));
+      if(v.dinheiro>0) partes.push('Dinheiro '+money(v.dinheiro));
+      return `<div class="lancamento-item">
+        <span class="icone entrada"><svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg></span>
+        <div class="corpo">
+          <div class="titulo">${fmtData(v.data)}</div>
+          <div class="meta"><span class="tag">${partes.join(' · ') || 'Sem valores'}</span></div>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div class="valor entrada">${money(total)}</div>
+          <span class="rm" onclick="removerVenda('${v.id}')" style="font-size:15px;">🗑</span>
+        </div>
+      </div>`;
+    }).join('');
   }
 }
 
-function abrirModalNovoLancamento(){
-  let tipoLanc = 'saida';
-  const categoriasEntrada = ['Vendas','Serviços','Outros'];
+function abrirModalNovoLancamento(tipoInicial){
+  let tipoLanc = tipoInicial || 'entrada';
   const categoriasSaida = ['Compra de Mercadoria','Frete','Imposto sobre Compra','Aluguel','Energia','Água','Internet','Salário','Marketing','Manutenção','Despesa Financeira','Despesas Diversas','Outros'];
+  const hojeISO = new Date().toISOString().slice(0,10);
+  const corpoEntrada = `
+    <div class="campo"><label>Data</label><input type="date" id="nlData" value="${hojeISO}"></div>
+    <div class="campo campo-2">
+      <div><label>Total no Pix</label><input type="number" step="0.01" id="nlPix" placeholder="0,00"></div>
+      <div><label>Total no Cartão</label><input type="number" step="0.01" id="nlCartao" placeholder="0,00"></div>
+    </div>
+    <div class="campo"><label>Total em Dinheiro</label><input type="number" step="0.01" id="nlDinheiro" placeholder="0,00"></div>`;
+  const corpoSaida = `
+    <div class="campo"><label>Categoria</label><div class="categoria-chips" id="nlCategorias">${categoriasSaida.map((c,i)=>`<span class="cchip ${i===categoriasSaida.length-1?'ativo':''}" data-cat="${c}">${c}</span>`).join('')}</div></div>
+    <div class="campo"><label>Descrição <span>opcional</span></label><input type="text" id="nlDescricao" placeholder="Ex: Compra de estoque, Aluguel..."></div>
+    <div class="campo campo-2">
+      <div><label>Valor (R$)</label><input type="number" step="0.01" id="nlValor" placeholder="0,00"></div>
+      <div><label>Data</label><input type="date" id="nlData2" value="${hojeISO}"></div>
+    </div>`;
   const render = ()=>{
-    const cats = tipoLanc==='entrada' ? categoriasEntrada : categoriasSaida;
     document.getElementById('nlTipoEntrada').classList.toggle('ativo', tipoLanc==='entrada');
     document.getElementById('nlTipoSaida').classList.toggle('ativo', tipoLanc==='saida');
-    document.getElementById('nlCategorias').innerHTML = cats.map((c,i)=>`<span class="cchip ${i===cats.length-1?'ativo':''}" data-cat="${c}">${c}</span>`).join('');
+    document.getElementById('nlCorpo').innerHTML = tipoLanc==='entrada' ? corpoEntrada : corpoSaida;
   };
   abrirModal(`<h3>Novo Lançamento</h3>
     <div class="form-section-card">
@@ -4628,12 +4736,7 @@ function abrirModalNovoLancamento(){
           <div class="opc saida" id="nlTipoSaida"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>Saída</div>
         </div>
       </div>
-      <div class="campo"><label>Categoria</label><div class="categoria-chips" id="nlCategorias"></div></div>
-      <div class="campo"><label>Descrição</label><input type="text" id="nlDescricao" placeholder="Ex: Compra de estoque, Aluguel..."></div>
-      <div class="campo campo-2">
-        <div><label>Valor (R$)</label><input type="number" step="0.01" id="nlValor" placeholder="0,00"></div>
-        <div><label>Data</label><input type="date" id="nlData" value="${new Date().toISOString().slice(0,10)}"></div>
-      </div>
+      <div id="nlCorpo"></div>
     </div>
     <button class="btn-teal" id="btnSalvarLancamento" style="width:100%;">✓ Salvar</button>
     <div id="nlStatus" style="font-size:12px; margin-top:8px; min-height:16px;"></div>
@@ -4641,7 +4744,7 @@ function abrirModalNovoLancamento(){
   render();
   document.getElementById('nlTipoEntrada').addEventListener('click', ()=>{ tipoLanc='entrada'; render(); });
   document.getElementById('nlTipoSaida').addEventListener('click', ()=>{ tipoLanc='saida'; render(); });
-  document.getElementById('nlCategorias').addEventListener('click', (e)=>{
+  document.getElementById('nlCorpo').addEventListener('click', (e)=>{
     const chip = e.target.closest('.cchip');
     if(!chip) return;
     document.querySelectorAll('#nlCategorias .cchip').forEach(c=>c.classList.remove('ativo'));
@@ -4649,19 +4752,25 @@ function abrirModalNovoLancamento(){
   });
   document.getElementById('btnSalvarLancamento').addEventListener('click', async ()=>{
     const statusEl = document.getElementById('nlStatus');
-    const descricao = document.getElementById('nlDescricao').value.trim();
-    const valor = parseFloat(document.getElementById('nlValor').value) || 0;
-    const data = document.getElementById('nlData').value;
-    const categoriaEl = document.querySelector('#nlCategorias .cchip.ativo');
-    const categoria = categoriaEl ? categoriaEl.dataset.cat : 'Outros';
-    if(valor<=0){ statusEl.style.color='var(--warn)'; statusEl.textContent = 'Informe o valor do lançamento.'; return; }
-    if(!data){ statusEl.style.color='var(--warn)'; statusEl.textContent = 'Escolha a data.'; return; }
     try{
       if(tipoLanc==='entrada'){
-        const { data: row, error } = await sb.from('vendas').insert(comUserId({data, pix:0, cartao:0, dinheiro:valor})).select().single();
+        const data = document.getElementById('nlData').value;
+        const pix = parseFloat(document.getElementById('nlPix').value) || 0;
+        const cartao = parseFloat(document.getElementById('nlCartao').value) || 0;
+        const dinheiro = parseFloat(document.getElementById('nlDinheiro').value) || 0;
+        if(!data){ statusEl.style.color='var(--warn)'; statusEl.textContent = 'Escolha a data.'; return; }
+        if((pix+cartao+dinheiro)===0){ statusEl.style.color='var(--warn)'; statusEl.textContent = 'Preencha ao menos um valor (Pix, Cartão ou Dinheiro).'; return; }
+        const { data: row, error } = await sb.from('vendas').insert(comUserId({data, pix, cartao, dinheiro})).select().single();
         if(error) throw error;
         vendas.push(fromDbVenda(row));
       } else {
+        const descricao = document.getElementById('nlDescricao').value.trim();
+        const valor = parseFloat(document.getElementById('nlValor').value) || 0;
+        const data = document.getElementById('nlData2').value;
+        const categoriaEl = document.querySelector('#nlCategorias .cchip.ativo');
+        const categoria = categoriaEl ? categoriaEl.dataset.cat : 'Outros';
+        if(valor<=0){ statusEl.style.color='var(--warn)'; statusEl.textContent = 'Informe o valor do lançamento.'; return; }
+        if(!data){ statusEl.style.color='var(--warn)'; statusEl.textContent = 'Escolha a data.'; return; }
         const nome = descricao ? `${categoria} — ${descricao}` : categoria;
         const { data: row, error } = await sb.from('despesas').insert(comUserId({nome, valor, dia:new Date(data+'T00:00:00').getDate()})).select().single();
         if(error) throw error;
@@ -6118,7 +6227,7 @@ function alternarTema(){
   try{ localStorage.setItem('marcato_pdv_tema', escuro ? 'escuro' : 'claro'); }catch(e){}
   if(typeof Chart !== 'undefined'){
     Chart.defaults.color = corTextoGrafico();
-    [chartVfVendas, chartVfLucro, chartVfAparelhos, chartVfClientes, chartFluxo, chartFornecedor, chartBoletosDia, chartCategoria, chartGaugeComprometido]
+    [chartVfVendas, chartVfLucro, chartVfAparelhos, chartVfClientes, chartFluxo, chartFornecedor, chartBoletosDia, chartCategoria, chartGaugeComprometido, chartFinDia, chartFinForma, chartBoletosBenef, chartBoletosDiaMes]
       .forEach(ch => { if(ch) ch.update(); });
   }
 }
