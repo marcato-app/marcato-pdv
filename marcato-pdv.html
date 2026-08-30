@@ -831,16 +831,22 @@ datalist{}
   .msub-ico{ width:32px; height:32px; border-radius:9px; background:var(--tint-neutral); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
   .msub-ico svg{ width:15px; height:15px; stroke:var(--ink-soft); fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
   .msub-tema-val{ margin-left:auto; font-size:12.5px; color:var(--brand); font-weight:600; }
-  /* ---- Financeiro/Mais viram tela de cards em vez de lista ---- */
-  .msub-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  /* ---- Financeiro/Mais viram tela de cards (linhas cheias, ícone + título + subtítulo + seta) ---- */
+  .msub-grid{ display:flex; flex-direction:column; gap:10px; }
   .msub-grid .msub-item{
-    flex-direction:column; justify-content:center; text-align:center; gap:9px;
-    background:var(--card); border:1px solid var(--line); border-radius:14px; padding:16px 6px 14px;
-    box-shadow:var(--shadow-sm); font-size:11.5px; font-weight:600; line-height:1.25;
+    justify-content:flex-start; gap:12px;
+    background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 14px;
+    box-shadow:var(--shadow-sm); font-size:15px; font-weight:700; line-height:1.3;
   }
   .msub-grid .msub-item.hide{ display:none; }
-  .msub-grid .msub-ico{ width:44px; height:44px; border-radius:13px; }
+  .msub-grid .msub-ico{ width:44px; height:44px; border-radius:13px; flex-shrink:0; }
   .msub-grid .msub-ico svg{ width:19px; height:19px; }
+  .msub-grid .msub-item > span:not(.msub-ico){ display:flex; flex-direction:column; gap:2px; flex:1; min-width:0; }
+  .msub-grid .msub-item .msub-sub{ font-size:12px; font-weight:400; color:var(--ink-soft); }
+  .msub-grid .msub-item::after{
+    content:""; width:8px; height:8px; border-right:2px solid var(--ink-dim); border-bottom:2px solid var(--ink-dim);
+    transform:rotate(-45deg); flex-shrink:0; margin-left:auto;
+  }
   .msub-grid .msub-item:nth-of-type(6n+1) .msub-ico{ background:var(--brand-glow); } .msub-grid .msub-item:nth-of-type(6n+1) .msub-ico svg{ stroke:var(--brand); }
   .msub-grid .msub-item:nth-of-type(6n+2) .msub-ico{ background:var(--green-glow); } .msub-grid .msub-item:nth-of-type(6n+2) .msub-ico svg{ stroke:var(--green-dark); }
   .msub-grid .msub-item:nth-of-type(6n+3) .msub-ico{ background:var(--orange-glow); } .msub-grid .msub-item:nth-of-type(6n+3) .msub-ico svg{ stroke:var(--orange); }
@@ -2205,11 +2211,11 @@ datalist{}
     <div class="msub-sheet">
       <div class="msub-head"><b>Financeiro</b><button class="msub-close" data-close-submenu>✕</button></div>
       <div class="msub-grid">
-        <div class="msub-item" data-view="fluxo"><span class="msub-ico"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg></span><span>Fluxo de Caixa</span></div>
-        <div class="msub-item" data-view="despesas"><span class="msub-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><line x1="8" y1="12" x2="16" y2="12"></line></svg></span><span>Despesas Fixas</span></div>
-        <div class="msub-item" data-view="boletos"><span class="msub-ico"><svg viewBox="0 0 24 24"><line x1="3" y1="4" x2="3" y2="20" stroke-width="2"></line><line x1="6.5" y1="4" x2="6.5" y2="20" stroke-width="1"></line><line x1="9" y1="4" x2="9" y2="20" stroke-width="3"></line><line x1="13" y1="4" x2="13" y2="20" stroke-width="1"></line><line x1="16" y1="4" x2="16" y2="20" stroke-width="2"></line></svg></span><span>Boletos</span></div>
-        <div class="msub-item" data-view="compras" id="msubCompras"><span class="msub-ico"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg></span><span>Compras e Entradas</span></div>
-        <div class="msub-item" data-view="vendafornecedor" id="msubVendaFornecedor"><span class="msub-ico"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"></path></svg></span><span>Venda Fornecedor</span></div>
+        <div class="msub-item" data-view="fluxo"><span class="msub-ico"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg></span><span>Fluxo de Caixa<span class="msub-sub">Vendas por dia, entradas e saídas</span></span></div>
+        <div class="msub-item" data-view="despesas"><span class="msub-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><line x1="8" y1="12" x2="16" y2="12"></line></svg></span><span>Despesas Fixas<span class="msub-sub">Água, luz, aluguel e outras contas</span></span></div>
+        <div class="msub-item" data-view="boletos"><span class="msub-ico"><svg viewBox="0 0 24 24"><line x1="3" y1="4" x2="3" y2="20" stroke-width="2"></line><line x1="6.5" y1="4" x2="6.5" y2="20" stroke-width="1"></line><line x1="9" y1="4" x2="9" y2="20" stroke-width="3"></line><line x1="13" y1="4" x2="13" y2="20" stroke-width="1"></line><line x1="16" y1="4" x2="16" y2="20" stroke-width="2"></line></svg></span><span>Boletos<span class="msub-sub">Cadastre e acompanhe vencimentos</span></span></div>
+        <div class="msub-item" data-view="compras" id="msubCompras"><span class="msub-ico"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg></span><span>Compras e Entradas<span class="msub-sub">Registre compras de mercadoria</span></span></div>
+        <div class="msub-item" data-view="vendafornecedor" id="msubVendaFornecedor"><span class="msub-ico"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"></path></svg></span><span>Venda Fornecedor<span class="msub-sub">Compra e venda de aparelhos</span></span></div>
       </div>
     </div>
   </div>
@@ -2226,11 +2232,11 @@ datalist{}
       </div>
 
       <div class="msub-grid">
-        <div class="msub-item" data-view="orcamentos" id="msubOrcamentos"><span class="msub-ico"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg></span><span>Orçamentos</span></div>
-        <div class="msub-item" data-view="assistencia" id="msubAssistencia"><span class="msub-ico"><svg viewBox="0 0 24 24"><circle cx="7" cy="7" r="3"></circle><line x1="9.1" y1="9.1" x2="16.5" y2="16.5"></line><circle cx="18.5" cy="18.5" r="3"></circle></svg></span><span>Assistência Técnica</span></div>
-        <div class="msub-item" data-view="testes" id="msubTestes"><span class="msub-ico"><svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg></span><span>Testes de Aparelho</span></div>
-        <div class="msub-item" data-view="calculadora" id="msubCalculadora"><span class="msub-ico"><svg viewBox="0 0 24 24"><line x1="19" y1="5" x2="5" y2="19"></line><circle cx="6.5" cy="6.5" r="2.5"></circle><circle cx="17.5" cy="17.5" r="2.5"></circle></svg></span><span>Calculadora</span></div>
-        <div class="msub-item" data-view="config"><span class="msub-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><line x1="12" y1="1.5" x2="12" y2="4.5"></line><line x1="12" y1="19.5" x2="12" y2="22.5"></line><line x1="1.5" y1="12" x2="4.5" y2="12"></line><line x1="19.5" y1="12" x2="22.5" y2="12"></line></svg></span><span>Configurações</span></div>
+        <div class="msub-item" data-view="orcamentos" id="msubOrcamentos"><span class="msub-ico"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg></span><span>Orçamentos<span class="msub-sub">Monte orçamentos antes da venda</span></span></div>
+        <div class="msub-item" data-view="assistencia" id="msubAssistencia"><span class="msub-ico"><svg viewBox="0 0 24 24"><circle cx="7" cy="7" r="3"></circle><line x1="9.1" y1="9.1" x2="16.5" y2="16.5"></line><circle cx="18.5" cy="18.5" r="3"></circle></svg></span><span>Assistência Técnica<span class="msub-sub">Fila de consertos e ordens de serviço</span></span></div>
+        <div class="msub-item" data-view="testes" id="msubTestes"><span class="msub-ico"><svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg></span><span>Testes de Aparelho<span class="msub-sub">Checklist de diagnóstico</span></span></div>
+        <div class="msub-item" data-view="calculadora" id="msubCalculadora"><span class="msub-ico"><svg viewBox="0 0 24 24"><line x1="19" y1="5" x2="5" y2="19"></line><circle cx="6.5" cy="6.5" r="2.5"></circle><circle cx="17.5" cy="17.5" r="2.5"></circle></svg></span><span>Calculadora<span class="msub-sub">Cálculos rápidos</span></span></div>
+        <div class="msub-item" data-view="config"><span class="msub-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><line x1="12" y1="1.5" x2="12" y2="4.5"></line><line x1="12" y1="19.5" x2="12" y2="22.5"></line><line x1="1.5" y1="12" x2="4.5" y2="12"></line><line x1="19.5" y1="12" x2="22.5" y2="12"></line></svg></span><span>Configurações<span class="msub-sub">Dados da empresa, metas e mais</span></span></div>
       </div>
 
       <div class="msub-card" style="margin-top:12px;">
@@ -6803,15 +6809,24 @@ function aplicarTerminologiaSegmento(segmento){
   const descProdutos = document.getElementById('descProdutosForm');
   if(descProdutos) descProdutos.textContent = t.subtitleProdutos;
 
-  // Antes só aparecia pra segmento "eletronicos" — agora fica sempre visível
-  // pra todo mundo ver essas funções em "Mais", independente do tipo de negócio.
-  const mostrarEletronicos = true;
+  // Só o segmento "eletrônicos" usa Assistência Técnica/Testes de Aparelho/Calculadora
+  // (ferramentas de conserto e revenda de aparelho usado, não fazem sentido pra
+  // mercado/hortifruti). Compras e Venda Fornecedor servem qualquer segmento.
+  const mostrarEletronicos = segmento === 'eletronicos';
   document.getElementById('navGroupOperacao').classList.toggle('hide', !mostrarEletronicos);
-  [['navAssistencia','assistencia'], ['navTestes','testes'], ['navOrcamentos','orcamentos'], ['navCalculadora','calculadora'], ['navCompras','compras'], ['navVendaFornecedor','vendafornecedor']].forEach(([navId, viewName])=>{
+  [
+    ['navAssistencia','msubAssistencia','assistencia', mostrarEletronicos],
+    ['navTestes','msubTestes','testes', mostrarEletronicos],
+    ['navCalculadora','msubCalculadora','calculadora', mostrarEletronicos],
+    ['navOrcamentos','msubOrcamentos','orcamentos', true],
+    ['navCompras','msubCompras','compras', true],
+    ['navVendaFornecedor','msubVendaFornecedor','vendafornecedor', mostrarEletronicos],
+  ].forEach(([navId, msubId, viewName, mostrar])=>{
     const navEl = document.getElementById(navId);
-    if(!navEl) return;
-    navEl.classList.toggle('hide', !mostrarEletronicos);
-    if(!mostrarEletronicos && !document.getElementById('view-'+viewName).classList.contains('hide')){
+    if(navEl) navEl.classList.toggle('hide', !mostrar);
+    const msubEl = document.getElementById(msubId);
+    if(msubEl) msubEl.classList.toggle('hide', !mostrar);
+    if(!mostrar && !document.getElementById('view-'+viewName).classList.contains('hide')){
       document.querySelector('.navitem[data-view="painel"]').click();
     }
   });
