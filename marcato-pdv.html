@@ -253,6 +253,97 @@ main{flex:1; padding:28px 34px 60px; max-width:1220px;}
 }
 .estoque-baixo-card .alerta-icone svg{ width:15px; height:15px; stroke:var(--orange); fill:none; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
 
+/* ---------- Chips de filtro de período ---------- */
+.chip-row{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
+.chip{
+  display:inline-flex; align-items:center; gap:6px; padding:9px 16px; border-radius:99px; border:1px solid var(--line);
+  background:var(--card); color:var(--ink-soft); font-size:12.5px; font-weight:600; cursor:pointer; white-space:nowrap;
+  transition:background .15s, color .15s, border-color .15s;
+}
+.chip svg{ width:13px; height:13px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+.chip:hover{ border-color:var(--brand); }
+.chip.active{ background:var(--orange); color:#fff; border-color:var(--orange); }
+
+/* ---------- Navegação de mês ---------- */
+.month-nav{
+  display:flex; align-items:center; justify-content:space-between; background:var(--card); border:1px solid var(--line);
+  border-radius:var(--radius); padding:8px 10px; margin-bottom:16px; box-shadow:var(--shadow-sm);
+}
+.month-nav button{
+  width:34px; height:34px; border-radius:50%; border:none; background:var(--orange-glow); color:var(--orange);
+  display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;
+}
+.month-nav button svg{ width:15px; height:15px; stroke:var(--orange); fill:none; stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round; }
+.month-nav .label{ font-size:15px; font-weight:700; text-transform:capitalize; }
+
+/* ---------- Resumo do período (cards com ícone) ---------- */
+.resumo-head{ display:flex; align-items:center; justify-content:space-between; margin:20px 0 12px; }
+.resumo-head .eye{ width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:var(--ink-soft); cursor:pointer; }
+.resumo-head .eye svg{ width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+.resumo-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:8px; }
+.resumo-card{
+  background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:16px; box-shadow:var(--shadow-sm);
+}
+.resumo-card .icone{ width:34px; height:34px; border-radius:10px; display:flex; align-items:center; justify-content:center; margin-bottom:12px; }
+.resumo-card .icone svg{ width:16px; height:16px; stroke-width:2; fill:none; stroke-linecap:round; stroke-linejoin:round; }
+.resumo-card .icone.tint-green{ background:var(--green-glow); } .resumo-card .icone.tint-green svg{ stroke:var(--green-dark); }
+.resumo-card .icone.tint-warn{ background:var(--warn-soft); } .resumo-card .icone.tint-warn svg{ stroke:var(--warn); }
+.resumo-card .icone.tint-brand{ background:var(--brand-glow); } .resumo-card .icone.tint-brand svg{ stroke:var(--brand); }
+.resumo-card .icone.tint-orange{ background:var(--orange-glow); } .resumo-card .icone.tint-orange svg{ stroke:var(--orange); }
+.resumo-card .v{ font-family:'IBM Plex Mono',monospace; font-size:19px; font-weight:700; letter-spacing:-.01em; }
+.resumo-card.oculto .v{ font-size:22px; letter-spacing:2px; }
+.resumo-card .k{ font-size:12.5px; color:var(--ink-soft); margin-top:4px; }
+.resumo-card .sub{ font-size:10.5px; color:var(--ink-dim); margin-top:1px; }
+
+/* ---------- Lista de últimos lançamentos ---------- */
+.lancamento-item{
+  display:flex; align-items:center; gap:12px; background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+  padding:14px 16px; margin-bottom:10px; box-shadow:var(--shadow-sm);
+}
+.lancamento-item .icone{ width:36px; height:36px; border-radius:11px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.lancamento-item .icone svg{ width:16px; height:16px; stroke-width:2.2; fill:none; stroke-linecap:round; stroke-linejoin:round; }
+.lancamento-item .icone.entrada{ background:var(--green-glow); } .lancamento-item .icone.entrada svg{ stroke:var(--green-dark); }
+.lancamento-item .icone.saida{ background:var(--warn-soft); } .lancamento-item .icone.saida svg{ stroke:var(--warn); }
+.lancamento-item .corpo{ flex:1; min-width:0; }
+.lancamento-item .titulo{ font-size:13.5px; font-weight:700; margin-bottom:5px; }
+.lancamento-item .meta{ display:flex; align-items:center; gap:8px; }
+.lancamento-item .meta .tag{ background:var(--tint-neutral); color:var(--ink-soft); }
+.lancamento-item .meta .data{ font-size:11.5px; color:var(--ink-dim); }
+.lancamento-item .valor{ font-family:'IBM Plex Mono',monospace; font-size:14.5px; font-weight:700; flex-shrink:0; }
+.lancamento-item .valor.entrada{ color:var(--green-dark); } .lancamento-item .valor.saida{ color:var(--warn); }
+.ver-todas-link{ display:block; text-align:center; color:var(--brand); font-weight:700; font-size:13.5px; padding:6px 0 4px; cursor:pointer; }
+.ver-todas-link svg{ width:12px; height:12px; vertical-align:-1px; margin-left:2px; stroke:currentColor; fill:none; stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round; }
+
+/* ---------- Modal: seção de formulário com ícone ---------- */
+.form-section-card{
+  background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:16px; margin-bottom:14px;
+}
+.form-section-card .head{ display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+.form-section-card .head .icone{ width:32px; height:32px; border-radius:9px; background:var(--brand-glow); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.form-section-card .head .icone svg{ width:15px; height:15px; stroke:var(--brand); fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+.form-section-card .head b{ font-size:14px; font-weight:700; }
+.form-section-card .head .add{ margin-left:auto; width:28px; height:28px; border-radius:9px; background:var(--brand-glow); color:var(--brand); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:16px; font-weight:700; }
+.form-section-card .campo{ margin-bottom:12px; }
+.form-section-card .campo:last-child{ margin-bottom:0; }
+.form-section-card .campo label{ display:block; font-size:11px; font-weight:600; color:var(--ink-soft); margin-bottom:6px; }
+.form-section-card .campo label span{ text-transform:none; font-weight:400; color:var(--ink-dim); }
+.form-section-card .campo input, .form-section-card .campo select{
+  width:100%; padding:11px 13px; border-radius:11px; border:1px solid var(--line); background:var(--bg-app); font-size:14px; color:var(--ink);
+}
+.form-section-card .campo-2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.form-section-card .vazio{ text-align:center; color:var(--ink-dim); font-size:12.5px; padding:14px; border:1.5px dashed var(--line); border-radius:11px; }
+.tipo-toggle{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px; }
+.tipo-toggle .opc{
+  display:flex; align-items:center; justify-content:center; gap:7px; padding:12px; border-radius:12px; border:1.5px solid var(--line);
+  background:var(--card); color:var(--ink-soft); font-weight:700; font-size:14px; cursor:pointer;
+}
+.tipo-toggle .opc svg{ width:15px; height:15px; stroke:currentColor; fill:none; stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round; }
+.tipo-toggle .opc.entrada.ativo{ background:var(--green); border-color:var(--green); color:#fff; }
+.tipo-toggle .opc.saida.ativo{ background:var(--warn); border-color:var(--warn); color:#fff; }
+.categoria-chips{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+.categoria-chips .cchip{ padding:8px 14px; border-radius:99px; border:1px solid var(--line); background:var(--card); font-size:12.5px; font-weight:600; color:var(--ink-soft); cursor:pointer; }
+.categoria-chips .cchip.ativo{ background:var(--brand); border-color:var(--brand); color:#fff; }
+
 /* ---------- Hero card (destaque do Painel) ---------- */
 .hero-row{ display:grid; grid-template-columns:1.5fr 1fr 1fr; gap:14px; margin-bottom:22px; }
 .hero-card{
@@ -1116,8 +1207,67 @@ datalist{}
     <!-- ================= FLUXO DE CAIXA ================= -->
     <section id="view-fluxo" class="hide">
       <div class="topbar">
-        <div><h1>Fluxo de Caixa</h1><p>Lance o total vendido por dia, separado por forma de pagamento</p></div>
+        <div><h1>Visão Geral</h1><p>Suas entradas e saídas em um só lugar</p></div>
       </div>
+
+      <div class="chip-row" id="chipsPeriodoFinanceiro">
+        <div class="chip" data-periodo="hoje">Hoje</div>
+        <div class="chip" data-periodo="semana">Esta semana</div>
+        <div class="chip active" data-periodo="mes">Este mês</div>
+        <div class="chip" data-periodo="personalizado"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>Personalizado</div>
+      </div>
+
+      <div class="month-nav">
+        <button onclick="mudarMesFinanceiro(-1)"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg></button>
+        <span class="label" id="labelMesFinanceiro">—</span>
+        <button onclick="mudarMesFinanceiro(1)"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
+      </div>
+
+      <div class="resumo-head">
+        <div class="section-title-lg" style="margin:0;">Resumo do período</div>
+        <div class="eye" id="btnOcultarValoresFinanceiro" onclick="alternarOcultarValoresFinanceiro()">
+          <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+        </div>
+      </div>
+      <div class="resumo-grid">
+        <div class="resumo-card">
+          <span class="icone tint-green"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg></span>
+          <div class="v" id="finEntradas">R$ 0,00</div>
+          <div class="k">Entradas</div><div class="sub" id="finEntradasSub">vs. mês anterior</div>
+        </div>
+        <div class="resumo-card">
+          <span class="icone tint-warn"><svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg></span>
+          <div class="v" id="finSaidas">R$ 0,00</div>
+          <div class="k">Saídas</div><div class="sub" id="finSaidasSub">vs. mês anterior</div>
+        </div>
+        <div class="resumo-card">
+          <span class="icone tint-brand"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg></span>
+          <div class="v" id="finSaldo">R$ 0,00</div>
+          <div class="k">Saldo Final</div><div class="sub" id="finSaldoSub">vs. mês anterior</div>
+        </div>
+        <div class="resumo-card">
+          <span class="icone tint-orange"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></span>
+          <div class="v" id="finRepresentatividade">—</div>
+          <div class="k">Saídas vs. Entradas</div><div class="sub">representatividade</div>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:6px;">
+        <h3>Entradas × Saídas — período</h3>
+        <div class="desc" style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+          <span style="display:flex; align-items:center; gap:6px;"><span style="width:9px; height:9px; border-radius:50%; background:var(--brand); display:inline-block;"></span>Entradas</span>
+          <span style="display:flex; align-items:center; gap:6px;"><span style="width:9px; height:9px; border-radius:50%; background:var(--orange); display:inline-block;"></span>Saídas</span>
+        </div>
+        <div class="chart-wrap" id="wrapFinanceiroChart"><canvas id="chartFinanceiro"></canvas></div>
+      </div>
+
+      <div class="section-title-lg">Últimos lançamentos</div>
+      <div id="listaUltimosLancamentos"></div>
+      <div class="ver-todas-link" onclick="document.getElementById('chipsPeriodoFinanceiro').scrollIntoView({behavior:'smooth'})">Ver todas as movimentações <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+
+      <button class="btn-primary" style="width:100%; margin:16px 0 24px; padding:14px;" onclick="abrirModalNovoLancamento()">+ Novo Lançamento</button>
+
+      <div class="section-label">Lançamentos detalhados</div>
 
       <div class="panel">
         <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
@@ -1289,10 +1439,51 @@ datalist{}
     <!-- ================= ORÇAMENTOS ================= -->
     <section id="view-orcamentos" class="hide">
       <div class="topbar">
-        <div><h1>Orçamentos</h1><p>Monte um orçamento pro cliente antes de fechar a venda ou o conserto</p></div>
+        <div><h1>Vendas</h1><p>Orçamentos, vendas e conversões em um só lugar</p></div>
       </div>
 
-      <div class="panel" style="margin-bottom:16px;">
+      <div class="kpis" style="grid-template-columns:repeat(3,1fr);">
+        <div class="kpi accent-brand">
+          <div class="kpi-icon-badge tint-brand"><svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg></div>
+          <div class="k">Vendas hoje</div><div class="v" id="rvVendasHoje">0</div>
+        </div>
+        <div class="kpi accent-blue">
+          <div class="kpi-icon-badge tint-blue"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v10M9 9.5c0-1.4 1.3-2.5 3-2.5s3 1.1 3 2.5-1.3 2-3 2.5-3 1.1-3 2.5 1.3 2.5 3 2.5 3-1.1 3-2.5"></path></svg></div>
+          <div class="k">Faturamento</div><div class="v" id="rvFaturamento">R$ 0,00</div>
+        </div>
+        <div class="kpi accent-orange">
+          <div class="kpi-icon-badge tint-orange"><svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg></div>
+          <div class="k">Ticket Médio</div><div class="v" id="rvTicketMedio">R$ 0,00</div>
+        </div>
+      </div>
+
+      <div class="section-title-lg">Relatório de Vendas</div>
+      <div class="chip-row" id="chipsPeriodoRelatorio">
+        <div class="chip active" data-periodorv="mes">Este mês</div>
+        <div class="chip" data-periodorv="3meses">Últimos 3 meses</div>
+        <div class="chip" data-periodorv="ano">Este ano</div>
+        <div class="chip" data-periodorv="todos">Todos</div>
+      </div>
+      <button class="btn-ghost" style="width:100%; margin-bottom:20px; justify-content:center; display:flex; gap:8px;" onclick="window.print()">
+        <svg viewBox="0 0 24 24" style="width:15px; height:15px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+        Exportar Relatório PDF
+      </button>
+
+      <div class="section-title-lg">Todas as Vendas</div>
+      <div class="formrow" style="margin-bottom:10px;">
+        <div class="field" style="flex:1; min-width:200px;"><input type="text" id="rvBusca" placeholder="Cliente, produto ou nº da venda" style="width:100%;"></div>
+      </div>
+      <div class="chip-row" id="chipsTipoRelatorio">
+        <div class="chip active" data-tiporv="">Todos</div>
+        <div class="chip" data-tiporv="orcamento">Orçamento</div>
+        <div class="chip" data-tiporv="dinheiro">Dinheiro</div>
+        <div class="chip" data-tiporv="pix">Pix</div>
+        <div class="chip" data-tiporv="cartao">Cartão</div>
+      </div>
+      <div class="desc" id="rvContagem" style="margin-bottom:10px;"></div>
+      <div id="listaRelatorioVendas"></div>
+
+      <div class="panel" style="margin-bottom:16px; margin-top:8px;">
         <h3>Novo orçamento</h3>
         <div class="formrow">
           <div class="field" style="flex:1; min-width:220px;">
@@ -1329,7 +1520,7 @@ datalist{}
         <div id="orStatus" style="font-size:12px; margin-top:8px; min-height:16px;"></div>
       </div>
 
-      <div class="panel">
+      <div class="panel hide">
         <h3>Orçamentos cadastrados</h3>
         <table>
           <thead><tr><th>Cliente</th><th>Data</th><th>Validade</th><th>Total</th><th>Status</th><th></th></tr></thead>
@@ -2651,20 +2842,34 @@ async function salvarClienteNoBanco({nome, telefone, email, cpfCnpj, endereco, t
   return c;
 }
 function abrirModalNovoCliente(){
-  abrirModal(`<h3>Adicionar cliente</h3><div class="desc">Só o nome é obrigatório — preencha o resto se quiser.</div>
-    <div class="field" style="margin-bottom:10px;"><label>Nome</label><input type="text" id="clNome" placeholder="Nome completo" style="width:100%;"></div>
-    <div class="field" style="margin-bottom:10px;"><label>Tipo</label>
-      <select id="clTipoCliente" style="width:100%;">
-        <option value="">Não informado</option>
-        <option value="varejo">Varejo</option>
-        <option value="atacado">Atacado</option>
-      </select>
+  abrirModal(`<h3>Cliente</h3>
+    <div class="form-section-card">
+      <div class="head">
+        <span class="icone"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></span>
+        <b>Dados Pessoais</b>
+      </div>
+      <div class="campo"><label>Nome completo</label><input type="text" id="clNome" placeholder="Nome completo"></div>
+      <div class="campo"><label>Telefone / WhatsApp</label><input type="text" id="clTelefone" placeholder="(00) 00000-0000"></div>
+      <div class="campo"><label>E-mail <span>opcional</span></label><input type="email" id="clEmail" placeholder="opcional"></div>
+      <div class="campo campo-2">
+        <div><label>CPF/CNPJ <span>opcional</span></label><input type="text" id="clCpfCnpj" placeholder="opcional"></div>
+        <div><label>Tipo</label>
+          <select id="clTipoCliente">
+            <option value="">Não informado</option>
+            <option value="varejo">Varejo</option>
+            <option value="atacado">Atacado</option>
+          </select>
+        </div>
+      </div>
     </div>
-    <div class="field" style="margin-bottom:10px;"><label>Telefone</label><input type="text" id="clTelefone" placeholder="(00) 00000-0000" style="width:100%;"></div>
-    <div class="field" style="margin-bottom:10px;"><label>E-mail</label><input type="email" id="clEmail" placeholder="opcional" style="width:100%;"></div>
-    <div class="field" style="margin-bottom:10px;"><label>CPF/CNPJ</label><input type="text" id="clCpfCnpj" placeholder="opcional" style="width:100%;"></div>
-    <div class="field" style="margin-bottom:14px;"><label>Endereço completo (com CEP)</label><input type="text" id="clEndereco" placeholder="opcional" style="width:100%;"></div>
-    <button class="btn-teal" id="btnAddCliente" style="width:100%;">Salvar cliente</button>
+    <div class="form-section-card">
+      <div class="head">
+        <span class="icone"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg></span>
+        <b>Endereço</b>
+      </div>
+      <div class="campo"><label>Endereço completo (com CEP) <span>opcional</span></label><input type="text" id="clEndereco" placeholder="opcional"></div>
+    </div>
+    <button class="btn-teal" id="btnAddCliente" style="width:100%;">✓ Cadastrar Cliente</button>
     <div id="clStatus" style="font-size:12px; margin-top:8px; min-height:16px;"></div>
     <div class="modal-close-row"><button class="btn-ghost" onclick="fecharModal()">Cancelar</button></div>`);
   document.getElementById('btnAddCliente').addEventListener('click', async ()=>{
@@ -2857,6 +3062,115 @@ function renderOrcamentos(){
       <td>${acaoConverter}<span class="rm" onclick="removerOrcamento('${o.id}')">remover</span></td>`;
     tbody.appendChild(tr);
   });
+}
+
+/* ===================== VENDAS — RELATÓRIO (KPIs + lista unificada) ===================== */
+let periodoRelatorioVendas = 'mes';
+let tipoRelatorioVendas = '';
+document.getElementById('chipsPeriodoRelatorio').addEventListener('click', (e)=>{
+  const chip = e.target.closest('.chip'); if(!chip) return;
+  document.querySelectorAll('#chipsPeriodoRelatorio .chip').forEach(c=>c.classList.remove('active'));
+  chip.classList.add('active');
+  periodoRelatorioVendas = chip.dataset.periodorv;
+  renderRelatorioVendas();
+});
+document.getElementById('chipsTipoRelatorio').addEventListener('click', (e)=>{
+  const chip = e.target.closest('.chip'); if(!chip) return;
+  document.querySelectorAll('#chipsTipoRelatorio .chip').forEach(c=>c.classList.remove('active'));
+  chip.classList.add('active');
+  tipoRelatorioVendas = chip.dataset.tiporv;
+  renderRelatorioVendas();
+});
+document.getElementById('rvBusca').addEventListener('input', renderRelatorioVendas);
+
+function intervaloRelatorioVendas(){
+  const hoje = new Date(); const hojeISO = hoje.toISOString().slice(0,10);
+  if(periodoRelatorioVendas==='todos') return {ini:'0000-01-01', fim:'9999-12-31'};
+  if(periodoRelatorioVendas==='ano') return {ini:hojeISO.slice(0,4)+'-01-01', fim:hojeISO.slice(0,4)+'-12-31'};
+  if(periodoRelatorioVendas==='3meses'){
+    const d = new Date(hoje); d.setMonth(d.getMonth()-3);
+    return {ini:d.toISOString().slice(0,10), fim:hojeISO};
+  }
+  return {ini:hojeISO.slice(0,7)+'-01', fim:hojeISO.slice(0,7)+'-31'};
+}
+
+function renderRelatorioVendas(){
+  const hojeISO = new Date().toISOString().slice(0,10);
+  const {ini, fim} = intervaloRelatorioVendas();
+  const busca = document.getElementById('rvBusca').value.trim().toLowerCase();
+
+  const vendasHojeCount = vendasPDV.filter(v=>v.dataHora && v.dataHora.slice(0,10)===hojeISO).length;
+  const vendasPeriodo = vendasPDV.filter(v=>v.dataHora && v.dataHora.slice(0,10)>=ini && v.dataHora.slice(0,10)<=fim);
+  const faturamentoPeriodo = vendasPeriodo.reduce((s,v)=>s+v.total,0);
+  const ticketMedio = vendasPeriodo.length>0 ? faturamentoPeriodo/vendasPeriodo.length : 0;
+  document.getElementById('rvVendasHoje').textContent = vendasHojeCount;
+  document.getElementById('rvFaturamento').textContent = money(faturamentoPeriodo);
+  document.getElementById('rvTicketMedio').textContent = money(ticketMedio);
+
+  const itens = [];
+  orcamentos.forEach(o=>{
+    const dataRef = o.criadoEm ? o.criadoEm.slice(0,10) : '';
+    if(dataRef < ini || dataRef > fim) return;
+    if(tipoRelatorioVendas && tipoRelatorioVendas!=='orcamento') return;
+    const cliente = clientes.find(c=>c.id===o.clienteId);
+    const nome = cliente ? cliente.nome : '(cliente removido)';
+    if(busca && !nome.toLowerCase().includes(busca) && !o.itens.some(it=>it.descricao.toLowerCase().includes(busca))) return;
+    itens.push({tipo:'orcamento', ordenar:dataRef, o, nome});
+  });
+  vendasPDV.forEach(v=>{
+    const dataRef = v.dataHora ? v.dataHora.slice(0,10) : '';
+    if(dataRef < ini || dataRef > fim) return;
+    if(tipoRelatorioVendas && tipoRelatorioVendas!==v.forma) return;
+    const itensTxt = (v.itens||[]).map(it=>it.nome).join(', ');
+    if(busca && !itensTxt.toLowerCase().includes(busca)) return;
+    itens.push({tipo:'venda', ordenar:v.dataHora||'', v, itensTxt});
+  });
+  itens.sort((a,b)=> a.ordenar<b.ordenar?1:-1);
+
+  document.getElementById('rvContagem').textContent = `${itens.length} item(ns) encontrado(s)`;
+  const lista = document.getElementById('listaRelatorioVendas');
+  if(itens.length===0){
+    lista.innerHTML = '<div class="empty"><b>Nada encontrado</b>Ajuste os filtros ou o período acima.</div>';
+    return;
+  }
+  const corBorda = {orcamento:'var(--brand)', dinheiro:'var(--green)', pix:'var(--blue)', cartao:'var(--orange)'};
+  lista.innerHTML = itens.map(it=>{
+    if(it.tipo==='orcamento'){
+      const o = it.o;
+      const pendente = o.status!=='convertido';
+      const totalItens = o.itens.map(x=>`<div style="display:flex; justify-content:space-between; font-size:12.5px; padding:6px 0; border-top:1px solid var(--line);"><span><span class="tag" style="background:var(--tint-neutral); margin-right:6px;">${x.qtd}x</span>${x.descricao}</span><span>${money(x.valorUnit*x.qtd)}</span></div>`).join('');
+      return `<div class="panel" style="border-left:3px solid var(--brand); margin-bottom:12px; padding:16px;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
+          <div>
+            <div style="font-weight:700; font-size:14.5px;">Orçamento #${o.id.slice(0,6).toUpperCase()} <span class="tag" style="background:var(--brand-glow); color:var(--brand); margin-left:4px;">${pendente?'Pendente':'Convertido'}</span></div>
+            <div style="font-size:12px; color:var(--ink-soft); margin-top:4px;">${it.nome}</div>
+            <div style="font-size:11.5px; color:var(--ink-dim);">${fmtData(it.ordenar)}${o.validade?' • válido até '+fmtData(o.validade):''}</div>
+          </div>
+          <div style="font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:16px;">${money(o.total)}</div>
+        </div>
+        ${totalItens}
+        <div style="display:flex; gap:8px; margin-top:12px;">
+          ${pendente ? `<button class="btn-primary" style="flex:1;" onclick="converterOrcamentoEmVenda('${o.id}')">⇄ Converter em Venda</button>` : ''}
+          <button class="btn-ghost" style="width:44px; color:var(--warn); border-color:var(--warn-soft);" onclick="removerOrcamento('${o.id}')">🗑</button>
+        </div>
+      </div>`;
+    }
+    const v = it.v;
+    const formaLabel = {pix:'Pix', cartao:'Cartão', dinheiro:'Dinheiro'}[v.forma] || v.forma;
+    return `<div class="panel" style="border-left:3px solid ${corBorda[v.forma]||'var(--line)'}; margin-bottom:12px; padding:16px;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
+        <div>
+          <div style="font-weight:700; font-size:14.5px;">Venda #${v.id.slice(0,6).toUpperCase()} <span class="tag" style="background:var(--tint-neutral); margin-left:4px;">${formaLabel}</span></div>
+          <div style="font-size:12px; color:var(--ink-soft); margin-top:4px;">${it.itensTxt || 'Sem itens'}</div>
+          <div style="font-size:11.5px; color:var(--ink-dim);">${new Date(v.dataHora).toLocaleString('pt-BR')}</div>
+        </div>
+        <div style="font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:16px;">${money(v.total)}</div>
+      </div>
+      <div style="display:flex; gap:8px; margin-top:12px;">
+        <button class="btn-ghost" style="width:44px; color:var(--warn); border-color:var(--warn-soft);" onclick="removerVendaPDV('${v.id}')">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 /* ===================== ASSISTÊNCIA TÉCNICA ===================== */
@@ -4065,7 +4379,7 @@ function iniciarMenuColunas(tabela){
 ['clientes','boletos','vendas','compras','vendasFornecedor','produtos'].forEach(iniciarMenuColunas);
 
 /* ===================== PAINEL: KPIs + GRÁFICOS ===================== */
-let chartFluxo, chartFornecedor, chartBoletosDia, chartCategoria, chartGaugeComprometido;
+let chartFluxo, chartFornecedor, chartBoletosDia, chartCategoria, chartGaugeComprometido, chartFinanceiro;
 let ultimoTotalVendasPainel = 0, ultimoTotalDespesasPainel = 0, ultimoDiasNoMesPainel = 30;
 let ultimoDiasComVendaPainel = 0, ultimoProjecaoVendasPainel = 0;
 
@@ -4183,6 +4497,184 @@ function renderEstoqueBaixoPainel(){
       <div class="alerta-icone"><svg viewBox="0 0 24 24"><line x1="12" y1="8" x2="12" y2="13"></line><circle cx="12" cy="16.5" r=".6" fill="currentColor" stroke="none"></circle><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path></svg></div>
     </div>
   `).join('');
+}
+
+/* ===================== FINANCEIRO — VISÃO GERAL ===================== */
+let mesSelecionadoFinanceiro = mesAtualISO();
+let periodoFinanceiro = 'mes';
+let valoresFinanceiroOcultos = false;
+
+function mudarMesFinanceiro(delta){
+  const [ano, mes] = mesSelecionadoFinanceiro.split('-').map(Number);
+  const d = new Date(Date.UTC(ano, mes-1+delta, 1));
+  mesSelecionadoFinanceiro = d.toISOString().slice(0,7);
+  renderFinanceiroDashboard();
+}
+function alternarOcultarValoresFinanceiro(){
+  valoresFinanceiroOcultos = !valoresFinanceiroOcultos;
+  renderFinanceiroDashboard();
+}
+document.getElementById('chipsPeriodoFinanceiro').addEventListener('click', (e)=>{
+  const chip = e.target.closest('.chip');
+  if(!chip) return;
+  document.querySelectorAll('#chipsPeriodoFinanceiro .chip').forEach(c=>c.classList.remove('active'));
+  chip.classList.add('active');
+  periodoFinanceiro = chip.dataset.periodo;
+  renderFinanceiroDashboard();
+});
+function intervaloPeriodoFinanceiro(){
+  const hoje = new Date();
+  const hojeISO = hoje.toISOString().slice(0,10);
+  if(periodoFinanceiro==='hoje') return {ini:hojeISO, fim:hojeISO};
+  if(periodoFinanceiro==='semana'){
+    const diaSemana = hoje.getDay();
+    const ini = new Date(hoje); ini.setDate(hoje.getDate()-diaSemana);
+    return {ini: ini.toISOString().slice(0,10), fim: hojeISO};
+  }
+  return {ini: mesSelecionadoFinanceiro+'-01', fim: mesSelecionadoFinanceiro+'-31'};
+}
+function renderFinanceiroDashboard(){
+  const nomeMes = new Date(Date.UTC(...mesSelecionadoFinanceiro.split('-').map(Number), 1)).toLocaleDateString('pt-BR', {month:'long', year:'numeric', timeZone:'UTC'});
+  document.getElementById('labelMesFinanceiro').textContent = nomeMes;
+
+  const vendasMes = vendas.filter(v=>v.data && v.data.startsWith(mesSelecionadoFinanceiro));
+  const entradasMes = vendasMes.reduce((s,v)=>s+v.pix+v.cartao+v.dinheiro,0);
+  const boletosMes = boletos.filter(b=>b.vencimento && b.vencimento.startsWith(mesSelecionadoFinanceiro));
+  const totalBoletosMes = boletosMes.reduce((s,b)=>s+b.valor,0);
+  const totalDespesasMes = despesas.reduce((s,d)=>s+d.valor,0);
+  const saidasMes = totalBoletosMes + totalDespesasMes;
+  const saldoMes = entradasMes - saidasMes;
+  const representatividade = entradasMes>0 ? Math.round(saidasMes/entradasMes*100) : 0;
+
+  const oculto = valoresFinanceiroOcultos ? '••••••' : null;
+  document.getElementById('finEntradas').textContent = oculto || money(entradasMes);
+  document.getElementById('finSaidas').textContent = oculto || money(saidasMes);
+  document.getElementById('finSaldo').textContent = oculto || money(saldoMes);
+  document.getElementById('finSaldo').className = 'v ' + (saldoMes>=0 ? 'ok' : 'warn');
+  document.getElementById('finRepresentatividade').textContent = oculto || (representatividade+'%');
+  document.getElementById('finEntradasSub').textContent = `${vendasMes.length} lançamento(s) no mês`;
+  document.getElementById('finSaidasSub').textContent = `${despesas.length} despesa(s) + ${boletosMes.length} boleto(s)`;
+
+  // ---- Últimos lançamentos: junta vendas (entrada) + despesas/boletos (saída) ----
+  const {ini, fim} = intervaloPeriodoFinanceiro();
+  const lancamentos = [];
+  vendas.forEach(v=>{
+    const total = v.pix+v.cartao+v.dinheiro;
+    if(total>0 && v.data>=ini && v.data<=fim) lancamentos.push({tipo:'entrada', titulo:'Venda do dia', categoria:'Vendas', data:v.data, valor:total});
+  });
+  boletos.forEach(b=>{
+    if(b.vencimento && b.vencimento>=ini && b.vencimento<=fim) lancamentos.push({tipo:'saida', titulo:b.beneficiario, categoria:'Boleto', data:b.vencimento, valor:b.valor});
+  });
+  lancamentos.sort((a,b)=> a.data<b.data?1:-1);
+  const listaEl = document.getElementById('listaUltimosLancamentos');
+  if(lancamentos.length===0){
+    listaEl.innerHTML = '<div class="empty"><b>Nenhum lançamento no período</b>Ajuste os filtros acima ou adicione um lançamento.</div>';
+  } else {
+    listaEl.innerHTML = lancamentos.slice(0,8).map(l=>`
+      <div class="lancamento-item">
+        <span class="icone ${l.tipo}"><svg viewBox="0 0 24 24">${l.tipo==='entrada' ? '<line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline>' : '<line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline>'}</svg></span>
+        <div class="corpo">
+          <div class="titulo">${l.titulo}</div>
+          <div class="meta"><span class="tag">${l.categoria}</span><span class="data">${fmtData(l.data)}</span></div>
+        </div>
+        <div class="valor ${l.tipo}">${l.tipo==='entrada'?'+':'-'} ${money(l.valor)}</div>
+      </div>`).join('');
+  }
+
+  // ---- Gráfico: entradas x saídas por semana do mês ----
+  const wrap = document.getElementById('wrapFinanceiroChart');
+  if(typeof Chart === 'undefined'){
+    wrap.innerHTML = '<div class="empty"><b>Gráfico indisponível</b>A biblioteca de gráficos não carregou — recarregue a página.</div>';
+  } else {
+    if(!document.getElementById('chartFinanceiro')){ wrap.innerHTML = '<canvas id="chartFinanceiro"></canvas>'; }
+    const semanas = [0,0,0,0,0], semanasSaida = [0,0,0,0,0];
+    vendasMes.forEach(v=>{ const dia = +v.data.slice(8,10); const s = Math.min(4, Math.floor((dia-1)/7)); semanas[s]+= v.pix+v.cartao+v.dinheiro; });
+    boletosMes.forEach(b=>{ const dia = +b.vencimento.slice(8,10); const s = Math.min(4, Math.floor((dia-1)/7)); semanasSaida[s]+= b.valor; });
+    const corBrand = getComputedStyle(document.documentElement).getPropertyValue('--brand').trim() || '#6C3CE9';
+    const corLaranja = getComputedStyle(document.documentElement).getPropertyValue('--orange').trim() || '#F5821F';
+    const ctx = document.getElementById('chartFinanceiro').getContext('2d');
+    if(chartFinanceiro) chartFinanceiro.destroy();
+    chartFinanceiro = new Chart(ctx, {
+      type:'bar',
+      data:{
+        labels:['Sem 1','Sem 2','Sem 3','Sem 4','Sem 5'],
+        datasets:[
+          {type:'bar', label:'Entradas', data:semanas, backgroundColor:corBrand, borderRadius:4, maxBarThickness:20},
+          {type:'line', label:'Saídas', data:semanasSaida, borderColor:corLaranja, backgroundColor:corLaranja, tension:.35, pointRadius:3}
+        ]
+      },
+      options:{ responsive:true, maintainAspectRatio:false,
+        scales:{ x:{grid:{display:false}}, y:{grid:{color:corGradeGrafico()}, ticks:{callback:v=>moneyCompacta(v)}} },
+        plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label: ctx => `${ctx.dataset.label}: ${money(ctx.raw)}` } } } }
+    });
+  }
+}
+
+function abrirModalNovoLancamento(){
+  let tipoLanc = 'saida';
+  const categoriasEntrada = ['Vendas','Serviços','Outros'];
+  const categoriasSaida = ['Compra de Mercadoria','Frete','Imposto sobre Compra','Aluguel','Energia','Água','Internet','Salário','Marketing','Manutenção','Despesa Financeira','Despesas Diversas','Outros'];
+  const render = ()=>{
+    const cats = tipoLanc==='entrada' ? categoriasEntrada : categoriasSaida;
+    document.getElementById('nlTipoEntrada').classList.toggle('ativo', tipoLanc==='entrada');
+    document.getElementById('nlTipoSaida').classList.toggle('ativo', tipoLanc==='saida');
+    document.getElementById('nlCategorias').innerHTML = cats.map((c,i)=>`<span class="cchip ${i===cats.length-1?'ativo':''}" data-cat="${c}">${c}</span>`).join('');
+  };
+  abrirModal(`<h3>Novo Lançamento</h3>
+    <div class="form-section-card">
+      <div class="campo" style="margin-bottom:14px;"><label>Tipo</label>
+        <div class="tipo-toggle">
+          <div class="opc entrada" id="nlTipoEntrada"><svg viewBox="0 0 24 24"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>Entrada</div>
+          <div class="opc saida" id="nlTipoSaida"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>Saída</div>
+        </div>
+      </div>
+      <div class="campo"><label>Categoria</label><div class="categoria-chips" id="nlCategorias"></div></div>
+      <div class="campo"><label>Descrição</label><input type="text" id="nlDescricao" placeholder="Ex: Compra de estoque, Aluguel..."></div>
+      <div class="campo campo-2">
+        <div><label>Valor (R$)</label><input type="number" step="0.01" id="nlValor" placeholder="0,00"></div>
+        <div><label>Data</label><input type="date" id="nlData" value="${new Date().toISOString().slice(0,10)}"></div>
+      </div>
+    </div>
+    <button class="btn-teal" id="btnSalvarLancamento" style="width:100%;">✓ Salvar</button>
+    <div id="nlStatus" style="font-size:12px; margin-top:8px; min-height:16px;"></div>
+    <div class="modal-close-row"><button class="btn-ghost" onclick="fecharModal()">Cancelar</button></div>`);
+  render();
+  document.getElementById('nlTipoEntrada').addEventListener('click', ()=>{ tipoLanc='entrada'; render(); });
+  document.getElementById('nlTipoSaida').addEventListener('click', ()=>{ tipoLanc='saida'; render(); });
+  document.getElementById('nlCategorias').addEventListener('click', (e)=>{
+    const chip = e.target.closest('.cchip');
+    if(!chip) return;
+    document.querySelectorAll('#nlCategorias .cchip').forEach(c=>c.classList.remove('ativo'));
+    chip.classList.add('ativo');
+  });
+  document.getElementById('btnSalvarLancamento').addEventListener('click', async ()=>{
+    const statusEl = document.getElementById('nlStatus');
+    const descricao = document.getElementById('nlDescricao').value.trim();
+    const valor = parseFloat(document.getElementById('nlValor').value) || 0;
+    const data = document.getElementById('nlData').value;
+    const categoriaEl = document.querySelector('#nlCategorias .cchip.ativo');
+    const categoria = categoriaEl ? categoriaEl.dataset.cat : 'Outros';
+    if(valor<=0){ statusEl.style.color='var(--warn)'; statusEl.textContent = 'Informe o valor do lançamento.'; return; }
+    if(!data){ statusEl.style.color='var(--warn)'; statusEl.textContent = 'Escolha a data.'; return; }
+    try{
+      if(tipoLanc==='entrada'){
+        const { data: row, error } = await sb.from('vendas').insert(comUserId({data, pix:0, cartao:0, dinheiro:valor})).select().single();
+        if(error) throw error;
+        vendas.push(fromDbVenda(row));
+      } else {
+        const nome = descricao ? `${categoria} — ${descricao}` : categoria;
+        const { data: row, error } = await sb.from('despesas').insert(comUserId({nome, valor, dia:new Date(data+'T00:00:00').getDate()})).select().single();
+        if(error) throw error;
+        despesas.push(fromDbDespesa(row));
+      }
+      fecharModal();
+      renderTudo();
+    }catch(e){
+      console.error('Erro ao salvar lançamento:', e);
+      statusEl.style.color = 'var(--warn)';
+      statusEl.textContent = 'Erro ao salvar: ' + e.message;
+    }
+  });
 }
 
 function renderPainel(){
@@ -4413,6 +4905,7 @@ function renderTudo(){
   renderVendas();
   renderDespesas();
   renderBoletos();
+  renderFinanceiroDashboard();
   renderProdutos();
   renderCarrinho();
   renderHistorico();
@@ -4422,6 +4915,7 @@ function renderTudo(){
   renderFuncionarios();
   renderClientes();
   renderOrcamentos();
+  renderRelatorioVendas();
   renderOrdensServico();
   renderTestes();
   renderCompras();
