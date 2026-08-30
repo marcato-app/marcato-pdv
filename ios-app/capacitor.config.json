@@ -1,0 +1,13 @@
+{
+  "appId": "com.identidadevision.marcatopdv",
+  "appName": "Marcato PDV",
+  "webDir": "www",
+  "server": {
+    "url": "https://pdv.marcatoapp.com.br",
+    "cleartext": false
+  },
+  "ios": {
+    "contentInset": "always",
+    "backgroundColor": "#0B0B12"
+  }
+}
