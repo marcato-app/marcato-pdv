@@ -170,6 +170,10 @@ body{
 html:not(.tema-escuro) .theme-toggle .opt[data-modo="claro"]{ background:rgba(255,255,255,0.12); color:#fff; }
 html.tema-escuro .theme-toggle .opt[data-modo="escuro"]{ background:rgba(255,255,255,0.12); color:#fff; }
 
+/* ---------- Janela dedicada do PDV (abre em outra janela, sem menu lateral) ---------- */
+.janela-dedicada-pdv .sidebar{ display:none; }
+.janela-dedicada-pdv main{ max-width:100%; padding:18px 20px 40px; }
+
 /* ---------- Main ---------- */
 main{flex:1; padding:28px 34px 60px; max-width:1220px;}
 .topbar{display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:24px; gap:16px;}
@@ -2449,8 +2453,26 @@ function irParaView(viewName){
   if(typeof fecharSubmenuMobile==='function') fecharSubmenuMobile();
   if(typeof atualizarTabbarMobile==='function') atualizarTabbarMobile(viewName);
 }
+// Abre a tela de venda numa janela própria (sem menu lateral) — pensado pro uso no
+// computador/Windows, onde o caixa fica numa janela dedicada enquanto o resto do
+// sistema (relatórios, cadastros) continua na janela principal. No celular não tem
+// esse conceito de "janela separada", então isso só entra em ação a partir do menu
+// lateral (desktop) — a barra de abas de baixo continua abrindo o PDV na mesma tela.
+function abrirJanelaDedicadaPdv(){
+  const url = location.pathname + '?janela=pdv';
+  const janela = window.open(url, 'MarcatoPDVCaixa', 'width=520,height=880,menubar=no,toolbar=no,location=no,status=no');
+  if(janela){ janela.focus(); return true; }
+  return false; // popup bloqueado — quem chamou decide o que fazer
+}
 document.querySelectorAll('.navitem[data-view]').forEach(item=>{
-  item.addEventListener('click', ()=> irParaView(item.dataset.view));
+  item.addEventListener('click', (e)=>{
+    // e.isTrusted diferencia um clique de verdade do mouse/toque de um `.click()`
+    // disparado pelo próprio código (ex: converter orçamento em venda) — só o clique
+    // de verdade no menu deve abrir a janela dedicada; o resto continua navegando
+    // na mesma janela, senão quebra esses fluxos internos.
+    if(item.dataset.view==='pdv' && e.isTrusted && abrirJanelaDedicadaPdv()) return;
+    irParaView(item.dataset.view);
+  });
 });
 
 /* ---- Menu mobile (hambúrguer): abre/fecha a sidebar como gaveta ---- */
@@ -7039,6 +7061,13 @@ async function iniciarSessao(session){
     const ativo = document.querySelector('.navitem[data-view].active');
     if(typeof atualizarTabbarMobile==='function') atualizarTabbarMobile(ativo ? ativo.dataset.view : 'painel');
   });
+  // Se essa aba/janela foi aberta como "janela dedicada de caixa" (ver abrirJanelaDedicadaPdv),
+  // pula direto pro PDV e esconde o menu lateral — fica só a tela de venda, sem distração.
+  if(new URLSearchParams(location.search).get('janela')==='pdv'){
+    document.body.classList.add('janela-dedicada-pdv');
+    document.title = 'Marcato PDV — Caixa';
+    irParaView('pdv');
+  }
 }
 
 /* ---- Cadastro inicial da empresa (CNPJ + busca automática) ---- */
