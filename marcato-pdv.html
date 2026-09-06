@@ -390,6 +390,11 @@ html.tema-escuro .mini-kpi .v.ok{ color:var(--green); }
 .panel-tool{ background:var(--card-2); border:1px dashed var(--line-2); }
 .chart-wrap{position:relative; height:220px;}
 .chart-wrap.tall{height:260px;}
+/* Gráficos com uma barra por dia do mês (até 31 categorias) — em vez do Chart.js
+   pular labels pra não sobrepor (autoSkip), o wrap vira scroll horizontal com uma
+   largura mínima por dia, garantindo que toda data apareça. */
+.chart-wrap.dias-do-mes{ overflow-x:auto; overflow-y:hidden; }
+.chart-wrap.dias-do-mes .chart-dias-inner{ height:100%; }
 #view-painel .panel:hover, #view-painel .kpi:hover{
   transform:translateY(-2px); border-color:#D3E0DC; box-shadow:var(--shadow-md);
 }
@@ -1261,8 +1266,8 @@ datalist{}
 
       <div class="panel">
         <h3>Vendas por dia — mês selecionado</h3>
-        <div class="desc">Total vendido (Pix + Cartão + Dinheiro) em cada dia do mês</div>
-        <div class="chart-wrap" id="wrapFinDiaChart"><canvas id="chartFinDia"></canvas></div>
+        <div class="desc">Total vendido (Pix + Cartão + Dinheiro) em cada dia do mês. Arraste pros lados pra ver o mês inteiro.</div>
+        <div class="chart-wrap dias-do-mes" id="wrapFinDiaChart"><div class="chart-dias-inner"><canvas id="chartFinDia"></canvas></div></div>
       </div>
 
       <div class="panel" style="margin-top:16px;">
@@ -1390,8 +1395,8 @@ datalist{}
 
       <div class="panel" style="margin-top:16px;">
         <h3>Vencimentos por dia do mês</h3>
-        <div class="desc">Concentração de vencimentos — dias em vermelho estão acima da média</div>
-        <div class="chart-wrap" id="wrapBoletosDiaMes"><canvas id="chartBoletosDiaMes"></canvas></div>
+        <div class="desc">Concentração de vencimentos — dias em vermelho estão acima da média. Arraste pros lados pra ver o mês inteiro.</div>
+        <div class="chart-wrap dias-do-mes" id="wrapBoletosDiaMes"><div class="chart-dias-inner"><canvas id="chartBoletosDiaMes"></canvas></div></div>
       </div>
 
       <div class="section-title-lg">Boletos cadastrados</div>
@@ -2894,15 +2899,14 @@ function renderBoletos(){
     } else if(typeof Chart === 'undefined'){
       wrapDiaMes.innerHTML = '<div class="empty"><b>Gráfico indisponível</b></div>';
     } else {
-      if(!document.getElementById('chartBoletosDiaMes')){ wrapDiaMes.innerHTML = '<canvas id="chartBoletosDiaMes"></canvas>'; }
-      const ctx = document.getElementById('chartBoletosDiaMes').getContext('2d');
+      const ctx = prepararCanvasDias('wrapBoletosDiaMes', 'chartBoletosDiaMes', diasNoMesGrafico);
       if(chartBoletosDiaMes) chartBoletosDiaMes.destroy();
       chartBoletosDiaMes = new Chart(ctx, {
         type:'bar',
         data:{ labels: porDiaMes.map((_,i)=>String(i+1)), datasets:[{ data: porDiaMes, borderRadius:3, maxBarThickness:16,
           backgroundColor: porDiaMes.map(v=> v > mediaDiaMes*1.5 ? '#DD6B55' : corBrand) }] },
         options:{ responsive:true, maintainAspectRatio:false,
-          scales:{ x:{grid:{display:false}}, y:{grid:{color:corGradeGrafico()}, ticks:{callback:v=>moneyCompacta(v)}} },
+          scales:{ x:{grid:{display:false}, ticks:{autoSkip:false, maxRotation:0}}, y:{grid:{color:corGradeGrafico()}, ticks:{callback:v=>moneyCompacta(v)}} },
           plugins:{ legend:{display:false}, tooltip:{ callbacks:{ title: items => `Dia ${items[0].label}`, label: ctx => money(ctx.raw) } } } }
       });
     }
@@ -4706,6 +4710,25 @@ function renderEstoqueBaixoPainel(){
   `).join('');
 }
 
+// Gráficos com uma barra por dia do mês (até 31 categorias): o Chart.js some com
+// labels pra não sobrepor (autoSkip) quando a barra é estreita — em vez disso, a
+// gente dá largura mínima fixa por dia e deixa o wrap rolar de lado, então nenhuma
+// data some, só precisa arrastar.
+const LARGURA_MIN_POR_DIA = 26;
+function prepararCanvasDias(wrapId, canvasId, dias){
+  const wrap = document.getElementById(wrapId);
+  if(!wrap) return null;
+  const larguraMin = dias * LARGURA_MIN_POR_DIA;
+  let inner = wrap.querySelector('.chart-dias-inner');
+  if(!inner || !document.getElementById(canvasId)){
+    wrap.innerHTML = `<div class="chart-dias-inner"><canvas id="${canvasId}"></canvas></div>`;
+    inner = wrap.querySelector('.chart-dias-inner');
+  }
+  inner.style.width = larguraMin+'px';
+  inner.style.minWidth = '100%';
+  return document.getElementById(canvasId).getContext('2d');
+}
+
 /* ===================== FINANCEIRO — VISÃO GERAL ===================== */
 let mesSelecionadoFinanceiro = mesAtualISO();
 
@@ -4728,17 +4751,16 @@ function renderFinanceiroDashboard(){
   if(typeof Chart === 'undefined'){
     wrapDia.innerHTML = '<div class="empty"><b>Gráfico indisponível</b>A biblioteca de gráficos não carregou — recarregue a página.</div>';
   } else {
-    if(!document.getElementById('chartFinDia')){ wrapDia.innerHTML = '<canvas id="chartFinDia"></canvas>'; }
+    const ctx = prepararCanvasDias('wrapFinDiaChart', 'chartFinDia', diasNoMes);
     const totalPorDia = new Array(diasNoMes).fill(0);
     vendasMes.forEach(v=>{ const dia = +v.data.slice(8,10); if(dia>=1 && dia<=diasNoMes) totalPorDia[dia-1] += v.pix+v.cartao+v.dinheiro; });
     const corBrand = getComputedStyle(document.documentElement).getPropertyValue('--brand').trim() || '#6C3CE9';
-    const ctx = document.getElementById('chartFinDia').getContext('2d');
     if(chartFinDia) chartFinDia.destroy();
     chartFinDia = new Chart(ctx, {
       type:'bar',
       data:{ labels: Array.from({length:diasNoMes},(_,i)=>String(i+1)), datasets:[{label:'Vendido', data:totalPorDia, backgroundColor:corBrand, borderRadius:3, maxBarThickness:16}] },
       options:{ responsive:true, maintainAspectRatio:false,
-        scales:{ x:{grid:{display:false}}, y:{grid:{color:corGradeGrafico()}, ticks:{callback:v=>moneyCompacta(v)}} },
+        scales:{ x:{grid:{display:false}, ticks:{autoSkip:false, maxRotation:0}}, y:{grid:{color:corGradeGrafico()}, ticks:{callback:v=>moneyCompacta(v)}} },
         plugins:{ legend:{display:false}, tooltip:{ callbacks:{ label: ctx => money(ctx.raw) } } } }
     });
   }
