@@ -18,11 +18,11 @@
 <style>
 :root{
   --brand:#7C5CFC; --brand-2:#9B82FF; --brand-dark:#6142D6; --brand-glow: rgba(124,92,252,0.15);
-  --green:#17B88A; --green-dark:#0E9270; --green-glow: rgba(23,184,138,0.14);
+  --green:#17B88A; --green-dark:#0A7A5D; --green-glow: rgba(23,184,138,0.14);
   --bg-dark:#0B0B12; --bg-dark-2:#111117;
   --bg-app:#F7F7FA; --card:#FFFFFF; --card-2:#F3F1FE;
-  --ink:#14141F; --ink-soft:#65656F; --ink-dim:#9A99A6; --line:#E3E3EC; --line-2:#D5D5E0;
-  --warn:#D0433A; --warn-soft:#FBEAEA;
+  --ink:#14141F; --ink-soft:#65656F; --ink-dim:#74737E; --line:#E3E3EC; --line-2:#D5D5E0;
+  --warn:#C2352C; --warn-soft:#FBEAEA;
   --ok:#17B88A;
   --radius:16px; --radius-sm:10px;
   --shadow-sm:0 1px 2px rgba(20,20,31,.04);
@@ -32,13 +32,17 @@
   --ink-solid-bg:#14141F; --ink-solid-fg:#FFFFFF;
   --blue:#2F6FED; --blue-glow:#E8EFFD;
   --orange:#F5821F; --orange-glow:#FDECDC;
+  /* Laranja e roxo vivos funcionam como preenchimento, mas como TEXTO ficam em
+     2,6:1 e 3,8:1 sobre branco. Estes dois sao a versao para texto — mesma
+     familia de cor, contraste que da pra ler. */
+  --orange-text:#A85200; --brand-text:#6142D6;
   color-scheme:light;
 }
 html.tema-escuro{
   --brand:#8B6BFF; --brand-2:#A98FFF; --brand-dark:#6E4EE8; --brand-glow: rgba(139,107,255,.32);
   --green:#22D6A3; --green-dark:#1AB78C; --green-glow: rgba(34,214,163,.2);
   --bg-app:#09090F; --card:#141420; --card-2:#1A1A2C;
-  --ink:#F1F1F6; --ink-soft:#9998A8; --ink-dim:#6B6A7C; --line:rgba(255,255,255,.08); --line-2:rgba(255,255,255,.14);
+  --ink:#F1F1F6; --ink-soft:#9998A8; --ink-dim:#8A8999; --line:rgba(255,255,255,.08); --line-2:rgba(255,255,255,.14);
   --warn:#FF6F66; --warn-soft:rgba(255,111,102,.16);
   --ok:#22D6A3;
   --shadow-sm:0 1px 2px rgba(0,0,0,.3);
@@ -50,6 +54,7 @@ html.tema-escuro{
   --ink-solid-bg:#EFEDFB; --ink-solid-fg:#141420;
   --blue:#5B93FF; --blue-glow:rgba(91,147,255,.18);
   --orange:#FF9848; --orange-glow:rgba(255,152,72,.18);
+  --orange-text:#FFA867; --brand-text:#A98FFF;
   color-scheme:dark;
 }
 /* ---- PDV/Vendas fica travado no visual atual — a reforma de design abaixo não entra aqui ---- */
@@ -63,6 +68,7 @@ html.tema-escuro{
   --radius:16px; --radius-sm:10px;
   --tint-neutral:#E9ECEB;
   --ink-solid-bg:#0E1E1B; --ink-solid-fg:#FFFFFF;
+  --orange-text:#F5821F; --brand-text:#6C3CE9;
 }
 html.tema-escuro #view-pdv{
   --brand:#7C4DFF; --brand-2:#9B6BFF; --brand-dark:#5B2FE0; --brand-glow: rgba(124,77,255,.35);
@@ -210,7 +216,7 @@ main{flex:1; padding:28px 34px 60px; max-width:1220px;}
 .kpi .v.warn{color:var(--warn);}
 .kpi .v.ok{color:var(--green-dark);}
 .kpi .sub{font-size:11px; color:var(--ink-soft); margin-top:4px;}
-.kpi:hover{ transform:translateY(-2px); box-shadow:var(--shadow-md); border-color:#D3E0DC; }
+.kpi:hover{ transform:translateY(-2px); box-shadow:var(--shadow-md); border-color:var(--line-2); }
 
 /* ---------- Painel: resultado do mês ----------
    Uma pergunta por tela: "sobrou ou faltou?". O valor domina a hierarquia,
@@ -254,6 +260,7 @@ main{flex:1; padding:28px 34px 60px; max-width:1220px;}
 .resultado-selo.neutro{ background:var(--tint-neutral); color:var(--ink-soft); }
 
 .barra-composicao{ display:flex; flex-direction:column; gap:6px; margin:20px 0 14px; }
+.barra-composicao.vazia{ display:none; }
 .barra-composicao .faixa{
   height:10px; border-radius:99px; min-width:3px;
   transition:width .5s cubic-bezier(.22,1,.36,1);
@@ -347,7 +354,7 @@ main{flex:1; padding:28px 34px 60px; max-width:1220px;}
   flex-shrink:0; box-shadow:var(--shadow-sm);
 }
 .tip-icon svg{ width:18px; height:18px; stroke:var(--brand); fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
-.tip-body b{ display:block; color:var(--brand); font-size:13.5px; margin-bottom:4px; }
+.tip-body b{ display:block; color:var(--brand-text); font-size:13.5px; margin-bottom:4px; }
 .tip-body p{ margin:0; font-size:12.5px; color:var(--ink); line-height:1.5; }
 .tip-dots{ display:flex; justify-content:center; gap:5px; margin:10px 0 4px; }
 .tip-dot{ width:6px; height:6px; border-radius:50%; background:var(--line-2); }
@@ -365,8 +372,8 @@ main{flex:1; padding:28px 34px 60px; max-width:1220px;}
   display:flex; align-items:center; gap:12px; background:var(--card); border:1px solid var(--line); border-left:4px solid var(--orange);
   border-radius:var(--radius); padding:14px 16px; margin-bottom:10px; box-shadow:var(--shadow-sm);
 }
-.estoque-baixo-card .nome{ font-size:13.5px; color:var(--ink-soft); margin-bottom:3px; }
-.estoque-baixo-card .qtd{ font-family:'IBM Plex Mono',monospace; font-size:19px; font-weight:700; color:var(--orange); }
+.estoque-baixo-card .nome{ font-size:14px; font-weight:600; color:var(--ink); margin-bottom:2px; }
+.estoque-baixo-card .qtd{ font-family:'IBM Plex Mono',monospace; font-size:12.5px; font-weight:700; color:var(--orange-text); letter-spacing:.01em; }
 .estoque-baixo-card .alerta-icone{
   margin-left:auto; width:30px; height:30px; border-radius:50%; border:2px solid var(--orange); color:var(--orange);
   display:flex; align-items:center; justify-content:center; flex-shrink:0;
@@ -382,7 +389,8 @@ main{flex:1; padding:28px 34px 60px; max-width:1220px;}
 }
 .chip svg{ width:13px; height:13px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
 .chip:hover{ border-color:var(--brand); }
-.chip.active{ background:var(--orange); color:#fff; border-color:var(--orange); }
+.chip.active{ background:var(--orange-text); color:#fff; border-color:var(--orange-text); }
+html.tema-escuro .chip.active{ color:#231200; }
 
 /* ---------- Navegação de mês ---------- */
 .month-nav{
@@ -451,7 +459,7 @@ main{flex:1; padding:28px 34px 60px; max-width:1220px;}
 .form-section-card .head .icone{ width:32px; height:32px; border-radius:9px; background:var(--brand-glow); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
 .form-section-card .head .icone svg{ width:15px; height:15px; stroke:var(--brand); fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
 .form-section-card .head b{ font-size:14px; font-weight:700; }
-.form-section-card .head .add{ margin-left:auto; width:28px; height:28px; border-radius:9px; background:var(--brand-glow); color:var(--brand); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:16px; font-weight:700; }
+.form-section-card .head .add{ margin-left:auto; width:28px; height:28px; border-radius:9px; background:var(--brand-glow); color:var(--brand-text); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:16px; font-weight:700; }
 .form-section-card .campo{ margin-bottom:12px; }
 .form-section-card .campo:last-child{ margin-bottom:0; }
 .form-section-card .campo label{ display:block; font-size:11px; font-weight:600; color:var(--ink-soft); margin-bottom:6px; }
@@ -520,7 +528,7 @@ html.tema-escuro .mini-kpi .v.ok{ color:var(--green); }
 .chart-wrap.dias-do-mes{ overflow-x:auto; overflow-y:hidden; }
 .chart-wrap.dias-do-mes .chart-dias-inner{ height:100%; }
 #view-painel .panel:hover, #view-painel .kpi:hover{
-  transform:translateY(-2px); border-color:#D3E0DC; box-shadow:var(--shadow-md);
+  transform:translateY(-2px); border-color:var(--line-2); box-shadow:var(--shadow-md);
 }
 
 /* ---------- Rótulo de agrupamento de seção (Painel) ---------- */
@@ -579,8 +587,10 @@ html.tema-escuro .mini-kpi .v.ok{ color:var(--green); }
 th.hide-col, td.hide-col{ display:none; }
 
 .empty{
-  text-align:center; padding:34px 14px; color:var(--ink-soft); font-size:12.5px; line-height:1.6;
+  text-align:center; padding:30px 18px; color:var(--ink-soft); font-size:12.5px; line-height:1.6;
+  border:1.5px dashed var(--line); border-radius:var(--radius); background:var(--bg-app);
 }
+td > .empty, td .empty{ border:none; background:none; padding:26px 14px; }
 .empty b{color:var(--ink); display:block; font-size:13.5px; margin-bottom:4px;}
 
 /* ---------- Forms ---------- */
@@ -628,8 +638,8 @@ tbody tr{transition:background .1s;}
 tbody tr:hover{background:var(--tint-neutral);}
 tr:last-child td{border-bottom:none;}
 .tag{font-size:10.5px; padding:4px 10px; border-radius:99px; font-weight:600; font-family:'Inter',sans-serif;}
-.tag.pendente{background:var(--warn-soft); color:var(--warn);}
-.tag.pago{background:var(--green-glow); color:var(--green-dark);}
+.tag.pendente{background:var(--warn-soft); color:var(--warn); text-transform:capitalize;}
+.tag.pago{background:var(--green-glow); color:var(--green-dark); text-transform:capitalize;}
 .rm{
   display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px;
   border-radius:8px; color:var(--ink-dim); cursor:pointer; font-size:0; flex-shrink:0; transition:background .12s, color .12s;
@@ -794,6 +804,45 @@ datalist{}
 /* leitor de código de barras — sem campo visível, mas continua focável (leitor USB/BT "digita" nele) */
 .leitor-oculto{ position:absolute; width:1px; height:1px; padding:0; margin:0; border:0; opacity:0; overflow:hidden; }
 
+/* ================= BASE VISUAL COMUM A TODAS AS TELAS =================
+   Regras que valem em qualquer lugar fora do PDV, que fica congelado. */
+
+/* Algarismos de largura fixa em tudo que e numero. Sem isso a coluna de
+   dinheiro dança de uma linha pra outra e o olho perde a referencia. */
+.kpi .v, .mini-kpi .v, .hero-card .v, .resumo-card .v,
+.lancamento-item .valor, .resultado-mes .valor, .parcela b,
+.atencao-card .quanto, .estoque-baixo-card .qtd,
+main:not(#view-pdv) td, .mono{
+  font-variant-numeric:tabular-nums; font-feature-settings:"tnum" 1;
+}
+#view-pdv .mono, #view-pdv td{ font-variant-numeric:normal; font-feature-settings:normal; }
+
+/* Tracking por tamanho: numero grande fecha, caixa-alta pequena abre.
+   O mesmo letter-spacing pra tudo deixa titulo frouxo e rotulo apertado. */
+.topbar h1{ letter-spacing:-.022em; }
+.kpi .v, .mini-kpi .v, .resumo-card .v{ letter-spacing:-.018em; }
+.section-title-lg{ letter-spacing:-.012em; }
+.kpi .k, .mini-kpi .k, .resumo-card .k, th{ letter-spacing:.07em; }
+
+/* Anel de foco visivel. So input/select tinham; quem navega por teclado
+   ficava sem saber onde estava em botao, aba, chip ou link. */
+:where(button, a, .chip, .tab2, .navitem, .rm, [role="button"], [tabindex]):focus-visible{
+  outline:2px solid var(--brand);
+  outline-offset:2px;
+  border-radius:var(--radius-sm);
+}
+#view-pdv :focus-visible{ outline-color:var(--brand); }
+
+/* Profundidade por papel, nao a mesma sombra em tudo: o que esta apoiado na
+   pagina quase nao levanta; o que flutua por cima levanta de verdade. */
+.panel, .kpi, .mini-kpi, .resumo-card, .lancamento-item, .atencao-card, .estoque-baixo-card{
+  box-shadow:var(--shadow-sm);
+}
+.modal-card, .msub-sheet{ box-shadow:var(--shadow-lg); }
+
+/* Titulo de secao com a mesma respiracao em toda tela. */
+.section-title-lg + .chip-row, .section-title-lg + .panel{ margin-top:0; }
+
 /* ================= RESPONSIVO (celular / tablet) ================= */
 @media (max-width:900px){
   .kpis{grid-template-columns:repeat(2,1fr) !important;}
@@ -809,9 +858,10 @@ datalist{}
   /* ---- Paleta mobile (Marcato) — sobrescreve os tokens só no celular ---- */
   :root{
     --bg-app:#F5F4F0; --card:#FFFFFF; --card-2:#F1EDFB;
-    --ink:#1F1E1C; --ink-soft:#6B6A66; --ink-dim:#9A988F; --line:#DDDBD3; --line-2:#CFCCC1;
+    --ink:#1F1E1C; --ink-soft:#6B6A66; --ink-dim:#706F66; --line:#DDDBD3; --line-2:#CFCCC1;
     --warn:#B3261E; --warn-soft:#FBEAEA;
     --green-dark:#27500A; --green-glow:#EAF3DE;
+    --orange-text:#A85200; --brand-text:#6142D6;
     --tint-neutral:#EEEDE7;
     --radius:14px; --radius-sm:12px;
     --shadow-sm:0 3px 10px rgba(0,0,0,.09);
@@ -819,9 +869,10 @@ datalist{}
   }
   html.tema-escuro{
     --bg-app:#0A0A09; --card:#151410; --card-2:#1B1912;
-    --ink:#F3F1EB; --ink-soft:#928D7C; --ink-dim:#615D4F; --line:#232219; --line-2:#312F23;
+    --ink:#F3F1EB; --ink-soft:#928D7C; --ink-dim:#8B8676; --line:#232219; --line-2:#312F23;
     --warn:#FF7A6B; --warn-soft:#301A17;
     --green-dark:#7BD9A0; --green-glow:#152417;
+    --orange-text:#FFA867; --brand-text:#A98FFF;
     --tint-neutral:#1E1C15;
     --shadow-sm:0 3px 10px rgba(0,0,0,.3);
     --shadow-md:0 8px 20px rgba(0,0,0,.4);
@@ -930,7 +981,8 @@ datalist{}
   .rm{ width:36px; height:36px; border-radius:10px; }
   .rm::before{ font-size:15px; }
   .tag{ font-size:11px; padding:5px 11px; }
-  .tag[onclick]{ padding:7px 13px; }
+  /* Tag que alterna pago/pendente e um botao de verdade — precisa de alvo. */
+  .tag[onclick]{ display:inline-flex; align-items:center; min-height:32px; padding:0 14px; }
 
   .auth-card, .modal-card{ padding:22px 18px; }
   .auth-card, .modal-card, .panel, .kpi, .mini-kpi, .hero-card{ border-radius:var(--radius); }
@@ -3650,7 +3702,7 @@ function renderRelatorioVendas(){
       return `<div class="panel" style="border-left:3px solid var(--brand); margin-bottom:12px; padding:16px;">
         <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
           <div>
-            <div style="font-weight:700; font-size:14.5px;">Orçamento #${o.id.slice(0,6).toUpperCase()} <span class="tag" style="background:var(--brand-glow); color:var(--brand); margin-left:4px;">${pendente?'Pendente':'Convertido'}</span></div>
+            <div style="font-weight:700; font-size:14.5px;">Orçamento #${o.id.slice(0,6).toUpperCase()} <span class="tag" style="background:var(--brand-glow); color:var(--brand-text); margin-left:4px;">${pendente?'Pendente':'Convertido'}</span></div>
             <div style="font-size:12px; color:var(--ink-soft); margin-top:4px;">${esc(it.nome)}</div>
             <div style="font-size:11.5px; color:var(--ink-dim);">${fmtData(it.ordenar)}${o.validade?' • válido até '+fmtData(o.validade):''}</div>
           </div>
@@ -5103,7 +5155,7 @@ function renderFinanceiroDashboard(){
         </div>
         <div style="display:flex; align-items:center; gap:10px;">
           <div class="valor entrada">${money(total)}</div>
-          <span class="rm" onclick="removerVenda('${v.id}')" style="font-size:15px;">🗑</span>
+          <span class="rm rm-card" role="button" tabindex="0" aria-label="Remover venda" onclick="removerVenda('${v.id}')"></span>
         </div>
       </div>`;
     }).join('');
@@ -5263,6 +5315,8 @@ function renderResultadoDoMes(mesISO, atual){
   // pra cor da bolinha da legenda bater com um pedaço visível da barra.
   document.getElementById('faixaDespesas').style.width = (saiu>0 ? atual.totalDespesas/saiu*100 : 0) + '%';
   document.getElementById('faixaBoletos').style.width = (saiu>0 ? atual.totalBoletosMes/saiu*100 : 0) + '%';
+  // Mes sem nenhum movimento: a barra so mostraria dois toquinhos de min-width.
+  document.getElementById('barraComposicao').classList.toggle('vazia', atual.totalVendas <= 0 && saiu <= 0);
   document.getElementById('composEntrou').textContent = money(atual.totalVendas);
   document.getElementById('composDespesas').textContent = money(atual.totalDespesas);
   document.getElementById('composBoletos').textContent = money(atual.totalBoletosMes);
