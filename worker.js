@@ -63,6 +63,15 @@ function serviceHeaders(env) {
     "content-type": "application/json"
   };
 }
+// Ids que chegam de fora (corpo da requisição, external_reference devolvido pelo
+// Mercado Pago) entram direto na query do Supabase. Um "&" ou vírgula ali muda o
+// filtro inteiro, então só passa o que for UUID de verdade.
+var UUID_RE = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+function idSeguro(valor) {
+  return typeof valor === "string" && UUID_RE.test(valor) ? valor : null;
+}
+__name(idSeguro, "idSeguro");
+__name2(idSeguro, "idSeguro");
 __name(serviceHeaders, "serviceHeaders");
 __name2(serviceHeaders, "serviceHeaders");
 async function sbSelect(env, table, query) {
@@ -195,8 +204,10 @@ async function adminLiberarAcesso(request, env) {
   } catch (e) {
     return jsonResponse({ error: "JSON inv\xE1lido" }, 400);
   }
-  const { empresaId, duracao } = body;
-  if (!empresaId || !duracao) return jsonResponse({ error: "Falta empresaId ou dura\xE7\xE3o" }, 400);
+  const { empresaId: empresaIdBruto, duracao } = body;
+  if (!empresaIdBruto || !duracao) return jsonResponse({ error: "Falta empresaId ou dura\xE7\xE3o" }, 400);
+  const empresaId = idSeguro(empresaIdBruto);
+  if (!empresaId) return jsonResponse({ error: "empresaId inv\xE1lido" }, 400);
   if (duracao !== "vitalicio" && !DIAS_POR_DURACAO[duracao]) {
     return jsonResponse({ error: "Dura\xE7\xE3o inv\xE1lida" }, 400);
   }
@@ -304,7 +315,7 @@ async function webhookMercadoPago(request, env, ctx) {
   });
   if (!mpResp.ok) return new Response("ok", { status: 200 });
   const preapproval = await mpResp.json();
-  const empresaId = preapproval.external_reference;
+  const empresaId = idSeguro(preapproval.external_reference);
   if (!empresaId) return new Response("ok", { status: 200 });
   const statusMap = { authorized: "ativa", paused: "atrasada", cancelled: "cancelada", pending: "trial" };
   const novoStatus = statusMap[preapproval.status] || "atrasada";

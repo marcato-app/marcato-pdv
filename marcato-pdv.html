@@ -2359,6 +2359,14 @@ let itensVendaFornecedorAtual = []; // aparelhos sendo montados na venda fornece
 let vendasFornecedor = [];
 let clienteSelecionadoVF = null; // {id, nome} — cliente escolhido pra venda fornecedor em construção (opcional)
 
+/* Escapa texto antes de jogar em innerHTML. Precisa existir porque quase tudo aqui é
+   montado com template string: nome de cliente, beneficiário lido por OCR do boleto,
+   nome de produto que vem do catálogo externo... Sem isso, um nome com < ou aspas vira
+   HTML de verdade — na melhor das hipóteses quebra a tela, na pior roda script na sessão
+   de quem abriu (um funcionário conseguiria agir como o dono). */
+const esc = (v) => String(v==null ? '' : v)
+  .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+  .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 const money = (v) => (isNaN(v)?0:v).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const moneyCompacta = (v) => (isNaN(v)?0:v).toLocaleString('pt-BR',{style:'currency',currency:'BRL',notation:'compact',maximumFractionDigits:1});
 const uid = () => (crypto.randomUUID ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c=>{ const r=Math.random()*16|0, v=c=='x'?r:(r&0x3|0x8); return v.toString(16); }));
@@ -2866,7 +2874,7 @@ function renderDespesas(){
   document.getElementById('emptyDespesas').classList.toggle('hide', despesas.length>0);
   despesas.forEach(d=>{
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td style="font-family:'Inter',sans-serif;">${d.nome}</td><td>${money(d.valor)}</td><td>${d.dia ? 'Dia '+d.dia : '—'}</td><td><span class="rm" onclick="removerDespesa('${d.id}')">remover</span></td>`;
+    tr.innerHTML = `<td style="font-family:'Inter',sans-serif;">${esc(d.nome)}</td><td>${money(d.valor)}</td><td>${d.dia ? 'Dia '+d.dia : '—'}</td><td><span class="rm" onclick="removerDespesa('${d.id}')">remover</span></td>`;
     tbody.appendChild(tr);
   });
 
@@ -2879,7 +2887,7 @@ function renderDespesas(){
       <div class="lancamento-item">
         <span class="icone saida"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg></span>
         <div class="corpo">
-          <div class="titulo">${d.nome}</div>
+          <div class="titulo">${esc(d.nome)}</div>
           <div class="meta"><span class="tag">${d.dia ? 'Vence dia '+d.dia : 'Sem vencimento fixo'}</span></div>
         </div>
         <div style="display:flex; align-items:center; gap:10px;">
@@ -2954,7 +2962,7 @@ function renderBoletos(){
   const ordenado = [...filtrados].sort((a,b)=> a.vencimento < b.vencimento ? -1 : 1);
   ordenado.forEach(b=>{
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td style="font-family:'Inter',sans-serif;" data-label="Beneficiário">${b.beneficiario}</td><td data-label="Valor">${money(b.valor)}</td><td data-col="dataDoc" data-label="Data do documento">${fmtData(b.dataDocumento)}</td><td data-col="vencimento" data-label="Vencimento">${fmtData(b.vencimento)}</td>
+    tr.innerHTML = `<td style="font-family:'Inter',sans-serif;" data-label="Beneficiário">${esc(b.beneficiario)}</td><td data-label="Valor">${money(b.valor)}</td><td data-col="dataDoc" data-label="Data do documento">${fmtData(b.dataDocumento)}</td><td data-col="vencimento" data-label="Vencimento">${fmtData(b.vencimento)}</td>
       <td data-col="status" data-label="Status"><span class="tag ${b.status}" style="cursor:pointer;" onclick="togglePago('${b.id}')">${b.status}</span></td>
       <td data-label=""><span class="rm" onclick="removerBoleto('${b.id}')">remover</span></td>`;
     tbody.appendChild(tr);
@@ -2975,7 +2983,7 @@ function renderBoletos(){
         <div class="lancamento-item">
           <span class="icone saida"><svg viewBox="0 0 24 24"><line x1="3" y1="4" x2="3" y2="20"></line><line x1="9" y1="4" x2="9" y2="20"></line><line x1="15" y1="4" x2="15" y2="20"></line><line x1="21" y1="4" x2="21" y2="20"></line></svg></span>
           <div class="corpo">
-            <div class="titulo">${b.beneficiario}</div>
+            <div class="titulo">${esc(b.beneficiario)}</div>
             <div class="meta"><span class="tag ${b.status}" style="cursor:pointer;" onclick="togglePago('${b.id}')">${b.status}</span><span class="data">Vence ${fmtData(b.vencimento)}</span></div>
           </div>
           <div style="display:flex; align-items:center; gap:10px;">
@@ -3238,7 +3246,7 @@ function renderClientes(){
   const tipoLabel = {varejo:'Varejo', atacado:'Atacado'};
   filtrados.forEach(c=>{
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td style="font-family:'Inter',sans-serif;" data-label="Nome">${c.nome}</td><td data-col="tipo" data-label="Tipo">${tipoLabel[c.tipoCliente]||'—'}</td><td data-col="telefone" data-label="Telefone">${c.telefone||'—'}</td><td data-col="email" data-label="E-mail">${c.email||'—'}</td><td data-label=""><span class="rm" onclick="removerCliente('${c.id}')">remover</span></td>`;
+    tr.innerHTML = `<td style="font-family:'Inter',sans-serif;" data-label="Nome">${esc(c.nome)}</td><td data-col="tipo" data-label="Tipo">${tipoLabel[c.tipoCliente]||'—'}</td><td data-col="telefone" data-label="Telefone">${esc(c.telefone||'—')}</td><td data-col="email" data-label="E-mail">${esc(c.email||'—')}</td><td data-label=""><span class="rm" onclick="removerCliente('${c.id}')">remover</span></td>`;
     tbody.appendChild(tr);
   });
   aplicarColunasVisiveis('clientes');
@@ -3252,8 +3260,8 @@ function renderClientes(){
         <div class="lancamento-item">
           <span class="icone neutro"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></span>
           <div class="corpo">
-            <div class="titulo">${c.nome}</div>
-            <div class="meta"><span class="tag">${tipoLabel[c.tipoCliente]||'Sem tipo'}</span><span class="data">${c.telefone || c.email || ''}</span></div>
+            <div class="titulo">${esc(c.nome)}</div>
+            <div class="meta"><span class="tag">${tipoLabel[c.tipoCliente]||'Sem tipo'}</span><span class="data">${esc(c.telefone || c.email || '')}</span></div>
           </div>
           <span class="rm" onclick="removerCliente('${c.id}')" style="font-size:15px;">🗑</span>
         </div>`).join('');
@@ -3277,7 +3285,7 @@ function abrirSelecionarClienteOrcamento(){
   }
   const itens = clientes.map(c=>`
     <div class="modal-list-item" onclick="selecionarClienteParaOrcamento('${c.id}')">
-      <span>${c.nome}</span><span class="imei">${c.telefone||''}</span>
+      <span>${esc(c.nome)}</span><span class="imei">${esc(c.telefone||'')}</span>
     </div>`).join('');
   abrirModal(`<h3>Selecionar cliente</h3>${itens}
     <div class="modal-close-row"><button class="btn-ghost" onclick="fecharModal()">Cancelar</button></div>`);
@@ -3299,7 +3307,7 @@ function renderItensOrcamentoAtual(){
   document.getElementById('emptyItensOrcamento').classList.toggle('hide', itensOrcamentoAtual.length>0);
   itensOrcamentoAtual.forEach((item,i)=>{
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td style="font-family:'Inter',sans-serif;">${item.descricao}</td><td>${item.qtd}</td><td>${money(item.valorUnit)}</td><td>${money(item.qtd*item.valorUnit)}</td><td><span class="rm" onclick="removerItemOrcamento(${i})">remover</span></td>`;
+    tr.innerHTML = `<td style="font-family:'Inter',sans-serif;">${esc(item.descricao)}</td><td>${item.qtd}</td><td>${money(item.valorUnit)}</td><td>${money(item.qtd*item.valorUnit)}</td><td><span class="rm" onclick="removerItemOrcamento(${i})">remover</span></td>`;
     tbody.appendChild(tr);
   });
   const subtotal = calcularTotalItensOrcamento();
@@ -3396,7 +3404,7 @@ function renderOrcamentos(){
     const cliente = clientes.find(c=>c.id===o.clienteId);
     const tr = document.createElement('tr');
     const acaoConverter = o.status==='convertido' ? '' : `<span class="rm" onclick="converterOrcamentoEmVenda('${o.id}')">converter em venda</span> &nbsp; `;
-    tr.innerHTML = `<td style="font-family:'Inter',sans-serif;">${cliente ? cliente.nome : '(cliente removido)'}</td><td>${fmtData(o.criadoEm ? o.criadoEm.slice(0,10) : null)}</td><td>${fmtData(o.validade)}</td><td>${money(o.total)}</td>
+    tr.innerHTML = `<td style="font-family:'Inter',sans-serif;">${esc(cliente ? cliente.nome : '(cliente removido)')}</td><td>${fmtData(o.criadoEm ? o.criadoEm.slice(0,10) : null)}</td><td>${fmtData(o.validade)}</td><td>${money(o.total)}</td>
       <td><span class="tag ${rotulos[o.status]||'pendente'}" style="cursor:${o.status==='convertido'?'default':'pointer'};" onclick="alternarStatusOrcamento('${o.id}')">${textos[o.status]||o.status}</span></td>
       <td>${acaoConverter}<span class="rm" onclick="removerOrcamento('${o.id}')">remover</span></td>`;
     tbody.appendChild(tr);
@@ -3477,12 +3485,12 @@ function renderRelatorioVendas(){
     if(it.tipo==='orcamento'){
       const o = it.o;
       const pendente = o.status!=='convertido';
-      const totalItens = o.itens.map(x=>`<div style="display:flex; justify-content:space-between; font-size:12.5px; padding:6px 0; border-top:1px solid var(--line);"><span><span class="tag" style="background:var(--tint-neutral); margin-right:6px;">${x.qtd}x</span>${x.descricao}</span><span>${money(x.valorUnit*x.qtd)}</span></div>`).join('');
+      const totalItens = o.itens.map(x=>`<div style="display:flex; justify-content:space-between; font-size:12.5px; padding:6px 0; border-top:1px solid var(--line);"><span><span class="tag" style="background:var(--tint-neutral); margin-right:6px;">${x.qtd}x</span>${esc(x.descricao)}</span><span>${money(x.valorUnit*x.qtd)}</span></div>`).join('');
       return `<div class="panel" style="border-left:3px solid var(--brand); margin-bottom:12px; padding:16px;">
         <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
           <div>
             <div style="font-weight:700; font-size:14.5px;">Orçamento #${o.id.slice(0,6).toUpperCase()} <span class="tag" style="background:var(--brand-glow); color:var(--brand); margin-left:4px;">${pendente?'Pendente':'Convertido'}</span></div>
-            <div style="font-size:12px; color:var(--ink-soft); margin-top:4px;">${it.nome}</div>
+            <div style="font-size:12px; color:var(--ink-soft); margin-top:4px;">${esc(it.nome)}</div>
             <div style="font-size:11.5px; color:var(--ink-dim);">${fmtData(it.ordenar)}${o.validade?' • válido até '+fmtData(o.validade):''}</div>
           </div>
           <div style="font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:16px;">${money(o.total)}</div>
@@ -3500,7 +3508,7 @@ function renderRelatorioVendas(){
       <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
         <div>
           <div style="font-weight:700; font-size:14.5px;">Venda #${v.id.slice(0,6).toUpperCase()} <span class="tag" style="background:var(--tint-neutral); margin-left:4px;">${formaLabel}</span></div>
-          <div style="font-size:12px; color:var(--ink-soft); margin-top:4px;">${it.itensTxt || 'Sem itens'}</div>
+          <div style="font-size:12px; color:var(--ink-soft); margin-top:4px;">${esc(it.itensTxt || 'Sem itens')}</div>
           <div style="font-size:11.5px; color:var(--ink-dim);">${new Date(v.dataHora).toLocaleString('pt-BR')}</div>
         </div>
         <div style="font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:16px;">${money(v.total)}</div>
@@ -3541,7 +3549,7 @@ function abrirSelecionarClienteOS(){
   }
   const itens = clientes.map(c=>`
     <div class="modal-list-item" onclick="selecionarClienteParaOS('${c.id}')">
-      <span>${c.nome}</span><span class="imei">${c.telefone||''}</span>
+      <span>${esc(c.nome)}</span><span class="imei">${esc(c.telefone||'')}</span>
     </div>`).join('');
   abrirSubModal(`<h3>Selecionar cliente</h3>${itens}
     <div class="modal-close-row"><button class="btn-ghost" onclick="fecharSubModal()">Cancelar</button></div>`);
@@ -3558,7 +3566,7 @@ function popularSelectTecnicos(){
   const select = document.getElementById('osTecnico');
   if(!select) return;
   const atual = select.value;
-  select.innerHTML = '<option value="">Não definido</option>' + funcionarios.filter(f=>f.ativo).map(f=>`<option value="${f.nome}">${f.nome}</option>`).join('');
+  select.innerHTML = '<option value="">Não definido</option>' + funcionarios.filter(f=>f.ativo).map(f=>`<option value="${esc(f.nome)}">${esc(f.nome)}</option>`).join('');
   select.value = atual;
 }
 
@@ -3626,7 +3634,7 @@ async function atualizarStatusOS(id, novoStatus){
 function abrirValorFinalOS(id){
   const o = ordensServico.find(x=>x.id===id);
   if(!o) return;
-  abrirModal(`<h3>Valor final do conserto</h3><div class="desc">${o.aparelho}</div>
+  abrirModal(`<h3>Valor final do conserto</h3><div class="desc">${esc(o.aparelho)}</div>
     <input type="number" step="0.01" id="osValorFinalInput" value="${o.valorFinal!==null?o.valorFinal:''}" placeholder="0,00" style="width:100%; font-size:18px; padding:12px; text-align:center;">
     <div class="modal-close-row"><button class="btn-ghost" onclick="fecharModal()">Cancelar</button><button class="btn-teal" onclick="confirmarValorFinalOS('${id}')">Salvar</button></div>`);
   const el = document.getElementById('osValorFinalInput');
@@ -3676,9 +3684,9 @@ function renderOrdensServico(){
     const tr = document.createElement('tr');
     const opcoesStatus = Object.entries(STATUS_OS).map(([v,label])=>`<option value="${v}" ${o.status===v?'selected':''}>${label}</option>`).join('');
     const podeCobrar = o.status!=='cancelado';
-    tr.innerHTML = `<td style="font-family:'Inter',sans-serif;">${cliente ? cliente.nome : '(cliente removido)'}</td>
-      <td>${o.aparelho}${o.imeiSerial?`<div class="mono" style="font-size:10.5px; color:var(--ink-soft);">${o.imeiSerial}</div>`:''}</td>
-      <td style="font-size:11px; max-width:180px;">${o.problemaRelatado||'—'}</td>
+    tr.innerHTML = `<td style="font-family:'Inter',sans-serif;">${esc(cliente ? cliente.nome : '(cliente removido)')}</td>
+      <td>${esc(o.aparelho)}${o.imeiSerial?`<div class="mono" style="font-size:10.5px; color:var(--ink-soft);">${esc(o.imeiSerial)}</div>`:''}</td>
+      <td style="font-size:11px; max-width:180px;">${esc(o.problemaRelatado||'—')}</td>
       <td><select onchange="atualizarStatusOS('${o.id}', this.value)">${opcoesStatus}</select></td>
       <td>${o.valorFinal!==null?money(o.valorFinal):'—'} <span class="rm" onclick="abrirValorFinalOS('${o.id}')">editar</span></td>
       <td>${podeCobrar?`<span class="rm" onclick="cobrarOS('${o.id}')">cobrar</span> &nbsp; `:''}<span class="rm" onclick="removerOS('${o.id}')">remover</span></td>`;
@@ -3709,8 +3717,8 @@ function renderKanbanOS(){
       const dias = o.dataEntrada ? Math.max(0, Math.floor((Date.now() - new Date(o.dataEntrada).getTime())/86400000)) : null;
       const valorMostrado = o.valorFinal!==null ? money(o.valorFinal) : (o.valorOrcado!==null ? money(o.valorOrcado) : '—');
       return `<div class="kanban-card" draggable="true" ondragstart="dragStartOS(event,'${o.id}')" ondragend="dragEndOS(event)">
-        <div class="cli">${cliente ? cliente.nome : '(cliente removido)'}</div>
-        <div class="apr">${o.aparelho}${o.imeiSerial?` · <span class="mono">${o.imeiSerial}</span>`:''}${o.problemaRelatado?`<br>${o.problemaRelatado}`:''}</div>
+        <div class="cli">${esc(cliente ? cliente.nome : '(cliente removido)')}</div>
+        <div class="apr">${esc(o.aparelho)}${o.imeiSerial?` · <span class="mono">${esc(o.imeiSerial)}</span>`:''}${o.problemaRelatado?`<br>${esc(o.problemaRelatado)}`:''}</div>
         <div class="meta">
           <span>${dias!==null ? `há ${dias} dia${dias===1?'':'s'}` : ''}</span>
           <span class="mono" style="font-weight:700; color:var(--ink);">${valorMostrado}</span>
@@ -3771,7 +3779,7 @@ function abrirSelecionarClienteTeste(){
   }
   const itens = clientes.map(c=>`
     <div class="modal-list-item" onclick="selecionarClienteParaTeste('${c.id}')">
-      <span>${c.nome}</span><span class="imei">${c.telefone||''}</span>
+      <span>${esc(c.nome)}</span><span class="imei">${esc(c.telefone||'')}</span>
     </div>`).join('');
   abrirSubModal(`<h3>Selecionar cliente</h3>${itens}
     <div class="modal-close-row"><button class="btn-ghost" onclick="fecharSubModal()">Cancelar</button></div>`);
@@ -3854,9 +3862,9 @@ function abrirDetalhesTeste(id){
     const cor = v==='defeito' ? 'var(--warn)' : (v==='ok' ? 'var(--green-dark)' : 'var(--ink-soft)');
     return `<div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--line); font-size:12.5px;"><span>${label}</span><span style="color:${cor}; font-weight:600;">${ITEM_TESTE_LABEL[v]}</span></div>`;
   }).join('');
-  abrirModal(`<h3>${t.aparelho}</h3><div class="desc">${t.imeiSerial||'sem IMEI informado'} — ${fmtData(t.criadoEm ? t.criadoEm.slice(0,10) : null)}</div>
+  abrirModal(`<h3>${esc(t.aparelho)}</h3><div class="desc">${esc(t.imeiSerial||'sem IMEI informado')} — ${fmtData(t.criadoEm ? t.criadoEm.slice(0,10) : null)}</div>
     ${linhas}
-    ${t.observacoes ? `<div class="desc" style="margin-top:10px;">${t.observacoes}</div>` : ''}
+    ${t.observacoes ? `<div class="desc" style="margin-top:10px;">${esc(t.observacoes)}</div>` : ''}
     <div class="modal-close-row"><button class="btn-ghost" onclick="fecharModal()">Fechar</button></div>`);
 }
 
@@ -3868,7 +3876,7 @@ function renderTestes(){
   testesAparelho.forEach(t=>{
     const cliente = clientes.find(c=>c.id===t.clienteId);
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td style="font-family:'Inter',sans-serif;">${t.aparelho}</td><td>${cliente?cliente.nome:'—'}</td><td>${fmtData(t.criadoEm ? t.criadoEm.slice(0,10) : null)}</td>
+    tr.innerHTML = `<td style="font-family:'Inter',sans-serif;">${esc(t.aparelho)}</td><td>${esc(cliente?cliente.nome:'—')}</td><td>${fmtData(t.criadoEm ? t.criadoEm.slice(0,10) : null)}</td>
       <td><span class="tag ${RESULTADO_TESTE_TAG[t.resultadoGeral]||'pendente'}" style="cursor:pointer;" onclick="abrirDetalhesTeste('${t.id}')">${RESULTADO_TESTE_LABEL[t.resultadoGeral]||t.resultadoGeral}</span></td>
       <td><span class="rm" onclick="abrirDetalhesTeste('${t.id}')">ver</span> &nbsp; <span class="rm" onclick="removerTeste('${t.id}')">remover</span></td>`;
     tbody.appendChild(tr);
@@ -3995,13 +4003,13 @@ function renderCompras(){
   document.getElementById('emptyCompras').classList.toggle('hide', filtrados.length>0);
   filtrados.forEach(c=>{
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td style="font-family:'Inter',sans-serif;">${c.fornecedor}</td><td data-col="data">${fmtData(c.data)}</td><td data-col="itens">${c.itens.length}</td><td>${money(c.total)}</td><td><span class="rm" onclick="removerCompra('${c.id}')">remover</span></td>`;
+    tr.innerHTML = `<td style="font-family:'Inter',sans-serif;">${esc(c.fornecedor)}</td><td data-col="data">${fmtData(c.data)}</td><td data-col="itens">${c.itens.length}</td><td>${money(c.total)}</td><td><span class="rm" onclick="removerCompra('${c.id}')">remover</span></td>`;
     tbody.appendChild(tr);
   });
   const dl = document.getElementById('sugestoesFornecedorCompra');
   if(dl){ const unicos = [...new Set(compras.map(c=>c.fornecedor))]; dl.innerHTML = unicos.map(n=>`<option value="${n}">`).join(''); }
   const dlP = document.getElementById('sugestoesProdutoCompra');
-  if(dlP){ dlP.innerHTML = produtos.map(p=>`<option value="${p.nome}">`).join(''); }
+  if(dlP){ dlP.innerHTML = produtos.map(p=>`<option value="${esc(p.nome)}">`).join(''); }
   aplicarColunasVisiveis('compras');
 }
 document.getElementById('filtroBuscaCompra').addEventListener('input', renderCompras);
@@ -4032,7 +4040,7 @@ function renderMovimentacoesEstoque(){
 function abrirAjusteEstoque(produtoId){
   const p = produtos.find(x=>x.id===produtoId);
   if(!p) return;
-  abrirModal(`<h3>Ajustar estoque</h3><div class="desc">${p.nome} — estoque atual: ${p.estoque!==null?p.estoque:'—'}</div>
+  abrirModal(`<h3>Ajustar estoque</h3><div class="desc">${esc(p.nome)} — estoque atual: ${p.estoque!==null?p.estoque:'—'}</div>
     <div class="field" style="margin-bottom:10px;"><label>Novo estoque</label><input type="number" id="ajEstoqueNovo" value="${p.estoque!==null?p.estoque:0}" style="width:100%; font-size:18px; padding:12px; text-align:center;"></div>
     <div class="field" style="margin-bottom:14px;"><label>Motivo do ajuste</label><input type="text" id="ajEstoqueMotivo" placeholder="Ex: contagem de inventário, avaria não registrada..." style="width:100%;"></div>
     <div class="modal-close-row"><button class="btn-ghost" onclick="fecharModal()">Cancelar</button><button class="btn-teal" onclick="confirmarAjusteEstoque('${produtoId}')">Salvar</button></div>`);
@@ -4116,7 +4124,7 @@ function abrirSelecionarClienteVF(){
   }
   const itens = clientes.map(c=>`
     <div class="modal-list-item" onclick="selecionarClienteParaVF('${c.id}')">
-      <span>${c.nome}</span><span class="imei">${c.telefone||''}</span>
+      <span>${esc(c.nome)}</span><span class="imei">${esc(c.telefone||'')}</span>
     </div>`).join('');
   abrirModal(`<h3>Selecionar cliente</h3>${itens}
     <div class="modal-close-row"><button class="btn-ghost" onclick="fecharModal()">Cancelar</button></div>`);
@@ -4178,7 +4186,7 @@ function renderItensVendaFornecedor(){
   itensVendaFornecedorAtual.forEach((it,i)=>{
     total += it.valorVenda;
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${it.telefone}</td><td>${it.capacidade||'—'}</td><td>${it.cor||'—'}</td><td class="mono" style="font-size:11.5px;">${it.imei||'—'}</td><td>${it.valorCompra!==null?money(it.valorCompra):'—'}</td><td>${money(it.valorVenda)}</td><td><span class="rm" onclick="removerItemVF(${i})">remover</span></td>`;
+    tr.innerHTML = `<td>${esc(it.telefone)}</td><td>${it.capacidade||'—'}</td><td>${it.cor||'—'}</td><td class="mono" style="font-size:11.5px;">${esc(it.imei||'—')}</td><td>${it.valorCompra!==null?money(it.valorCompra):'—'}</td><td>${money(it.valorVenda)}</td><td><span class="rm" onclick="removerItemVF(${i})">remover</span></td>`;
     tbody.appendChild(tr);
   });
   document.getElementById('vfTotalItens').textContent = money(total);
@@ -4305,16 +4313,16 @@ function renderVendasFornecedor(){
     tr.setAttribute('data-vf-id', v.id);
     if(v.id === editandoVfId){
       tr.innerHTML = `<td>${v.dataVenda ? new Date(v.dataVenda).toLocaleString('pt-BR') : '—'}</td>
-        <td>${cliente ? cliente.nome : '—'}</td>
-        <td data-col="telefone"><input type="text" class="editTelefone" value="${v.telefone||''}" style="width:140px;"></td>
+        <td>${esc(cliente ? cliente.nome : '—')}</td>
+        <td data-col="telefone"><input type="text" class="editTelefone" value="${esc(v.telefone||'')}" style="width:140px;"></td>
         <td data-col="capacidade"><input type="text" class="editCapacidade" value="${v.capacidade||''}" style="width:80px;"></td>
         <td data-col="cor"><input type="text" class="editCor" value="${v.cor||''}" style="width:80px;"></td>
-        <td data-col="imei"><input type="text" class="editImei" value="${v.imei||''}" style="width:120px;"></td>
+        <td data-col="imei"><input type="text" class="editImei" value="${esc(v.imei||'')}" style="width:120px;"></td>
         <td data-col="envio">${ENVIO_LABEL[v.tipoEnvio]||v.tipoEnvio}</td>
         <td><input type="number" step="0.01" class="editValorVenda" value="${v.valorVenda}" style="width:90px;"></td>
         <td><span class="rm" onclick="salvarEdicaoVF('${v.id}')">salvar</span> · <span class="rm" onclick="cancelarEdicaoVF()">cancelar</span></td>`;
     } else {
-      tr.innerHTML = `<td>${v.dataVenda ? new Date(v.dataVenda).toLocaleString('pt-BR') : '—'}</td><td>${cliente ? cliente.nome : '—'}</td><td data-col="telefone">${v.telefone}</td><td data-col="capacidade">${v.capacidade||'—'}</td><td data-col="cor">${v.cor||'—'}</td><td data-col="imei" class="mono" style="font-size:11.5px;">${v.imei||'—'}</td><td data-col="envio">${ENVIO_LABEL[v.tipoEnvio]||v.tipoEnvio}</td><td><b>${money(v.valorVenda)}</b></td><td><span class="rm" onclick="iniciarEdicaoVF('${v.id}')">editar</span> · <span class="rm" onclick="gerarPdfVendaFornecedor('${v.id}')">compartilhar PDF</span> · <span class="rm" onclick="apagarVendaFornecedor('${v.id}')">apagar</span></td>`;
+      tr.innerHTML = `<td>${v.dataVenda ? new Date(v.dataVenda).toLocaleString('pt-BR') : '—'}</td><td>${esc(cliente ? cliente.nome : '—')}</td><td data-col="telefone">${esc(v.telefone)}</td><td data-col="capacidade">${esc(v.capacidade||'—')}</td><td data-col="cor">${esc(v.cor||'—')}</td><td data-col="imei" class="mono" style="font-size:11.5px;">${esc(v.imei||'—')}</td><td data-col="envio">${ENVIO_LABEL[v.tipoEnvio]||v.tipoEnvio}</td><td><b>${money(v.valorVenda)}</b></td><td><span class="rm" onclick="iniciarEdicaoVF('${v.id}')">editar</span> · <span class="rm" onclick="gerarPdfVendaFornecedor('${v.id}')">compartilhar PDF</span> · <span class="rm" onclick="apagarVendaFornecedor('${v.id}')">apagar</span></td>`;
     }
     tbody.appendChild(tr);
   });
@@ -4474,8 +4482,8 @@ function montarDadosPdfVendaFornecedor(id){
   const cor = emp.cor_pdf || '#6C3CE9';
   const corEscura = escurecerCor(cor, 0.35);
   const logoHtml = emp.logo_url ? `<img src="${emp.logo_url}" style="max-height:58px; max-width:120px; object-fit:contain; display:block; flex-shrink:0;">` : '';
-  const linhasHtml = itens.map(it=>`<tr><td>${it.telefone}</td><td>${it.capacidade || '—'}</td><td>${it.cor || '—'}</td><td>${it.imei || '—'}</td><td style="text-align:right;">${money(it.valorVenda)}</td></tr>`).join('');
-  const html = `<!doctype html><html><head><meta charset="UTF-8"><title>Venda — ${v.telefone}</title>
+  const linhasHtml = itens.map(it=>`<tr><td>${esc(it.telefone)}</td><td>${it.capacidade || '—'}</td><td>${it.cor || '—'}</td><td>${esc(it.imei || '—')}</td><td style="text-align:right;">${money(it.valorVenda)}</td></tr>`).join('');
+  const html = `<!doctype html><html><head><meta charset="UTF-8"><title>Venda — ${esc(v.telefone)}</title>
     <style>
       @page{ margin:18mm; }
       body{ font-family:-apple-system,'Segoe UI',sans-serif; color:#0E1E1B; max-width:680px; margin:0 auto; }
@@ -4499,10 +4507,10 @@ function montarDadosPdfVendaFornecedor(id){
       <div class="empresa">
         ${logoHtml}
         <div class="empresa-texto">
-          <b>${emp.razao_social || 'Marcato PDV'}</b>
+          <b>${esc(emp.razao_social || 'Marcato PDV')}</b>
           <div>${emp.cnpj ? 'CNPJ: '+emp.cnpj : ''}</div>
-          <div>${emp.endereco || ''}</div>
-          <div>${emp.telefone || ''}</div>
+          <div>${esc(emp.endereco || '')}</div>
+          <div>${esc(emp.telefone || '')}</div>
         </div>
       </div>
       <div class="titulo">
@@ -4789,7 +4797,7 @@ function popularFiltroMesPainel(){
   select.innerHTML = ordenados.map(m=>{
     const [y,mm] = m.split('-');
     const nome = new Date(Date.UTC(+y,+mm-1,1)).toLocaleDateString('pt-BR',{month:'long', year:'numeric', timeZone:'UTC'});
-    return `<option value="${m}" ${m===mesSelecionadoPainel?'selected':''}>${nome}</option>`;
+    return `<option value="${m}" ${m===mesSelecionadoPainel?'selected':''}>${esc(nome)}</option>`;
   }).join('');
 }
 
@@ -4832,7 +4840,7 @@ function renderEstoqueBaixoPainel(){
   titulo.classList.toggle('hide', itensBaixos.length===0);
   wrap.innerHTML = itensBaixos.map(p => `
     <div class="estoque-baixo-card">
-      <div><div class="nome">${p.nome}</div><div class="qtd">${p.estoque} unidade${p.estoque===1?'':'s'}</div></div>
+      <div><div class="nome">${esc(p.nome)}</div><div class="qtd">${p.estoque} unidade${p.estoque===1?'':'s'}</div></div>
       <div class="alerta-icone"><svg viewBox="0 0 24 24"><line x1="12" y1="8" x2="12" y2="13"></line><circle cx="12" cy="16.5" r=".6" fill="currentColor" stroke="none"></circle><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path></svg></div>
     </div>
   `).join('');
@@ -5406,16 +5414,16 @@ function renderProdutos(){
   filtrados.forEach(p=>{
     const estoqueReal = p.controlaSerie ? unidadesEstoque.filter(u=>u.produtoId===p.id && u.status==='disponivel').length : p.estoque;
     const estoqueBaixo = estoqueReal!==null && estoqueReal<=5;
-    const thumb = p.fotoUrl ? `<img src="${p.fotoUrl}" style="width:32px; height:32px; border-radius:6px; object-fit:cover;">` : `<div style="width:32px; height:32px; border-radius:6px; background:var(--bg-app);"></div>`;
+    const thumb = p.fotoUrl ? `<img src="${esc(p.fotoUrl)}" style="width:32px; height:32px; border-radius:6px; object-fit:cover;">` : `<div style="width:32px; height:32px; border-radius:6px; background:var(--bg-app);"></div>`;
     const tr = document.createElement('tr');
     const acaoAjustar = p.controlaSerie ? '' : `<span class="rm" onclick="abrirAjusteEstoque('${p.id}')">ajustar</span> &nbsp; `;
-    tr.innerHTML = `<td>${thumb}</td><td style="font-family:'Sora',sans-serif;">${p.nome} ${p.vendidoPorPeso?'<span class="tag pago" style="margin-left:5px;">R$/kg</span>':''} ${p.controlaSerie?'<span class="tag pendente" style="margin-left:5px;">IMEI/série</span>':''}</td><td data-col="codigo" style="font-size:11px; color:var(--ink-soft);">${p.codigoBarras||'—'}</td><td data-col="categoria">${p.categoria}</td><td>${money(p.preco)}${p.vendidoPorPeso?'/kg':''}</td><td>${estoqueReal!==null?estoqueReal:'—'} ${estoqueBaixo?'<span class="tag pendente" style="margin-left:5px;">baixo</span>':''}</td><td>${acaoAjustar}<span class="rm" onclick="abrirRegistrarPerda('${p.id}')">perda</span> &nbsp; <span class="rm" onclick="removerProduto('${p.id}')">remover</span></td>`;
+    tr.innerHTML = `<td>${thumb}</td><td style="font-family:'Sora',sans-serif;">${esc(p.nome)} ${p.vendidoPorPeso?'<span class="tag pago" style="margin-left:5px;">R$/kg</span>':''} ${p.controlaSerie?'<span class="tag pendente" style="margin-left:5px;">IMEI/série</span>':''}</td><td data-col="codigo" style="font-size:11px; color:var(--ink-soft);">${esc(p.codigoBarras||'—')}</td><td data-col="categoria">${esc(p.categoria)}</td><td>${money(p.preco)}${p.vendidoPorPeso?'/kg':''}</td><td>${estoqueReal!==null?estoqueReal:'—'} ${estoqueBaixo?'<span class="tag pendente" style="margin-left:5px;">baixo</span>':''}</td><td>${acaoAjustar}<span class="rm" onclick="abrirRegistrarPerda('${p.id}')">perda</span> &nbsp; <span class="rm" onclick="removerProduto('${p.id}')">remover</span></td>`;
     tbody.appendChild(tr);
   });
   const selCat = document.getElementById('filtroCategoriaProduto');
   const catAtual = selCat.value;
   const catsUnicas = [...new Set(produtos.map(p=>p.categoria).filter(Boolean))].sort();
-  selCat.innerHTML = '<option value="">Todas</option>' + catsUnicas.map(c=>`<option value="${c}">${c}</option>`).join('');
+  selCat.innerHTML = '<option value="">Todas</option>' + catsUnicas.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');
   selCat.value = catAtual;
   aplicarColunasVisiveis('produtos');
 }
@@ -5473,7 +5481,7 @@ function renderPerdas(){
   const motivos = {estragou:'Estragou/venceu', quebrou:'Quebrou/danificou', roubo:'Furto/perda', outro:'Outro'};
   perdas.slice(0,50).forEach(p=>{
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${fmtData(p.data)}</td><td style="font-family:'Sora',sans-serif;">${p.produtoNome||'—'}</td><td>${p.quantidade}${p.unidade==='kg'?' kg':' un'}</td><td>${motivos[p.motivo]||p.motivo}</td>`;
+    tr.innerHTML = `<td>${fmtData(p.data)}</td><td style="font-family:'Sora',sans-serif;">${esc(p.produtoNome||'—')}</td><td>${p.quantidade}${p.unidade==='kg'?' kg':' un'}</td><td>${esc(motivos[p.motivo]||p.motivo)}</td>`;
     tbody.appendChild(tr);
   });
 }
@@ -5562,7 +5570,7 @@ function abrirBuscaAdicionar(){
     const encontrados = (termo ? produtos.filter(p=>p.nome.toLowerCase().includes(termo) || (p.codigoBarras && p.codigoBarras.includes(termo))) : produtos).slice(0,30);
     box.innerHTML = encontrados.length ? encontrados.map(p=>`
       <div class="modal-list-item" onclick="adicionarViaBusca('${p.id}')">
-        <span>${p.nome} ${p.vendidoPorPeso?'⚖':''}</span><span class="mono" style="font-weight:700; color:var(--brand-dark);">${money(p.preco)}${p.vendidoPorPeso?'/kg':''}</span>
+        <span>${esc(p.nome)} ${p.vendidoPorPeso?'⚖':''}</span><span class="mono" style="font-weight:700; color:var(--brand-dark);">${money(p.preco)}${p.vendidoPorPeso?'/kg':''}</span>
       </div>`).join('') : '<div class="desc">Nenhum produto encontrado</div>';
   };
   input.addEventListener('input', render);
@@ -5890,7 +5898,7 @@ function abrirConsultaPreco(){
     const encontrados = produtos.filter(p => p.nome.toLowerCase().includes(termo) || (p.codigoBarras && p.codigoBarras.includes(termo))).slice(0,20);
     box.innerHTML = encontrados.length ? encontrados.map(p=>`
       <div class="modal-list-item" style="cursor:default;">
-        <span>${p.nome}</span><span class="mono" style="font-weight:700; color:var(--brand-dark);">${money(p.preco)}${p.vendidoPorPeso?'/kg':''}</span>
+        <span>${esc(p.nome)}</span><span class="mono" style="font-weight:700; color:var(--brand-dark);">${money(p.preco)}${p.vendidoPorPeso?'/kg':''}</span>
       </div>`).join('') : '<div class="desc">Nenhum produto encontrado</div>';
   };
   input.addEventListener('input', render);
@@ -5954,18 +5962,18 @@ function adicionarAoCarrinhoPorSerie(produto){
   const livres = disponiveis.filter(u=>!jaNoCarrinho.has(u.id));
 
   if(disponiveis.length===0){
-    abrirModal(`<h3>Sem estoque</h3><div class="desc">Nenhuma unidade disponível de "${produto.nome}" (sem IMEI/série cadastrado em estoque).</div>
+    abrirModal(`<h3>Sem estoque</h3><div class="desc">Nenhuma unidade disponível de "${esc(produto.nome)}" (sem IMEI/série cadastrado em estoque).</div>
       <div class="modal-close-row"><button class="btn-ghost" onclick="fecharModal()">Fechar</button></div>`);
     return;
   }
   if(livres.length===0){
-    abrirModal(`<h3>Já no carrinho</h3><div class="desc">Todas as unidades disponíveis de "${produto.nome}" já estão no carrinho.</div>
+    abrirModal(`<h3>Já no carrinho</h3><div class="desc">Todas as unidades disponíveis de "${esc(produto.nome)}" já estão no carrinho.</div>
       <div class="modal-close-row"><button class="btn-ghost" onclick="fecharModal()">Fechar</button></div>`);
     return;
   }
   const itens = livres.map(u => `
     <div class="modal-list-item" onclick="confirmarEscolhaSerie('${produto.id}','${u.id}')">
-      <span>${produto.nome}</span><span class="imei">${u.imeiSerial}</span>
+      <span>${esc(produto.nome)}</span><span class="imei">${esc(u.imeiSerial)}</span>
     </div>`).join('');
   abrirModal(`<h3>Qual unidade vender?</h3><div class="desc">${livres.length} disponível(is) — toque na que está sendo vendida</div>${itens}
     <div class="modal-close-row"><button class="btn-ghost" onclick="fecharModal()">Cancelar</button></div>`);
@@ -5994,7 +6002,7 @@ function removerLinhaCarrinho(linhaId){
 function pedirCancelarItem(linhaId){
   const item = carrinho.find(i=>i.linhaId===linhaId);
   if(!item) return;
-  pedirSenhaGerente(`Cancelar "${item.nome}" do carrinho?`, ()=> removerLinhaCarrinho(linhaId));
+  pedirSenhaGerente(`Cancelar "${esc(item.nome)}" do carrinho?`, ()=> removerLinhaCarrinho(linhaId));
 }
 function calcularTotais(){
   const subtotal = carrinho.reduce((s,i)=>s+i.preco*i.qtd,0);
@@ -6029,11 +6037,11 @@ function renderMascote(itemAtual){
       : nomeLoja.trim().charAt(0).toUpperCase();
   } else if(p && p.fotoUrl){
     el.className = 'terminal-mascote-face terminal-mascote-item tem-foto';
-    el.innerHTML = `<img src="${p.fotoUrl}" alt="${p.nome}">`;
+    el.innerHTML = `<img src="${esc(p.fotoUrl)}" alt="${esc(p.nome)}">`;
   } else {
     el.className = 'terminal-mascote-face terminal-mascote-item';
     const nomeCat = (p && p.categoria) || (itemAtual.manual ? 'Valor avulso' : 'Item');
-    el.innerHTML = `<span class="cat-icon">${iconeCategoria(p && p.categoria)}</span><span class="cat-nome">${nomeCat}</span>`;
+    el.innerHTML = `<span class="cat-icon">${iconeCategoria(p && p.categoria)}</span><span class="cat-nome">${esc(nomeCat)}</span>`;
   }
 }
 
@@ -6051,7 +6059,7 @@ function renderCarrinho(){
       if(item.unidade==='kg'){
         tr.innerHTML = `
           <td data-label="Cód">${codigo}</td>
-          <td data-label="Descrição">${item.nome} ⚖</td>
+          <td data-label="Descrição">${esc(item.nome)} ⚖</td>
           <td data-label="Qtd">${item.qtd.toFixed(3)}kg</td>
           <td data-label="Vl. Unit">${money(item.preco)}</td>
           <td data-label="Vl. Total">${money(item.preco*item.qtd)}</td>
@@ -6062,7 +6070,7 @@ function renderCarrinho(){
       } else {
         tr.innerHTML = `
           <td data-label="Cód">${codigo}</td>
-          <td data-label="Descrição">${item.nome}${item.manual?' <span class="tag pendente">avulso</span>':''}</td>
+          <td data-label="Descrição">${esc(item.nome)}${item.manual?' <span class="tag pendente">avulso</span>':''}</td>
           <td class="acao" data-label="Qtd">
             <button class="btn-ghost btn-sm" onclick="alterarQtd('${item.linhaId}',-1)">−</button>
             <span>${item.qtd}</span>
@@ -6102,7 +6110,7 @@ function renderCarrinho(){
   if(elUltimo){
     if(itemAtual){
       const qtdTxt = itemAtual.unidade==='kg' ? itemAtual.qtd.toFixed(3)+'kg' : (itemAtual.qtd + 'x');
-      elUltimo.innerHTML = `<span class="qtd">${qtdTxt}</span><span class="nome">${itemAtual.nome}</span>`;
+      elUltimo.innerHTML = `<span class="qtd">${qtdTxt}</span><span class="nome">${esc(itemAtual.nome)}</span>`;
     } else {
       elUltimo.innerHTML = `<span class="qtd">—</span><span class="nome">Aguardando leitura...</span>`;
     }
@@ -6157,7 +6165,7 @@ async function finalizarVenda(forma, opts){
       if(p.garantiaMeses){
         const d = new Date(agora); d.setMonth(d.getMonth() + p.garantiaMeses);
         garantiaAte = d.toISOString().slice(0,10);
-        garantiaTextoComprovante += `<div class="mono" style="font-size:11.5px;">Garantia de ${p.nome}: até ${fmtData(garantiaAte)}</div>`;
+        garantiaTextoComprovante += `<div class="mono" style="font-size:11.5px;">Garantia de ${esc(p.nome)}: até ${fmtData(garantiaAte)}</div>`;
       }
       const { error } = await sb.from('unidades_estoque').update({status:'vendido', vendido_em:agora.toISOString(), garantia_ate:garantiaAte}).eq('id', item.unidadeEstoqueId);
       if(!error){ const u = unidadesEstoque.find(x=>x.id===item.unidadeEstoqueId); if(u){ u.status='vendido'; u.vendidoEm=agora.toISOString(); u.garantiaAte=garantiaAte; } }
@@ -6179,9 +6187,9 @@ async function finalizarVenda(forma, opts){
     troco: forma==='dinheiro'?troco:null, operador: operadorAtual
   };
 
-  const linhas = carrinho.map(i=>`${i.qtd}x ${i.nome} — ${money(i.preco*i.qtd)}`).join('<br>');
+  const linhas = carrinho.map(i=>`${i.qtd}x ${esc(i.nome)} — ${money(i.preco*i.qtd)}`).join('<br>');
   abrirModal(`<h3>Venda concluída ✓</h3>
-    <div class="desc">${agora.toLocaleString('pt-BR')} — pagamento: ${forma}${forma==='cartao' && parcelas>1 ? ` (${parcelas}x de ${money(total/parcelas)})` : ''}${operadorAtual ? ` — operador: ${operadorAtual}` : ''}</div>
+    <div class="desc">${agora.toLocaleString('pt-BR')} — pagamento: ${forma}${forma==='cartao' && parcelas>1 ? ` (${parcelas}x de ${money(total/parcelas)})` : ''}${operadorAtual ? ` — operador: ${esc(operadorAtual)}` : ''}</div>
     <div class="mono" style="font-size:12.5px; line-height:1.8; margin:10px 0;">${linhas}</div>
     ${desconto>0 ? `<div class="mono" style="font-size:12.5px;">Subtotal: ${money(subtotal)} — Desconto: -${money(desconto)}</div>` : ''}
     <div style="font-weight:700; font-size:16px; margin-top:6px;">Total: ${money(total)}</div>
@@ -6251,7 +6259,7 @@ function imprimirCupom(){
   const emp = empresaAtual || {};
   const linhas = v.itens.map(i=>{
     const qtdTxt = i.unidade==='kg' ? `${i.qtd.toFixed(3)}kg` : `${i.qtd}x`;
-    return `<tr><td>${qtdTxt} ${i.nome}</td><td style="text-align:right; white-space:nowrap;">${money(i.preco*i.qtd)}</td></tr>`;
+    return `<tr><td>${qtdTxt} ${esc(i.nome)}</td><td style="text-align:right; white-space:nowrap;">${money(i.preco*i.qtd)}</td></tr>`;
   }).join('');
   const logoHtml = emp.logo_url ? `<img src="${emp.logo_url}" style="max-width:100px; max-height:60px; display:block; margin:0 auto 8px;">` : '';
   const formaLabel = {pix:'Pix', cartao:'Cartão', dinheiro:'Dinheiro'}[v.forma] || v.forma;
@@ -6268,13 +6276,13 @@ function imprimirCupom(){
       .fine{ font-size:10px; text-align:center; margin-top:10px; }
     </style></head><body>
     ${logoHtml}
-    <h2>${emp.razao_social || 'Comprovante de venda'}</h2>
+    <h2>${esc(emp.razao_social || 'Comprovante de venda')}</h2>
     <div class="center">${emp.cnpj ? 'CNPJ: '+emp.cnpj : ''}</div>
-    <div class="center">${emp.endereco || ''}</div>
-    <div class="center">${emp.telefone || ''}</div>
+    <div class="center">${esc(emp.endereco || '')}</div>
+    <div class="center">${esc(emp.telefone || '')}</div>
     <div class="line"></div>
     <div>${new Date(v.dataHora).toLocaleString('pt-BR')}</div>
-    ${v.operador ? `<div>Operador: ${v.operador}</div>` : ''}
+    ${v.operador ? `<div>Operador: ${esc(v.operador)}</div>` : ''}
     <div class="line"></div>
     <table>${linhas}</table>
     <div class="line"></div>
@@ -6300,7 +6308,7 @@ function renderHistorico(){
   document.getElementById('emptyHistorico').classList.toggle('hide', vendasPDV.length>0);
   vendasPDV.slice(0,100).forEach(v=>{
     const dt = new Date(v.dataHora);
-    const itensTxt = v.itens.map(i=>`${i.qtd}x ${i.nome}`).join(', ');
+    const itensTxt = v.itens.map(i=>`${i.qtd}x ${esc(i.nome)}`).join(', ');
     const tr = document.createElement('tr');
     tr.innerHTML = `<td>${dt.toLocaleString('pt-BR')}</td><td style="font-size:11.5px;">${itensTxt}</td><td>${v.desconto>0?money(v.desconto):'—'}</td><td><b>${money(v.total)}</b></td><td style="text-transform:capitalize;">${v.forma}</td><td><span class="rm" onclick="removerVendaPDV('${v.id}')">estornar</span></td>`;
     tbody.appendChild(tr);
@@ -6450,7 +6458,7 @@ function renderFuncionarios(){
   document.getElementById('emptyFuncionarios').classList.toggle('hide', funcionarios.length>0);
   funcionarios.forEach(f=>{
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td style="font-family:'Inter',sans-serif;">${f.nome}</td><td><span class="tag ${f.ativo?'pago':'pendente'}" style="cursor:pointer;" onclick="toggleFuncionarioAtivo('${f.id}')">${f.ativo?'ativo':'inativo'}</span></td><td><span class="rm" onclick="removerFuncionario('${f.id}')">remover</span></td>`;
+    tr.innerHTML = `<td style="font-family:'Inter',sans-serif;">${esc(f.nome)}</td><td><span class="tag ${f.ativo?'pago':'pendente'}" style="cursor:pointer;" onclick="toggleFuncionarioAtivo('${f.id}')">${f.ativo?'ativo':'inativo'}</span></td><td><span class="rm" onclick="removerFuncionario('${f.id}')">remover</span></td>`;
     tbody.appendChild(tr);
   });
   renderSeletorOperador();
@@ -6488,7 +6496,7 @@ function trocarOperador(){
   const itemDono = `<div class="modal-list-item" onclick="confirmarOperador(null)"><span>👤 Dono(a) da empresa</span>${!operadorAtual?'<span class="imei">atual</span>':''}</div>`;
   const itensFuncionarios = ativos.map(f => `
     <div class="modal-list-item" onclick="abrirPinOperador('${f.id}')">
-      <span>${f.nome}</span>${operadorAtual===f.nome?'<span class="imei">atual</span>':''}
+      <span>${esc(f.nome)}</span>${operadorAtual===f.nome?'<span class="imei">atual</span>':''}
     </div>`).join('');
   const avisoVazio = ativos.length===0 ? `<div class="desc">Nenhum funcionário cadastrado ainda — adicione em Configurações.</div>` : '';
   abrirModal(`<h3>Quem está operando?</h3>${avisoVazio}${itemDono}${itensFuncionarios}
@@ -6512,7 +6520,7 @@ function abrirPinOperador(funcionarioId){
 function renderModalPin(titulo, erro){
   const dots = [0,1,2,3].map(i => `<div class="pin-dot ${i < pinDigitado.length ? 'filled' : ''}"></div>`).join('');
   const teclas = [1,2,3,4,5,6,7,8,9].map(n => `<button onclick="digitarPin('${n}')">${n}</button>`).join('');
-  abrirModal(`<h3>${titulo}</h3><div class="desc">${erro ? '<span style="color:var(--warn);">PIN incorreto, tente de novo.</span>' : 'Digite o PIN de 4 dígitos'}</div>
+  abrirModal(`<h3>${esc(titulo)}</h3><div class="desc">${erro ? '<span style="color:var(--warn);">PIN incorreto, tente de novo.</span>' : 'Digite o PIN de 4 dígitos'}</div>
     <div class="pin-dots">${dots}</div>
     <div class="pin-pad">${teclas}<button class="pin-clear" onclick="digitarPin('limpar')">Limpar</button><button onclick="digitarPin('0')">0</button><button class="pin-clear" onclick="fecharModal()">✕</button></div>`);
 }
@@ -6794,7 +6802,7 @@ fileFoto.addEventListener('change', async (e)=>{
   if(res.ok || res.beneficiario){
     box.innerHTML = `
       <div class="formrow" style="margin-top:10px;">
-        <div class="field"><label>Beneficiário</label><input type="text" id="fotoBenef" value="${res.beneficiario||''}"></div>
+        <div class="field"><label>Beneficiário</label><input type="text" id="fotoBenef" value="${esc(res.beneficiario||'')}"></div>
         <div class="field"><label>Valor</label><input type="number" step="0.01" id="fotoValor" value="${res.valor!==null?res.valor.toFixed(2):''}"></div>
         <div class="field"><label>Vencimento</label><input type="date" id="fotoVenc" value="${res.vencimentoISO||''}"></div>
         <button class="btn-teal" id="btnConfirmarFoto">Adicionar boleto</button>
@@ -6849,7 +6857,7 @@ fileMassa.addEventListener('change', async (e)=>{
       filaMassa[i].status = 'ok';
       div.querySelector('.status-badge').className = 'status-badge ok';
       div.querySelector('.status-badge').textContent = 'lido';
-      div.querySelector('.info').textContent = `${res.beneficiario || 'beneficiário não identificado'} — ${res.valor?money(res.valor):'—'} — venc. ${res.vencimentoISO?fmtData(res.vencimentoISO):'—'}`;
+      div.querySelector('.info').textContent = `${esc(res.beneficiario || 'beneficiário não identificado')} — ${res.valor?money(res.valor):'—'} — venc. ${res.vencimentoISO?fmtData(res.vencimentoISO):'—'}`;
     } else {
       filaMassa[i].status = 'fail';
       div.querySelector('.status-badge').className = 'status-badge fail';
@@ -6869,7 +6877,7 @@ fileMassa.addEventListener('change', async (e)=>{
       }));
       const duplicados = novos.filter(n => encontrarBoletoDuplicado(n.beneficiario, n.valor, n.vencimento));
       if(duplicados.length>0){
-        const lista = duplicados.map(d=>`- ${d.beneficiario} — ${money(d.valor)} — venc. ${fmtData(d.vencimento)}`).join('\n');
+        const lista = duplicados.map(d=>`- ${esc(d.beneficiario)} — ${money(d.valor)} — venc. ${fmtData(d.vencimento)}`).join('\n');
         const confirmar = confirm(`${duplicados.length} boleto(s) desse lote parecem já estar cadastrados (mesmo beneficiário/valor/vencimento):\n\n${lista}\n\nAdicionar mesmo assim? Cancelar vai pular só esses e adicionar o resto.`);
         if(!confirmar){ novos = novos.filter(n => !duplicados.includes(n)); }
       }
@@ -7098,8 +7106,8 @@ async function carregarContaMestre(){
     const empty = document.getElementById('cmEmptyEmpresas');
     empty.classList.toggle('hide', data.empresas.length > 0);
     tbody.innerHTML = data.empresas.map(e=>`<tr>
-      <td>${e.razaoSocial || '—'}</td>
-      <td>${e.email || '—'}</td>
+      <td>${esc(e.razaoSocial || '—')}</td>
+      <td>${esc(e.email || '—')}</td>
       <td>${e.segmento || '—'}</td>
       <td>${e.status}</td>
       <td>${e.trialFim ? new Date(e.trialFim).toLocaleDateString('pt-BR') : '—'}</td>
