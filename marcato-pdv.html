@@ -131,6 +131,8 @@ body{
 }
 .navitem .n svg{ width:13px; height:13px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; display:block; }
 .navitem:hover{background:rgba(255,255,255,0.055); color:#fff;}
+.navitem:active{ transform:scale(.97); transition-duration:0s; }
+@media (prefers-reduced-motion: reduce){ .navitem:active{ transform:none; } }
 .navitem.active{
   background:linear-gradient(135deg, var(--brand), var(--brand-dark)); color:#fff;
   box-shadow:0 6px 18px -6px rgba(108,60,233,.55);
@@ -486,7 +488,13 @@ button{
 .btn-ghost:hover{border-color:var(--brand); color:var(--brand);}
 .btn-sm{padding:6px 10px; font-size:11px;}
 button:disabled{opacity:.45; cursor:not-allowed; transform:none !important;}
-button:active{ transform:translateY(0) scale(.98); }
+/* transition-duration:0 aqui — o afundar precisa ser instantâneo no toque; só a
+   volta ao normal (regra base acima) é que deve ter aquele suavizar de .1s. */
+button:active{ transform:translateY(0) scale(.98); transition-duration:0s; }
+@media (prefers-reduced-motion: reduce){
+  button{ transition:none; }
+  button:active{ transform:none; }
+}
 
 /* ---------- Table ---------- */
 table{width:100%; border-collapse:collapse; font-size:12.5px;}
@@ -550,10 +558,21 @@ datalist{}
   position:fixed; inset:0; z-index:200; display:flex; align-items:center; justify-content:center;
   background:rgba(13,25,23,0.55); padding:20px; backdrop-filter:blur(2px);
 }
+.modal-overlay:not(.hide){ animation:modalScrimIn .16s ease-out; }
 .modal-card{
   background:var(--card); border-radius:14px; padding:26px 24px; width:100%; max-width:400px;
   box-shadow:0 24px 60px -20px rgba(0,0,0,0.5); max-height:85vh; overflow-y:auto;
 }
+/* "Materializa" em vez de só aparecer — a mesma folha entra com um leve blur+escala
+   que desfazem junto, então lê como um objeto real chegando, não um opacity:0 ligado. */
+.modal-overlay:not(.hide) .modal-card{ animation:modalCardIn .2s cubic-bezier(.2,.9,.32,1); }
+@keyframes modalScrimIn{ from{ opacity:0; } to{ opacity:1; } }
+@keyframes modalCardIn{ from{ opacity:0; transform:scale(.94) translateY(8px); filter:blur(4px); } to{ opacity:1; transform:none; filter:blur(0); } }
+@media (prefers-reduced-motion: reduce){
+  .modal-overlay:not(.hide){ animation:modalScrimIn .12s ease-out; }
+  .modal-overlay:not(.hide) .modal-card{ animation:modalFadeReduced .12s ease-out; }
+}
+@keyframes modalFadeReduced{ from{ opacity:0; } to{ opacity:1; } }
 .modal-card h3{ margin:0 0 4px; font-size:16px; }
 .modal-card .desc{ margin-bottom:16px; }
 .modal-list-item{
@@ -710,11 +729,13 @@ datalist{}
     --card:#FFFFFF; --line:#DDDBD3; --ink-soft:#6B6A66; --bg-app:#F5F4F0;
     --brand:#6C3CE9; --brand-dark:#4B21B8; --brand-glow: rgba(108,60,233,0.16);
     --shadow-md:0 8px 20px rgba(0,0,0,.13);
+    --glass:rgba(255,255,255,.72); --glass-edge:rgba(255,255,255,.55); --scrim:rgba(20,17,12,.4); --sheet-glass:rgba(245,244,240,.86);
   }
   html.tema-escuro .mobile-tabbar{
     --card:#151410; --line:#232219; --ink-soft:#928D7C; --bg-app:#0A0A09;
     --brand:#7C4DFF; --brand-dark:#5B2FE0; --brand-glow: rgba(124,77,255,.35);
     --shadow-md:0 8px 20px rgba(0,0,0,.4);
+    --glass:rgba(21,20,16,.68); --glass-edge:rgba(255,255,255,.08); --scrim:rgba(0,0,0,.55); --sheet-glass:rgba(21,20,16,.86);
   }
   .mobile-tabbar, .mobile-tabbar *{ font-family:'Poppins',sans-serif; }
 
@@ -785,8 +806,9 @@ datalist{}
     display:block; position:fixed; left:12px; right:12px; bottom:calc(10px + env(safe-area-inset-bottom)); z-index:120;
   }
   .mtabbar-track{
-    display:flex; align-items:center; gap:4px; border-radius:999px; border:1px solid var(--line);
-    background:var(--card); padding:6px; box-shadow:var(--shadow-md);
+    display:flex; align-items:center; gap:4px; border-radius:999px; border:1px solid var(--glass-edge);
+    background:var(--glass); backdrop-filter:blur(20px) saturate(180%); -webkit-backdrop-filter:blur(20px) saturate(180%);
+    padding:6px; box-shadow:var(--shadow-md);
   }
   .mtab-item{
     flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
@@ -811,13 +833,18 @@ datalist{}
 
   /* ---- Submenus (Financeiro / Mais) ---- */
   .mobile-submenu{ position:fixed; inset:0; z-index:150; }
-  .msub-backdrop{ position:absolute; inset:0; background:rgba(0,0,0,.45); }
+  .msub-backdrop{ position:absolute; inset:0; background:var(--scrim); opacity:0; }
   .msub-sheet{
-    position:absolute; left:0; right:0; bottom:0; max-height:82vh; overflow-y:auto;
-    background:var(--bg-app); border-radius:20px 20px 0 0; padding:18px 16px calc(22px + env(safe-area-inset-bottom));
-    animation:msubSobe .22s ease;
+    position:absolute; left:0; right:0; bottom:0; max-height:82vh; overflow-y:auto; will-change:transform;
+    background:var(--sheet-glass); backdrop-filter:blur(24px) saturate(160%); -webkit-backdrop-filter:blur(24px) saturate(160%);
+    border-radius:20px 20px 0 0; border-top:1px solid var(--glass-edge);
+    padding:8px 16px calc(22px + env(safe-area-inset-bottom));
+    box-shadow:0 -14px 44px -10px rgba(0,0,0,.32);
+    touch-action:none;
   }
-  @keyframes msubSobe{ from{ transform:translateY(26px); opacity:.3; } to{ transform:translateY(0); opacity:1; } }
+  .msub-handle-zone{ padding:6px 0 10px; display:flex; justify-content:center; cursor:grab; touch-action:none; }
+  .msub-handle-zone:active{ cursor:grabbing; }
+  .msub-handle{ width:36px; height:5px; border-radius:99px; background:var(--line); }
   .msub-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
   .msub-head b{ font-size:17px; font-weight:700; }
   .msub-close{
@@ -839,11 +866,17 @@ datalist{}
   /* ---- Financeiro/Mais viram tela de cards (linhas cheias, ícone + título + subtítulo + seta) ---- */
   .msub-grid{ display:flex; flex-direction:column; gap:10px; }
   .msub-grid .msub-item{
-    justify-content:flex-start; gap:12px;
+    justify-content:flex-start; gap:12px; -webkit-tap-highlight-color:transparent;
     background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 14px;
     box-shadow:var(--shadow-sm); font-size:15px; font-weight:700; line-height:1.3;
+    transition:transform 100ms ease-out, background-color 100ms ease-out;
   }
+  .msub-grid .msub-item:active{ transform:scale(.97); transition-duration:0s; background:color-mix(in srgb, var(--card) 90%, var(--ink-soft)); }
   .msub-grid .msub-item.hide{ display:none; }
+  @media (prefers-reduced-motion: reduce){
+    .msub-grid .msub-item{ transition:background-color 100ms ease-out; }
+    .msub-grid .msub-item:active{ transform:none; }
+  }
   .msub-grid .msub-ico{ width:44px; height:44px; border-radius:13px; flex-shrink:0; }
   .msub-grid .msub-ico svg{ width:19px; height:19px; }
   .msub-grid .msub-item > span:not(.msub-ico){ display:flex; flex-direction:column; gap:2px; flex:1; min-width:0; }
@@ -2214,6 +2247,7 @@ datalist{}
   <div class="mobile-submenu hide" id="submenuFinanceiro">
     <div class="msub-backdrop" data-close-submenu></div>
     <div class="msub-sheet">
+      <div class="msub-handle-zone" data-msub-handle><div class="msub-handle"></div></div>
       <div class="msub-head"><b>Financeiro</b><button class="msub-close" data-close-submenu>✕</button></div>
       <div class="msub-grid">
         <div class="msub-item" data-view="fluxo"><span class="msub-ico"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg></span><span>Fluxo de Caixa<span class="msub-sub">Vendas por dia, entradas e saídas</span></span></div>
@@ -2229,6 +2263,7 @@ datalist{}
   <div class="mobile-submenu hide" id="submenuMais">
     <div class="msub-backdrop" data-close-submenu></div>
     <div class="msub-sheet">
+      <div class="msub-handle-zone" data-msub-handle><div class="msub-handle"></div></div>
       <div class="msub-head"><b>Mais</b><button class="msub-close" data-close-submenu>✕</button></div>
 
       <div class="msub-profile" id="msubProfile">
@@ -2537,13 +2572,106 @@ function atualizarTabbarMobile(viewName){
   label.textContent = MTAB_LABELS[mtabId] || '';
 }
 
+/* ---- Física da folha (Financeiro/Mais): arrasta com o dedo, resiste um pouco se
+   puxar além do topo, e decide fechar ou voltar pelo rumo do gesto (velocidade),
+   não por um ponto fixo — mesma ideia da Designing Fluid Interfaces (WWDC18). ---- */
+const controlesSheetMobile = new Map();
+function criarControleSheet(submenuEl){
+  const sheet = submenuEl.querySelector('.msub-sheet');
+  const backdrop = submenuEl.querySelector('.msub-backdrop');
+  const handle = submenuEl.querySelector('[data-msub-handle]');
+  const reduzMovimento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let sheetHeight = 0, y = 0, velocidade = 0, arrastando = false;
+  let grabY0 = 0, yInicial = 0, ultimoY = 0, ultimoT = 0, rafId = null;
+
+  function medir(){ sheetHeight = sheet.getBoundingClientRect().height || 1; }
+  function aplicarFrame(){
+    const clamped = Math.max(0, y);
+    sheet.style.transform = `translateY(${clamped}px)`;
+    backdrop.style.opacity = String(1 - Math.min(1, clamped / sheetHeight));
+  }
+  function rubberband(overshoot, dim){ return (overshoot*dim*0.55)/(dim+0.55*Math.abs(overshoot)); }
+  function projetar(v, decel){ decel = decel||0.998; return (v/1000)*decel/(1-decel); }
+  function pararSpring(){ if(rafId){ cancelAnimationFrame(rafId); rafId = null; } }
+  function springPara(alvo, vInicial, aoAssentar){
+    pararSpring();
+    if(reduzMovimento){
+      // Sem física de mola, mas ainda com um esmaecer curto — "menos movimento" não é
+      // "sem nenhum feedback", é uma transição mais simples (crossfade de opacidade).
+      sheet.style.transition = 'transform .15s ease, opacity .15s ease';
+      backdrop.style.transition = 'opacity .15s ease';
+      y = alvo; velocidade = 0; aplicarFrame();
+      setTimeout(()=>{ sheet.style.transition = ''; backdrop.style.transition = ''; if(aoAssentar) aoAssentar(); }, 160);
+      return;
+    }
+    let v = vInicial;
+    const rigidez = 340, amortecimento = 2*Math.sqrt(rigidez); // damping ratio 1.0 — sem quicar
+    let ultimo = performance.now();
+    function passo(agora){
+      const dt = Math.min(0.032, (agora-ultimo)/1000); ultimo = agora;
+      const forca = -rigidez*(y-alvo) - amortecimento*v;
+      v += forca*dt; y += v*dt;
+      aplicarFrame();
+      if(Math.abs(v) < 4 && Math.abs(y-alvo) < 0.5){
+        y = alvo; velocidade = 0; aplicarFrame();
+        if(aoAssentar) aoAssentar();
+        return;
+      }
+      rafId = requestAnimationFrame(passo);
+    }
+    rafId = requestAnimationFrame(passo);
+  }
+  function abrir(){
+    submenuEl.classList.remove('hide');
+    medir();
+    if(reduzMovimento){ y = 0; aplicarFrame(); return; }
+    y = sheetHeight; aplicarFrame();
+    springPara(0, -600);
+  }
+  function fechar(vSaida){
+    springPara(sheetHeight || 400, vSaida==null?400:vSaida, ()=> submenuEl.classList.add('hide'));
+  }
+  function onDown(e){
+    pararSpring(); arrastando = true; medir();
+    try{ handle.setPointerCapture(e.pointerId); }catch(err){}
+    grabY0 = e.clientY; yInicial = y; ultimoY = e.clientY; ultimoT = performance.now(); velocidade = 0;
+  }
+  function onMove(e){
+    if(!arrastando) return;
+    const agora = performance.now(); const dt = Math.max(1, agora-ultimoT);
+    velocidade = velocidade*0.7 + ((e.clientY-ultimoY)/(dt/1000))*0.3;
+    ultimoY = e.clientY; ultimoT = agora;
+    let proximo = yInicial + (e.clientY - grabY0);
+    if(proximo < 0) proximo = rubberband(-proximo, sheetHeight) * -1;
+    y = proximo; aplicarFrame();
+  }
+  function onUp(){
+    if(!arrastando) return;
+    arrastando = false;
+    const projetado = y + projetar(velocidade);
+    if(projetado > sheetHeight*0.38) fechar(velocidade);
+    else springPara(0, velocidade);
+  }
+  handle.addEventListener('pointerdown', onDown);
+  handle.addEventListener('pointermove', onMove);
+  handle.addEventListener('pointerup', onUp);
+  handle.addEventListener('pointercancel', onUp);
+  window.addEventListener('resize', medir);
+  return { abrir, fechar };
+}
+function controleDoSubmenu(el){
+  if(!controlesSheetMobile.has(el)) controlesSheetMobile.set(el, criarControleSheet(el));
+  return controlesSheetMobile.get(el);
+}
 function abrirSubmenuMobile(id){
   fecharSubmenuMobile();
   const el = document.getElementById('submenu'+id);
-  if(el) el.classList.remove('hide');
+  if(el) controleDoSubmenu(el).abrir();
 }
 function fecharSubmenuMobile(){
-  document.querySelectorAll('.mobile-submenu').forEach(el=>el.classList.add('hide'));
+  document.querySelectorAll('.mobile-submenu').forEach(el=>{
+    if(!el.classList.contains('hide')) controleDoSubmenu(el).fechar();
+  });
 }
 
 document.querySelectorAll('.mtab-item[data-mtab]').forEach(btn=>{
