@@ -67,6 +67,9 @@ function serviceHeaders(env) {
 // Mercado Pago) entram direto na query do Supabase. Um "&" ou vírgula ali muda o
 // filtro inteiro, então só passa o que for UUID de verdade.
 var UUID_RE = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+function idMpSeguro(valor) {
+  return typeof valor === "string" && /^[A-Za-z0-9_-]{1,64}$/.test(valor) ? valor : null;
+}
 function idSeguro(valor) {
   return typeof valor === "string" && UUID_RE.test(valor) ? valor : null;
 }
@@ -291,7 +294,8 @@ async function criarAssinatura(request, env) {
   });
   const mpData = await mpResp.json();
   if (!mpResp.ok || !mpData.init_point) {
-    return jsonResponse({ error: "Erro ao criar assinatura no Mercado Pago", detalhe: mpData }, 502);
+    console.error("Mercado Pago recusou a assinatura:", mpResp.status, mpData);
+    return jsonResponse({ error: "Erro ao criar assinatura no Mercado Pago" }, 502);
   }
   await sbUpdate(env, "assinaturas", `empresa_id=eq.${empresa.id}`, {
     mp_preapproval_id: mpData.id,
@@ -308,7 +312,7 @@ async function webhookMercadoPago(request, env, ctx) {
   } catch (e) {
     return new Response("ok", { status: 200 });
   }
-  const preapprovalId = payload?.data?.id || payload?.id;
+  const preapprovalId = idMpSeguro(String(payload?.data?.id || payload?.id || ""));
   if (!preapprovalId) return new Response("ok", { status: 200 });
   const mpResp = await fetch(`${MP_API}/preapproval/${preapprovalId}`, {
     headers: { Authorization: `Bearer ${env.MP_ACCESS_TOKEN}` }
