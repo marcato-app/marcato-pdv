@@ -389,12 +389,20 @@ main{flex:1; padding:28px 34px 60px; max-width:1220px;}
   display:flex; align-items:center; justify-content:space-between; background:var(--card); border:1px solid var(--line);
   border-radius:var(--radius); padding:8px 10px; margin-bottom:16px; box-shadow:var(--shadow-sm);
 }
+/* padding:0 e box-sizing:content-box porque a regra global de button tem
+   padding:10px 17px (18px no mobile) — num botao de 34px isso zerava a caixa
+   de conteudo e a seta simplesmente sumia. */
 .month-nav button{
-  width:34px; height:34px; border-radius:50%; border:none; background:var(--orange-glow); color:var(--orange);
+  width:34px; height:34px; padding:0; box-sizing:border-box; border-radius:50%; border:none;
+  background:var(--orange-glow); color:var(--orange);
   display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;
 }
-.month-nav button svg{ width:15px; height:15px; stroke:var(--orange); fill:none; stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round; }
-.month-nav .label{ font-size:15px; font-weight:700; text-transform:capitalize; }
+.month-nav button:hover{ background:var(--orange); }
+.month-nav button:hover svg{ stroke:#fff; }
+.month-nav button svg{ width:15px; height:15px; flex-shrink:0; stroke:var(--orange); fill:none; stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round; }
+/* capitalize deixaria "Setembro De 2026" — so a primeira letra sobe de caixa. */
+.month-nav .label{ font-size:15px; font-weight:700; }
+.month-nav .label::first-letter{ text-transform:uppercase; }
 
 /* ---------- Resumo do período (cards com ícone) ---------- */
 .resumo-head{ display:flex; align-items:center; justify-content:space-between; margin:20px 0 12px; }
@@ -628,6 +636,9 @@ tr:last-child td{border-bottom:none;}
 }
 .rm::before{ content:"🗑"; font-size:13px; }
 .rm:hover{ background:var(--warn-soft); color:var(--warn); }
+/* Nos cards (mobile e listas) o alvo de toque cresce — 26px e pequeno demais pro dedo. */
+.rm.rm-card{ width:36px; height:36px; border-radius:10px; }
+.rm.rm-card::before{ font-size:15px; }
 #view-pdv .rm{ display:inline; width:auto; height:auto; border-radius:0; background:none !important; color:var(--ink-soft); font-size:11px; font-family:'Sora',sans-serif; font-weight:600; }
 #view-pdv .rm::before{ content:none; }
 #view-pdv .rm:hover{ color:var(--warn); }
@@ -908,9 +919,18 @@ datalist{}
   .formrow{ gap:8px; }
   .field{ flex:1 1 100%; }
   input, select{ min-width:0; width:100%; font-family:'Poppins',sans-serif; }
+  /* Varios campos carregam max-width/min-width inline pro layout de desktop
+     (ex: o simulador de boleto). No celular isso deixava o input do tamanho de
+     um dedo e meio no meio de uma coluna vazia. */
+  .field input, .field select, .field textarea{ max-width:none !important; min-width:0 !important; }
 
   button{ padding:12px 18px; border-radius:999px; font-family:'Poppins',sans-serif; }
   .btn-sm{ padding:8px 14px; }
+  /* Alvos de toque: 26px de lixeira e tag de 20px de altura sao pequenos demais. */
+  .rm{ width:36px; height:36px; border-radius:10px; }
+  .rm::before{ font-size:15px; }
+  .tag{ font-size:11px; padding:5px 11px; }
+  .tag[onclick]{ padding:7px 13px; }
 
   .auth-card, .modal-card{ padding:22px 18px; }
   .auth-card, .modal-card, .panel, .kpi, .mini-kpi, .hero-card{ border-radius:var(--radius); }
@@ -1034,11 +1054,24 @@ datalist{}
   .panel:has(table.tabela-cards-mobile){ overflow-x:visible; padding:14px; }
 }
 @media (max-width:480px){
-  .kpis{grid-template-columns:1fr !important;}
+  .kpis{grid-template-columns:1fr !important; gap:10px;}
   #view-painel .kpis{grid-template-columns:repeat(2,1fr) !important; gap:10px !important;}
+  /* Empilhado e com o icone em cima, cada KPI virava um card de 150px de altura
+     com metade vazia. Deitado, o mesmo dado ocupa um terco do espaco e a coluna
+     de rotulo/valor fica alinhada de um card pro outro. */
+  .kpi:has(.kpi-icon-badge){
+    display:flex; align-items:center; gap:13px; padding:12px 14px;
+  }
+  .kpi:has(.kpi-icon-badge) .kpi-icon-badge{ width:38px; height:38px; margin-bottom:0; flex-shrink:0; }
+  .kpi:has(.kpi-icon-badge) .k{ margin-bottom:1px; }
+  .kpi:has(.kpi-icon-badge) .v{ margin-top:0; font-size:21px; }
+  .kpi:has(.kpi-icon-badge) .k, .kpi:has(.kpi-icon-badge) .v, .kpi:has(.kpi-icon-badge) .sub{ text-align:left; }
   .hero-row{grid-template-columns:1fr !important;}
   .hero-card{grid-column:1; grid-row:auto;}
   .mini-kpi[style*="grid-column:2 / 4"]{grid-column:1 !important;}
+  /* "Limpar filtros" e afins ficavam com 30px de altura — abaixo do minimo confortavel. */
+  .btn-sm{ padding:11px 16px; }
+  .tip-refresh{ padding:10px 4px; }
 }
 </style>
 <script>(function(){
@@ -3020,7 +3053,7 @@ function renderDespesas(){
         </div>
         <div style="display:flex; align-items:center; gap:10px;">
           <div class="valor saida">${money(d.valor)}</div>
-          <span class="rm" onclick="removerDespesa('${d.id}')" style="font-size:15px;">🗑</span>
+          <span class="rm rm-card" role="button" tabindex="0" aria-label="Remover despesa" onclick="removerDespesa('${d.id}')"></span>
         </div>
       </div>`).join('');
   }
@@ -3116,7 +3149,7 @@ function renderBoletos(){
           </div>
           <div style="display:flex; align-items:center; gap:10px;">
             <div class="valor saida">${money(b.valor)}</div>
-            <span class="rm" onclick="removerBoleto('${b.id}')" style="font-size:15px;">🗑</span>
+            <span class="rm rm-card" role="button" tabindex="0" aria-label="Remover boleto" onclick="removerBoleto('${b.id}')"></span>
           </div>
         </div>`).join('');
     }
@@ -3391,7 +3424,7 @@ function renderClientes(){
             <div class="titulo">${esc(c.nome)}</div>
             <div class="meta"><span class="tag">${tipoLabel[c.tipoCliente]||'Sem tipo'}</span><span class="data">${esc(c.telefone || c.email || '')}</span></div>
           </div>
-          <span class="rm" onclick="removerCliente('${c.id}')" style="font-size:15px;">🗑</span>
+          <span class="rm rm-card" role="button" tabindex="0" aria-label="Remover cliente" onclick="removerCliente('${c.id}')"></span>
         </div>`).join('');
     }
   }
@@ -5494,6 +5527,42 @@ function renderPainel(){
 }
 
 /* ===================== RENDER GERAL ===================== */
+/* ---- Tabela vira lista de cards no celular ----
+   O CSS ja sabia fazer isso (.tabela-cards-mobile), mas so uma tabela do app
+   estava marcada — o resto rolava de lado no celular. Em vez de anotar tabela
+   por tabela, aqui a gente copia o texto do <th> pro data-label do <td> da
+   mesma coluna e liga a classe. Quem ja tem data-label proprio e respeitado. */
+function prepararTabelasMobile(raiz){
+  (raiz || document).querySelectorAll('main table').forEach(tabela=>{
+    if(tabela.closest('#view-pdv')) return;              // PDV fica exatamente como esta
+    if(tabela.classList.contains('sem-cards-mobile')) return;
+    const ths = [...tabela.querySelectorAll('thead th')];
+    if(ths.length === 0) return;
+    const rotulos = ths.map(th=>th.textContent.trim());
+    tabela.classList.add('tabela-cards-mobile');
+    tabela.querySelectorAll('tbody tr').forEach(tr=>{
+      // linha de "estado vazio" com colspan nao vira card
+      if(tr.children.length === 1 && tr.children[0].hasAttribute('colspan')) return;
+      [...tr.children].forEach((td,i)=>{
+        if(td.hasAttribute('data-label')) return;
+        td.setAttribute('data-label', rotulos[i] || '');
+      });
+    });
+  });
+}
+let rotulosAgendados = false;
+function agendarRotulosTabela(){
+  if(rotulosAgendados) return;
+  rotulosAgendados = true;
+  requestAnimationFrame(()=>{ rotulosAgendados = false; prepararTabelasMobile(); });
+}
+// Observa so childList: as proprias marcacoes sao atributos, entao nao ha laco.
+(function observarTabelas(){
+  const main = document.querySelector('main');
+  if(!main || typeof MutationObserver === 'undefined') return;
+  new MutationObserver(agendarRotulosTabela).observe(main, { childList:true, subtree:true });
+})();
+
 function renderTudo(){
   renderVendas();
   renderDespesas();
@@ -5514,6 +5583,7 @@ function renderTudo(){
   renderCompras();
   renderMovimentacoesEstoque();
   renderVendasFornecedor();
+  prepararTabelasMobile();
 }
 
 /* ===================== PRODUTOS ===================== */
