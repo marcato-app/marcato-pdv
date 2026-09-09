@@ -212,14 +212,128 @@ main{flex:1; padding:28px 34px 60px; max-width:1220px;}
 .kpi .sub{font-size:11px; color:var(--ink-soft); margin-top:4px;}
 .kpi:hover{ transform:translateY(-2px); box-shadow:var(--shadow-md); border-color:#D3E0DC; }
 
-/* ---------- Painel: cabeçalho de status ---------- */
-.painel-status-card{
-  display:flex; align-items:center; gap:10px; background:var(--card); border:1px solid var(--line);
-  border-radius:var(--radius); padding:14px 16px; box-shadow:var(--shadow-sm); margin-bottom:18px;
+/* ---------- Painel: resultado do mês ----------
+   Uma pergunta por tela: "sobrou ou faltou?". O valor domina a hierarquia,
+   a comparação com o mês passado dá o sentido, e a barra mostra a composição
+   sem obrigar ninguém a fazer conta de cabeça. */
+.resultado-mes{
+  background:var(--card); border:1px solid var(--line); border-radius:calc(var(--radius) + 4px);
+  padding:24px 24px 20px; box-shadow:var(--shadow-md); margin-bottom:8px; position:relative; overflow:hidden;
 }
-.painel-status-card .icone{ color:var(--brand); flex-shrink:0; display:flex; }
-.painel-status-card .icone svg{ width:18px; height:18px; stroke:var(--brand); fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
-.painel-status-card b{ font-size:15px; font-weight:700; }
+.resultado-mes::before{
+  content:""; position:absolute; inset:0 0 auto; height:3px;
+  background:linear-gradient(90deg, var(--brand), var(--green)); opacity:.9;
+}
+.resultado-topo{ display:flex; align-items:flex-start; justify-content:space-between; gap:16px; }
+.resultado-mes .rotulo{
+  font-size:12px; font-weight:600; letter-spacing:.02em; color:var(--ink-soft);
+  text-transform:uppercase; margin-bottom:6px;
+}
+.resultado-mes .rotulo span{ color:inherit; }
+.resultado-mes .valor{
+  font-family:'IBM Plex Mono',monospace; font-size:clamp(30px, 6vw, 44px); font-weight:700;
+  letter-spacing:-.025em; line-height:1.05; color:var(--green-dark);
+  font-variant-numeric:tabular-nums; margin-bottom:10px;
+}
+.resultado-mes .valor.negativo{ color:var(--warn); }
+.resultado-mes .comparativo{ display:flex; align-items:center; flex-wrap:wrap; gap:8px; font-size:12.5px; color:var(--ink-soft); }
+.chip-tendencia{
+  display:inline-flex; align-items:center; gap:5px; padding:4px 10px 4px 7px; border-radius:99px;
+  font-size:12.5px; font-weight:700; font-variant-numeric:tabular-nums;
+}
+.chip-tendencia svg{ width:13px; height:13px; fill:none; stroke:currentColor; stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round; }
+.chip-tendencia.sobe{ background:var(--green-glow); color:var(--green-dark); }
+.chip-tendencia.desce{ background:var(--warn-soft); color:var(--warn); }
+.chip-tendencia.neutro{ background:var(--tint-neutral); color:var(--ink-soft); font-weight:600; }
+.resultado-selo{
+  flex-shrink:0; padding:6px 13px; border-radius:99px; font-size:12px; font-weight:700;
+  letter-spacing:.01em; white-space:nowrap;
+}
+.resultado-selo.positivo{ background:var(--green-glow); color:var(--green-dark); }
+.resultado-selo.negativo{ background:var(--warn-soft); color:var(--warn); }
+.resultado-selo.neutro{ background:var(--tint-neutral); color:var(--ink-soft); }
+
+.barra-composicao{ display:flex; flex-direction:column; gap:6px; margin:20px 0 14px; }
+.barra-composicao .faixa{
+  height:10px; border-radius:99px; min-width:3px;
+  transition:width .5s cubic-bezier(.22,1,.36,1);
+}
+.barra-composicao .faixa.entrou{ background:linear-gradient(90deg, var(--green), var(--green-dark)); }
+.barra-composicao .faixa.saiu{ display:flex; gap:2px; background:none; }
+.barra-composicao .parte{ height:100%; border-radius:99px; min-width:0; transition:width .5s cubic-bezier(.22,1,.36,1); }
+.barra-composicao .parte.despesa{ background:var(--brand-2); }
+.barra-composicao .parte.boleto{ background:var(--brand); }
+
+.composicao-legenda{ display:grid; grid-template-columns:repeat(3,1fr); gap:4px; }
+.parcela{
+  display:flex; align-items:flex-start; gap:8px; background:none; border:0; padding:9px 8px;
+  border-radius:var(--radius-sm); text-align:left; cursor:pointer; color:inherit;
+  font-family:inherit; transition:background .15s;
+}
+.parcela:hover{ background:var(--tint-neutral); }
+.parcela .ponto{ width:9px; height:9px; border-radius:3px; flex-shrink:0; margin-top:4px; }
+.parcela .ponto.entrou{ background:var(--green); }
+.parcela .ponto.despesa{ background:var(--brand-2); }
+.parcela .ponto.boleto{ background:var(--brand); }
+.parcela .txt{ display:flex; flex-direction:column; gap:2px; min-width:0; }
+.parcela .nome{ font-size:11.5px; color:var(--ink-soft); }
+.parcela b{
+  font-family:'IBM Plex Mono',monospace; font-size:14px; font-weight:700; color:var(--ink);
+  font-variant-numeric:tabular-nums; letter-spacing:-.01em;
+}
+
+/* ---------- Painel: precisa da sua atenção ---------- */
+.atencao-card{
+  display:flex; align-items:center; gap:12px; width:100%; background:var(--card); border:1px solid var(--line);
+  border-radius:var(--radius); padding:13px 16px; margin-bottom:8px; box-shadow:var(--shadow-sm);
+  cursor:pointer; text-align:left; font-family:inherit; color:inherit;
+  transition:transform .15s cubic-bezier(.22,1,.36,1), box-shadow .15s, border-color .15s;
+}
+.atencao-card:hover{ transform:translateY(-1px); box-shadow:var(--shadow-md); border-color:var(--line-2); }
+.atencao-card:active{ transform:translateY(0) scale(.99); transition-duration:0s; }
+.atencao-card .marca{ width:4px; align-self:stretch; border-radius:99px; flex-shrink:0; min-height:34px; }
+.atencao-card.urgente .marca{ background:var(--warn); }
+.atencao-card.proximo .marca{ background:var(--orange); }
+.atencao-card .info{ display:flex; flex-direction:column; gap:3px; min-width:0; flex:1; }
+.atencao-card .quem{
+  font-size:14px; font-weight:600; color:var(--ink);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.atencao-card .quando{ font-size:11.5px; color:var(--ink-soft); }
+.atencao-card.urgente .quando{ color:var(--warn); font-weight:600; }
+.atencao-card .quanto{
+  font-family:'IBM Plex Mono',monospace; font-size:15px; font-weight:700; color:var(--ink);
+  font-variant-numeric:tabular-nums; flex-shrink:0; letter-spacing:-.01em;
+}
+.atencao-mais{
+  width:100%; background:none; border:1px dashed var(--line-2); border-radius:var(--radius); padding:11px;
+  font-family:inherit; font-size:12.5px; font-weight:600; color:var(--ink-soft); cursor:pointer; transition:color .15s, border-color .15s;
+}
+.atencao-mais:hover{ color:var(--brand); border-color:var(--brand); }
+.atencao-resumo{
+  margin-top:10px; font-size:12.5px; color:var(--ink-soft);
+}
+.atencao-resumo b{ font-family:'IBM Plex Mono',monospace; color:var(--warn); font-variant-numeric:tabular-nums; }
+.atencao-vazio{
+  display:flex; align-items:center; gap:12px; background:var(--green-glow); border:1px solid transparent;
+  border-radius:var(--radius); padding:16px 18px;
+}
+.atencao-vazio svg{ width:20px; height:20px; stroke:var(--green-dark); fill:none; stroke-width:2.6; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0; }
+.atencao-vazio b{ display:block; font-size:14px; color:var(--green-dark); margin-bottom:2px; }
+.atencao-vazio span{ font-size:12.5px; color:var(--ink-soft); }
+
+@media (max-width:640px){
+  .resultado-mes{ padding:20px 18px 16px; }
+  .composicao-legenda{ grid-template-columns:1fr; gap:0; }
+  .parcela{ align-items:center; justify-content:space-between; padding:10px 8px; border-bottom:1px solid var(--line); }
+  .composicao-legenda .parcela:last-child{ border-bottom:0; }
+  .parcela .txt{ flex-direction:row; align-items:center; justify-content:space-between; gap:12px; flex:1; }
+  .parcela .nome{ font-size:12.5px; }
+}
+@media (prefers-reduced-motion:reduce){
+  .barra-composicao .faixa, .barra-composicao .parte{ transition:none; }
+  .atencao-card{ transition:none; }
+}
 .section-title-lg{ font-size:15px; font-weight:700; margin:22px 0 12px; display:flex; align-items:center; gap:7px; }
 .section-title-lg:first-of-type{ margin-top:4px; }
 
@@ -1169,44 +1283,46 @@ datalist{}
         <div class="field"><label>Mês</label><select id="filtroMesPainel"></select></div>
       </div>
 
-      <div class="painel-status-card">
-        <span class="icone"><svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg></span>
-        <b>Sua loja hoje</b>
+      <!-- O resultado do mês responde a pergunta que a pessoa abre o app pra fazer:
+           "sobrou ou faltou?". Vem antes de tudo, com a comparação que dá sentido ao
+           número, e a barra mostra a composição pra não precisar fazer conta de cabeça. -->
+      <div class="resultado-mes" id="resultadoMes">
+        <div class="resultado-topo">
+          <div>
+            <div class="rotulo">Resultado de <span id="resultadoMesNome">—</span></div>
+            <div class="valor" id="resultadoValor">R$ 0,00</div>
+            <div class="comparativo" id="resultadoComparativo"></div>
+          </div>
+          <div class="resultado-selo" id="resultadoSelo"></div>
+        </div>
+
+        <div class="barra-composicao" id="barraComposicao">
+          <div class="faixa entrou" id="faixaEntrou"></div>
+          <div class="faixa saiu" id="faixaSaiu">
+            <span class="parte despesa" id="faixaDespesas"></span>
+            <span class="parte boleto" id="faixaBoletos"></span>
+          </div>
+        </div>
+        <div class="composicao-legenda">
+          <button type="button" class="parcela" onclick="irParaView('fluxo')">
+            <span class="ponto entrou"></span>
+            <span class="txt"><span class="nome">Entrou</span><b id="composEntrou">R$ 0,00</b></span>
+          </button>
+          <button type="button" class="parcela" onclick="irParaView('despesas')">
+            <span class="ponto despesa"></span>
+            <span class="txt"><span class="nome">Despesas fixas</span><b id="composDespesas">R$ 0,00</b></span>
+          </button>
+          <button type="button" class="parcela" onclick="irParaView('boletos')">
+            <span class="ponto boleto"></span>
+            <span class="txt"><span class="nome">Boletos e compras</span><b id="composBoletos">R$ 0,00</b></span>
+          </button>
+        </div>
       </div>
 
-      <div class="section-title-lg">Resumo — Mês</div>
+      <div class="section-title-lg">Precisa da sua atenção</div>
+      <div id="painelAtencao"></div>
 
-      <div class="kpis">
-        <div class="kpi accent-brand">
-          <div class="kpi-icon-badge tint-brand"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg></div>
-          <div class="k">Vendido no mês</div><div class="v" id="kpiVendas">R$ 0,00</div><div class="sub" id="kpiVendasSub">Pix + Cartão</div>
-        </div>
-        <div class="kpi accent-green">
-          <div class="kpi-icon-badge tint-green"><svg viewBox="0 0 24 24"><line x1="3" y1="4" x2="3" y2="20" stroke-width="2"></line><line x1="6.5" y1="4" x2="6.5" y2="20" stroke-width="1"></line><line x1="9" y1="4" x2="9" y2="20" stroke-width="3"></line><line x1="13" y1="4" x2="13" y2="20" stroke-width="1"></line><line x1="16" y1="4" x2="16" y2="20" stroke-width="2"></line></svg></div>
-          <div class="k">Boletos no mês</div><div class="v warn" id="kpiBoletos">R$ 0,00</div><div class="sub" id="kpiBoletosSub">A pagar</div>
-        </div>
-        <div class="kpi accent-orange">
-          <div class="kpi-icon-badge tint-orange"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><line x1="8" y1="12" x2="16" y2="12"></line></svg></div>
-          <div class="k">Despesas fixas</div><div class="v" id="kpiDespesas">R$ 0,00</div><div class="sub">Água, luz, aluguel...</div>
-        </div>
-        <div class="kpi accent-blue">
-          <div class="kpi-icon-badge tint-blue"><svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg></div>
-          <div class="k">Lucro presumido</div><div class="v ok" id="kpiLucro">R$ 0,00</div><div class="sub">Vendas − despesas − boletos</div>
-        </div>
-      </div>
-
-      <div class="section-title-lg">Dica do dia</div>
-      <div class="tip-card">
-        <div class="tip-icon"><svg id="tipIconSvg" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg></div>
-        <div class="tip-body"><b id="tipTitulo"></b><p id="tipTexto"></p></div>
-      </div>
-      <div class="tip-dots" id="tipDots"></div>
-      <div class="tip-refresh" onclick="proximaDica()">
-        <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
-        Novas dicas
-      </div>
-
-      <div class="section-title-lg hide" id="tituloEstoqueBaixoPainel">⚠️ Estoque Baixo</div>
+      <div class="section-title-lg hide" id="tituloEstoqueBaixoPainel">Estoque baixo</div>
       <div id="painelEstoqueBaixo"></div>
 
       <div class="section-label">Planejamento</div>
@@ -1280,6 +1396,18 @@ datalist{}
         <h3>Vendas do PDV por categoria</h3>
         <div class="desc">Top categorias de produto (mês selecionado acima) — categoria vem do cadastro em Produtos, autopreenchida pelo catálogo de referência quando disponível</div>
         <div class="chart-wrap" id="wrapCategoria"><canvas id="chartCategoria"></canvas></div>
+      </div>
+
+      <!-- Dica desceu pro rodapé: é conteúdo genérico, não pode competir com os
+           números do mês pelo topo da tela. -->
+      <div class="tip-card" style="margin-top:22px;">
+        <div class="tip-icon"><svg id="tipIconSvg" viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg></div>
+        <div class="tip-body"><b id="tipTitulo"></b><p id="tipTexto"></p></div>
+      </div>
+      <div class="tip-dots" id="tipDots"></div>
+      <div class="tip-refresh" onclick="proximaDica()">
+        <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+        Ver outra dica
       </div>
     </section>
 
@@ -5030,6 +5158,127 @@ function abrirModalNovoLancamento(tipoInicial){
   });
 }
 
+/* ---- Resultado do mes: o numero que a pessoa abre o app pra ver ----
+   Reune os mesmos totais que o renderPainel calcula, mas para um mes qualquer,
+   pra dar pra comparar com o mes anterior sem duplicar regra de negocio. */
+function totaisDoMes(mesISO){
+  const vendasMes = vendas.filter(v=>v.data && v.data.startsWith(mesISO));
+  const fornecedorMes = vendasFornecedor.filter(v=>v.dataVenda && v.dataVenda.startsWith(mesISO));
+  const entrou = vendasMes.reduce((s,v)=>s+v.pix+v.cartao+v.dinheiro,0)
+               + vendasMes.reduce((s,v)=>s+v.pixPdv+v.cartaoPdv+v.dinheiroPdv,0)
+               + fornecedorMes.reduce((s,v)=>s+v.valorVenda,0);
+  const despesasFixas = despesas.reduce((s,d)=>s+d.valor,0);
+  const saiuBoletos = boletos
+      .filter(b=>b.vencimento && b.vencimento.startsWith(mesISO) && b.status==='pendente')
+      .reduce((s,b)=>s+b.valor,0)
+    + fornecedorMes.reduce((s,v)=>s+(v.valorCompra||0),0);
+  return { entrou, despesasFixas, saiuBoletos, lucro: entrou - despesasFixas - saiuBoletos };
+}
+
+function mesAnteriorDe(mesISO){
+  const [y,m] = mesISO.split('-').map(Number);
+  const d = new Date(Date.UTC(y, m-2, 1));
+  return d.toISOString().slice(0,7);
+}
+
+function renderResultadoDoMes(mesISO, atual){
+  const [y,mm] = mesISO.split('-');
+  const nomeMes = new Date(Date.UTC(+y,+mm-1,1)).toLocaleDateString('pt-BR',{month:'long', timeZone:'UTC'});
+  document.getElementById('resultadoMesNome').textContent = nomeMes;
+
+  const lucro = atual.lucro;
+  const elValor = document.getElementById('resultadoValor');
+  elValor.textContent = money(lucro);
+  elValor.classList.toggle('negativo', lucro < 0);
+
+  // Comparacao com o mes anterior: sem ela o numero sozinho nao diz se o mes foi bom.
+  const anterior = totaisDoMes(mesAnteriorDe(mesISO));
+  const elComp = document.getElementById('resultadoComparativo');
+  const teveMesAnterior = anterior.entrou > 0 || anterior.saiuBoletos > 0;
+  if(!teveMesAnterior){
+    elComp.innerHTML = '<span class="chip-tendencia neutro">Primeiro mês com movimento</span>';
+  } else {
+    const dif = lucro - anterior.lucro;
+    const melhorou = dif >= 0;
+    const base = Math.abs(anterior.lucro);
+    const perc = base > 0 ? Math.round(Math.abs(dif)/base*100) : null;
+    const seta = melhorou
+      ? '<svg viewBox="0 0 24 24"><polyline points="5 14 12 7 19 14"></polyline></svg>'
+      : '<svg viewBox="0 0 24 24"><polyline points="5 10 12 17 19 10"></polyline></svg>';
+    elComp.innerHTML = `<span class="chip-tendencia ${melhorou?'sobe':'desce'}">${seta}${money(Math.abs(dif))}${perc!==null && perc<1000 ? ` · ${perc}%` : ''}</span>
+      <span class="comp-ref">${melhorou?'a mais':'a menos'} que o mês passado</span>`;
+  }
+
+  const selo = document.getElementById('resultadoSelo');
+  if(lucro > 0){
+    selo.className = 'resultado-selo positivo';
+    selo.textContent = 'Sobrou';
+  } else if(lucro < 0){
+    selo.className = 'resultado-selo negativo';
+    selo.textContent = 'Faltou';
+  } else {
+    selo.className = 'resultado-selo neutro';
+    selo.textContent = 'Zerado';
+  }
+
+  // Barra de composicao: entrou de um lado, saiu do outro, na mesma escala.
+  const saiu = atual.totalDespesas + atual.totalBoletosMes;
+  const maior = Math.max(atual.totalVendas, saiu, 1);
+  document.getElementById('faixaEntrou').style.width = (atual.totalVendas/maior*100) + '%';
+  document.getElementById('faixaSaiu').style.width = (saiu/maior*100) + '%';
+  // As duas partes dividem a faixa de saída na mesma proporção que têm entre si,
+  // pra cor da bolinha da legenda bater com um pedaço visível da barra.
+  document.getElementById('faixaDespesas').style.width = (saiu>0 ? atual.totalDespesas/saiu*100 : 0) + '%';
+  document.getElementById('faixaBoletos').style.width = (saiu>0 ? atual.totalBoletosMes/saiu*100 : 0) + '%';
+  document.getElementById('composEntrou').textContent = money(atual.totalVendas);
+  document.getElementById('composDespesas').textContent = money(atual.totalDespesas);
+  document.getElementById('composBoletos').textContent = money(atual.totalBoletosMes);
+}
+
+/* ---- "Precisa da sua atencao": o que vence agora, nao o mes inteiro ----
+   Vencidos primeiro, depois os proximos 7 dias. Cada card leva pro boleto. */
+function renderPainelAtencao(){
+  const wrap = document.getElementById('painelAtencao');
+  if(!wrap) return;
+  const hojeISO = new Date().toISOString().slice(0,10);
+  const limite = new Date(); limite.setDate(limite.getDate()+7);
+  const limiteISO = limite.toISOString().slice(0,10);
+
+  const relevantes = boletos
+    .filter(b=> b.status==='pendente' && b.vencimento && b.vencimento <= limiteISO)
+    .sort((a,b)=> a.vencimento.localeCompare(b.vencimento));
+
+  if(relevantes.length === 0){
+    wrap.innerHTML = `<div class="atencao-vazio">
+      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      <div><b>Tudo em dia</b><span>Nenhum boleto vencido ou vencendo essa semana.</span></div>
+    </div>`;
+    return;
+  }
+
+  const totalVencido = relevantes.filter(b=>b.vencimento < hojeISO).reduce((s,b)=>s+b.valor,0);
+  wrap.innerHTML = relevantes.slice(0,6).map(b=>{
+    const vencido = b.vencimento < hojeISO;
+    const dias = Math.round((new Date(b.vencimento+'T00:00:00') - new Date(hojeISO+'T00:00:00'))/86400000);
+    const quando = vencido
+      ? `venceu há ${Math.abs(dias)} dia${Math.abs(dias)===1?'':'s'}`
+      : (dias===0 ? 'vence hoje' : `vence em ${dias} dia${dias===1?'':'s'}`);
+    return `<button type="button" class="atencao-card ${vencido?'urgente':'proximo'}" onclick="irParaView('boletos')">
+      <span class="marca"></span>
+      <span class="info">
+        <span class="quem">${esc(b.beneficiario)}</span>
+        <span class="quando">${quando} · ${fmtData(b.vencimento)}</span>
+      </span>
+      <span class="quanto">${money(b.valor)}</span>
+    </button>`;
+  }).join('') + (relevantes.length > 6
+      ? `<button type="button" class="atencao-mais" onclick="irParaView('boletos')">Ver os outros ${relevantes.length-6} boletos</button>`
+      : '')
+    + (totalVencido > 0
+      ? `<div class="atencao-resumo">Em atraso: <b>${money(totalVencido)}</b></div>`
+      : '');
+}
+
 function renderPainel(){
   popularFiltroMesPainel();
   const mesAtual = mesSelecionadoPainel;
@@ -5063,17 +5312,8 @@ function renderPainel(){
   const lucro = totalVendas - totalDespesas - totalBoletosMes;
   const podeComprar = Math.max(totalVendas - totalDespesas - totalBoletosMes, 0);
 
-  document.getElementById('kpiVendas').textContent = money(totalVendas);
-  document.getElementById('kpiVendasSub').textContent = `${vendasMes.length} lançamento(s) manual(is) no Fluxo de Caixa`
-    + (vendasFornecedorMes.length>0 ? ` + ${money(totalVendasFornecedor)} em ${vendasFornecedorMes.length} venda(s) de fornecedor` : '')
-    + (totalVendasPdv>0 ? ` — + ${money(totalVendasPdv)} em vendas do PDV (não contado aqui)` : '');
-  document.getElementById('kpiDespesas').textContent = money(totalDespesas);
-  document.getElementById('kpiBoletos').textContent = money(totalBoletosMes);
-  document.getElementById('kpiBoletosSub').textContent = `${boletosMes.length} boleto(s) nesse mês`
-    + (totalCompraFornecedor>0 ? ` + ${money(totalCompraFornecedor)} em compra de aparelho (Venda Fornecedor)` : '');
-  const kpiLucroEl = document.getElementById('kpiLucro');
-  kpiLucroEl.textContent = money(lucro);
-  kpiLucroEl.className = 'v ' + (lucro>=0 ? 'ok' : 'warn');
+  renderResultadoDoMes(mesAtual, { totalVendas, totalDespesas, totalBoletosMes, lucro });
+  renderPainelAtencao();
   document.getElementById('podeComprar').textContent = money(podeComprar);
 
   // ---- Sugestões: teto diário/mensal de boleto ----
