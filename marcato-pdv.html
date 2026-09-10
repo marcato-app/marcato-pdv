@@ -1183,7 +1183,8 @@ main:not(#view-pdv) td, .mono{
     <div style="font-size:12px; color:var(--ink-soft); margin-bottom:16px;">Escolha uma senha nova pra sua conta.</div>
     <div class="field" style="margin-bottom:14px;"><label>Nova senha (mínimo 6 caracteres)</label><input type="password" id="novaSenhaRecuperacao" style="width:100%;" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false"></div>
     <button class="btn-teal" id="btnSalvarNovaSenha" style="width:100%;">Salvar nova senha</button>
-    <div id="recoveryStatus" style="font-size:12px; color:var(--warn); margin-top:12px; min-height:16px;"></div>
+    <div id="recoveryStatus" style="font-size:12px; color:var(--warn); margin-top:12px; min-height:16px; line-height:1.5;"></div>
+    <button class="btn-ghost hide" id="btnVoltarLoginRecuperacao" style="width:100%; margin-top:10px;" onclick="voltarParaLogin()">Voltar pro login</button>
   </div>
 </div>
 
@@ -2536,6 +2537,59 @@ document.addEventListener('DOMContentLoaded', () => {});
 const SUPABASE_URL = 'https://epxvhuvfwpiwvwoygmfo.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_12hl4FKRADnoxRkXLd3cIw_9LjKUI7k';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+/* ---- Link de "esqueci a senha" ----
+   O Supabase dispara PASSWORD_RECOVERY UMA vez, durante a inicializacao do
+   cliente. O ouvinte estava registrado no fim do arquivo: quando a
+   inicializacao terminava antes, o evento passava batido e a pessoa caia na
+   tela de login com o link aparentemente "funcionando". Agora ele entra aqui,
+   na linha seguinte ao createClient, e o link tambem e reconhecido pela
+   propria URL — pra nao depender de um unico evento chegar na hora certa. */
+const marcadorUrlAuth = (function(){
+  const hash = new URLSearchParams((location.hash || '').replace(/^#/, ''));
+  const query = new URLSearchParams(location.search);
+  const pega = (chave) => hash.get(chave) || query.get(chave);
+  return {
+    recuperacao: pega('type') === 'recovery',
+    temCodigo: !!query.get('code'),
+    erro: pega('error_description'),
+    codigoErro: pega('error_code'),
+  };
+})();
+let sessaoRecuperacaoPendente = null;
+let modoRecuperacao = marcadorUrlAuth.recuperacao;
+
+function mostrarTelaRecuperacao(){
+  modoRecuperacao = true;
+  const auth = document.getElementById('authScreen');
+  if(auth) auth.style.display = 'none';
+  document.getElementById('onboardingScreen').classList.add('hide');
+  document.getElementById('recoveryScreen').classList.remove('hide');
+}
+// Link invalido nao pode virar tela de login em silencio — a pessoa fica
+// tentando de novo sem saber que o problema e o link, nao a senha.
+function recuperacaoFalhou(mensagem){
+  const status = document.getElementById('recoveryStatus');
+  const campo = document.getElementById('novaSenhaRecuperacao');
+  const botao = document.getElementById('btnSalvarNovaSenha');
+  if(campo) campo.disabled = true;
+  if(botao) botao.disabled = true;
+  if(status){ status.style.color = 'var(--warn)'; status.textContent = mensagem; }
+  const voltar = document.getElementById('btnVoltarLoginRecuperacao');
+  if(voltar) voltar.classList.remove('hide');
+}
+function voltarParaLogin(){
+  history.replaceState(null, '', location.pathname);
+  location.reload();
+}
+
+sb.auth.onAuthStateChange((event, session) => {
+  if(event === 'PASSWORD_RECOVERY'){
+    sessaoRecuperacaoPendente = session;
+    mostrarTelaRecuperacao();
+  }
+});
+if(marcadorUrlAuth.recuperacao) mostrarTelaRecuperacao();
 
 let usuarioAtual = null; // {id, email} do usuário logado
 let empresaAtual = null; // linha da tabela "empresas" do usuário logado
@@ -7705,16 +7759,6 @@ document.addEventListener('keydown', (e)=>{
   if(el) el.value = new Date().toISOString().slice(0,10);
 })();
 
-let sessaoRecuperacaoPendente = null;
-sb.auth.onAuthStateChange((event, session) => {
-  if(event === 'PASSWORD_RECOVERY'){
-    sessaoRecuperacaoPendente = session;
-    document.getElementById('authScreen').style.display = 'none';
-    document.getElementById('onboardingScreen').classList.add('hide');
-    document.getElementById('recoveryScreen').classList.remove('hide');
-  }
-});
-
 document.getElementById('btnSalvarNovaSenha').addEventListener('click', async ()=>{
   const novaSenha = document.getElementById('novaSenhaRecuperacao').value;
   const statusEl = document.getElementById('recoveryStatus');
@@ -7729,10 +7773,33 @@ document.getElementById('btnSalvarNovaSenha').addEventListener('click', async ()
 });
 
 (async function initApp(){
-  const { data: { session } } = await sb.auth.getSession();
-  if(session && !sessaoRecuperacaoPendente){
-    await iniciarSessao(session);
+  // Link que o proprio Supabase ja recusou (expirado ou usado duas vezes).
+  if(marcadorUrlAuth.erro){
+    mostrarTelaRecuperacao();
+    recuperacaoFalhou(marcadorUrlAuth.codigoErro === 'otp_expired'
+      ? 'Esse link de redefinição já expirou. Peça um novo em "Esqueci minha senha" — o link vale por pouco tempo.'
+      : marcadorUrlAuth.erro);
+    return;
   }
+
+  const { data: { session } } = await sb.auth.getSession();
+
+  // No fluxo PKCE a URL nao traz "type=recovery": quem avisa e o evento, que
+  // pode chegar um instante depois do getSession. Espera antes de desistir.
+  if(marcadorUrlAuth.temCodigo && !modoRecuperacao){
+    await new Promise(r => setTimeout(r, 400));
+  }
+
+  if(modoRecuperacao || sessaoRecuperacaoPendente){
+    mostrarTelaRecuperacao();
+    sessaoRecuperacaoPendente = sessaoRecuperacaoPendente || session;
+    if(!sessaoRecuperacaoPendente){
+      recuperacaoFalhou('Não consegui validar esse link. Ele pode ter expirado, já ter sido usado, ou ter sido aberto num navegador diferente — o link precisa ser aberto no mesmo aparelho e navegador onde você pediu a troca. Peça um novo em "Esqueci minha senha".');
+    }
+    return;
+  }
+
+  if(session) await iniciarSessao(session);
 })();
 </script>
 </body>
