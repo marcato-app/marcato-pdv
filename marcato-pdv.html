@@ -640,16 +640,28 @@ tr:last-child td{border-bottom:none;}
 .tag{font-size:10.5px; padding:4px 10px; border-radius:99px; font-weight:600; font-family:'Inter',sans-serif;}
 .tag.pendente{background:var(--warn-soft); color:var(--warn); text-transform:capitalize;}
 .tag.pago{background:var(--green-glow); color:var(--green-dark); text-transform:capitalize;}
+/* Acao em linha de tabela/card. Era font-size:0 com uma lixeira no ::before,
+   entao TODA acao — editar, aprovar, cobrar, ver, salvar, compartilhar PDF —
+   saia na tela como lixeira, escondendo o proprio rotulo. Agora o rotulo e
+   que aparece; lixeira so no .rm-card, que e icone de proposito. */
 .rm{
-  display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px;
-  border-radius:8px; color:var(--ink-dim); cursor:pointer; font-size:0; flex-shrink:0; transition:background .12s, color .12s;
+  display:inline-flex; align-items:center; gap:4px; padding:5px 8px; border-radius:var(--radius-sm);
+  color:var(--ink-soft); cursor:pointer; font-family:'Inter',sans-serif; font-size:11.5px; font-weight:600;
+  white-space:nowrap; transition:background .12s, color .12s;
 }
-.rm::before{ content:"🗑"; font-size:13px; }
-.rm:hover{ background:var(--warn-soft); color:var(--warn); }
-/* Nos cards (mobile e listas) o alvo de toque cresce — 26px e pequeno demais pro dedo. */
-.rm.rm-card{ width:36px; height:36px; border-radius:10px; }
-.rm.rm-card::before{ font-size:15px; }
-#view-pdv .rm{ display:inline; width:auto; height:auto; border-radius:0; background:none !important; color:var(--ink-soft); font-size:11px; font-family:'Sora',sans-serif; font-weight:600; }
+.rm:hover{ background:var(--tint-neutral); color:var(--brand-text); }
+/* Celula que so tem acoes: alinha em faixa, com respiro entre elas. */
+td:has(> .rm){ display:flex; flex-wrap:wrap; align-items:center; gap:2px 4px; }
+/* Acao que apaga alguma coisa avisa pela cor antes do clique. */
+.rm.rm-perigo:hover{ background:var(--warn-soft); color:var(--warn); }
+/* Variante so-icone, usada nos cards de lista onde o rotulo nao cabe. */
+.rm.rm-card{
+  width:36px; height:36px; padding:0; justify-content:center; border-radius:10px;
+  font-size:0; color:var(--ink-dim); flex-shrink:0;
+}
+.rm.rm-card::before{ content:"🗑"; font-size:15px; }
+.rm.rm-card:hover{ background:var(--warn-soft); color:var(--warn); }
+#view-pdv .rm{ display:inline; width:auto; height:auto; padding:0; border-radius:0; background:none !important; color:var(--ink-soft); font-size:11px; font-family:'Sora',sans-serif; font-weight:600; }
 #view-pdv .rm::before{ content:none; }
 #view-pdv .rm:hover{ color:var(--warn); }
 #view-pdv th{ padding:8px 10px; background:none; border-radius:0; }
@@ -977,9 +989,9 @@ main:not(#view-pdv) td, .mono{
 
   button{ padding:12px 18px; border-radius:999px; font-family:'Poppins',sans-serif; }
   .btn-sm{ padding:8px 14px; }
-  /* Alvos de toque: 26px de lixeira e tag de 20px de altura sao pequenos demais. */
-  .rm{ width:36px; height:36px; border-radius:10px; }
-  .rm::before{ font-size:15px; }
+  /* Alvos de toque: tag de 20px de altura e pequena demais pro dedo. */
+  .rm{ padding:9px 10px; font-size:12px; }
+  .rm.rm-card{ width:40px; height:40px; padding:0; }
   .tag{ font-size:11px; padding:5px 11px; }
   /* Tag que alterna pago/pendente e um botao de verdade — precisa de alvo. */
   .tag[onclick]{ display:inline-flex; align-items:center; min-height:32px; padding:0 14px; }
@@ -3092,7 +3104,7 @@ function renderVendas(){
   filtrados.forEach(v=>{
     const total = v.pix+v.cartao+v.dinheiro;
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td data-label="Data">${fmtData(v.data)}</td><td data-col="pix" data-label="Pix">${money(v.pix)}</td><td data-col="cartao" data-label="Cartão">${money(v.cartao)}</td><td data-col="dinheiro" data-label="Dinheiro">${money(v.dinheiro)}</td><td data-label="Total"><b>${money(total)}</b></td><td data-label=""><span class="rm" onclick="removerVenda('${v.id}')">remover</span></td>`;
+    tr.innerHTML = `<td data-label="Data">${fmtData(v.data)}</td><td data-col="pix" data-label="Pix">${money(v.pix)}</td><td data-col="cartao" data-label="Cartão">${money(v.cartao)}</td><td data-col="dinheiro" data-label="Dinheiro">${money(v.dinheiro)}</td><td data-label="Total"><b>${money(total)}</b></td><td data-label=""><span class="rm rm-perigo" onclick="removerVenda('${v.id}')">remover</span></td>`;
     tbody.appendChild(tr);
   });
   aplicarColunasVisiveis('vendas');
@@ -3143,7 +3155,7 @@ function renderDespesas(){
   document.getElementById('emptyDespesas').classList.toggle('hide', despesas.length>0);
   despesas.forEach(d=>{
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td style="font-family:'Inter',sans-serif;">${esc(d.nome)}</td><td>${money(d.valor)}</td><td>${d.dia ? 'Dia '+d.dia : '—'}</td><td><span class="rm" onclick="removerDespesa('${d.id}')">remover</span></td>`;
+    tr.innerHTML = `<td style="font-family:'Inter',sans-serif;">${esc(d.nome)}</td><td>${money(d.valor)}</td><td>${d.dia ? 'Dia '+d.dia : '—'}</td><td><span class="rm rm-perigo" onclick="removerDespesa('${d.id}')">remover</span></td>`;
     tbody.appendChild(tr);
   });
 
@@ -3233,7 +3245,7 @@ function renderBoletos(){
     const tr = document.createElement('tr');
     tr.innerHTML = `<td style="font-family:'Inter',sans-serif;" data-label="Beneficiário">${esc(b.beneficiario)}</td><td data-label="Valor">${money(b.valor)}</td><td data-col="dataDoc" data-label="Data do documento">${fmtData(b.dataDocumento)}</td><td data-col="vencimento" data-label="Vencimento">${fmtData(b.vencimento)}</td>
       <td data-col="status" data-label="Status"><span class="tag ${b.status}" style="cursor:pointer;" onclick="togglePago('${b.id}')">${b.status}</span></td>
-      <td data-label=""><span class="rm" onclick="removerBoleto('${b.id}')">remover</span></td>`;
+      <td data-label=""><span class="rm rm-perigo" onclick="removerBoleto('${b.id}')">remover</span></td>`;
     tbody.appendChild(tr);
   });
   // datalist de beneficiários já usados
@@ -3515,7 +3527,7 @@ function renderClientes(){
   const tipoLabel = {varejo:'Varejo', atacado:'Atacado'};
   filtrados.forEach(c=>{
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td style="font-family:'Inter',sans-serif;" data-label="Nome">${esc(c.nome)}</td><td data-col="tipo" data-label="Tipo">${tipoLabel[c.tipoCliente]||'—'}</td><td data-col="telefone" data-label="Telefone">${esc(c.telefone||'—')}</td><td data-col="email" data-label="E-mail">${esc(c.email||'—')}</td><td data-label=""><span class="rm" onclick="removerCliente('${c.id}')">remover</span></td>`;
+    tr.innerHTML = `<td style="font-family:'Inter',sans-serif;" data-label="Nome">${esc(c.nome)}</td><td data-col="tipo" data-label="Tipo">${tipoLabel[c.tipoCliente]||'—'}</td><td data-col="telefone" data-label="Telefone">${esc(c.telefone||'—')}</td><td data-col="email" data-label="E-mail">${esc(c.email||'—')}</td><td data-label=""><span class="rm rm-perigo" onclick="removerCliente('${c.id}')">remover</span></td>`;
     tbody.appendChild(tr);
   });
   aplicarColunasVisiveis('clientes');
@@ -3576,7 +3588,7 @@ function renderItensOrcamentoAtual(){
   document.getElementById('emptyItensOrcamento').classList.toggle('hide', itensOrcamentoAtual.length>0);
   itensOrcamentoAtual.forEach((item,i)=>{
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td style="font-family:'Inter',sans-serif;">${esc(item.descricao)}</td><td>${item.qtd}</td><td>${money(item.valorUnit)}</td><td>${money(item.qtd*item.valorUnit)}</td><td><span class="rm" onclick="removerItemOrcamento(${i})">remover</span></td>`;
+    tr.innerHTML = `<td style="font-family:'Inter',sans-serif;">${esc(item.descricao)}</td><td>${item.qtd}</td><td>${money(item.valorUnit)}</td><td>${money(item.qtd*item.valorUnit)}</td><td><span class="rm rm-perigo" onclick="removerItemOrcamento(${i})">remover</span></td>`;
     tbody.appendChild(tr);
   });
   const subtotal = calcularTotalItensOrcamento();
@@ -3672,10 +3684,10 @@ function renderOrcamentos(){
   orcamentos.forEach(o=>{
     const cliente = clientes.find(c=>c.id===o.clienteId);
     const tr = document.createElement('tr');
-    const acaoConverter = o.status==='convertido' ? '' : `<span class="rm" onclick="converterOrcamentoEmVenda('${o.id}')">converter em venda</span> &nbsp; `;
+    const acaoConverter = o.status==='convertido' ? '' : `<span class="rm" onclick="converterOrcamentoEmVenda('${o.id}')">converter em venda</span>`;
     tr.innerHTML = `<td style="font-family:'Inter',sans-serif;">${esc(cliente ? cliente.nome : '(cliente removido)')}</td><td>${fmtData(o.criadoEm ? o.criadoEm.slice(0,10) : null)}</td><td>${fmtData(o.validade)}</td><td>${money(o.total)}</td>
       <td><span class="tag ${rotulos[o.status]||'pendente'}" style="cursor:${o.status==='convertido'?'default':'pointer'};" onclick="alternarStatusOrcamento('${o.id}')">${textos[o.status]||o.status}</span></td>
-      <td>${acaoConverter}<span class="rm" onclick="removerOrcamento('${o.id}')">remover</span></td>`;
+      <td>${acaoConverter}<span class="rm rm-perigo" onclick="removerOrcamento('${o.id}')">remover</span></td>`;
     tbody.appendChild(tr);
   });
 }
@@ -3958,7 +3970,7 @@ function renderOrdensServico(){
       <td style="font-size:11px; max-width:180px;">${esc(o.problemaRelatado||'—')}</td>
       <td><select onchange="atualizarStatusOS('${o.id}', this.value)">${opcoesStatus}</select></td>
       <td>${o.valorFinal!==null?money(o.valorFinal):'—'} <span class="rm" onclick="abrirValorFinalOS('${o.id}')">editar</span></td>
-      <td>${podeCobrar?`<span class="rm" onclick="cobrarOS('${o.id}')">cobrar</span> &nbsp; `:''}<span class="rm" onclick="removerOS('${o.id}')">remover</span></td>`;
+      <td>${podeCobrar?`<span class="rm" onclick="cobrarOS('${o.id}')">cobrar</span>`:''}<span class="rm rm-perigo" onclick="removerOS('${o.id}')">remover</span></td>`;
     tbody.appendChild(tr);
   });
   renderKanbanOS();
@@ -3995,7 +4007,7 @@ function renderKanbanOS(){
         <div class="meta acoes">
           <span class="rm" onclick="abrirValorFinalOS('${o.id}')">valor final</span>
           ${podeCobrarBase?`<span class="rm" onclick="cobrarOS('${o.id}')">cobrar</span>`:''}
-          <span class="rm" onclick="removerOS('${o.id}')">remover</span>
+          <span class="rm rm-perigo" onclick="removerOS('${o.id}')">remover</span>
         </div>
       </div>`;
     }).join('') || '<div class="kanban-empty-col">Nenhuma OS aqui</div>';
@@ -4147,7 +4159,7 @@ function renderTestes(){
     const tr = document.createElement('tr');
     tr.innerHTML = `<td style="font-family:'Inter',sans-serif;">${esc(t.aparelho)}</td><td>${esc(cliente?cliente.nome:'—')}</td><td>${fmtData(t.criadoEm ? t.criadoEm.slice(0,10) : null)}</td>
       <td><span class="tag ${RESULTADO_TESTE_TAG[t.resultadoGeral]||'pendente'}" style="cursor:pointer;" onclick="abrirDetalhesTeste('${t.id}')">${RESULTADO_TESTE_LABEL[t.resultadoGeral]||t.resultadoGeral}</span></td>
-      <td><span class="rm" onclick="abrirDetalhesTeste('${t.id}')">ver</span> &nbsp; <span class="rm" onclick="removerTeste('${t.id}')">remover</span></td>`;
+      <td><span class="rm" onclick="abrirDetalhesTeste('${t.id}')">ver</span><span class="rm rm-perigo" onclick="removerTeste('${t.id}')">remover</span></td>`;
     tbody.appendChild(tr);
   });
 }
@@ -4184,7 +4196,7 @@ function renderItensCompraAtual(){
   document.getElementById('emptyItensCompra').classList.toggle('hide', itensCompraAtual.length>0);
   itensCompraAtual.forEach((item,i)=>{
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td style="font-family:'Inter',sans-serif;">${item.produtoNome}</td><td>${item.quantidade}</td><td>${money(item.custoUnitario)}</td><td>${money(item.quantidade*item.custoUnitario)}</td><td><span class="rm" onclick="removerItemCompra(${i})">remover</span></td>`;
+    tr.innerHTML = `<td style="font-family:'Inter',sans-serif;">${item.produtoNome}</td><td>${item.quantidade}</td><td>${money(item.custoUnitario)}</td><td>${money(item.quantidade*item.custoUnitario)}</td><td><span class="rm rm-perigo" onclick="removerItemCompra(${i})">remover</span></td>`;
     tbody.appendChild(tr);
   });
   document.getElementById('cpTotalPreview').textContent = money(calcularTotalItensCompra());
@@ -4272,7 +4284,7 @@ function renderCompras(){
   document.getElementById('emptyCompras').classList.toggle('hide', filtrados.length>0);
   filtrados.forEach(c=>{
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td style="font-family:'Inter',sans-serif;">${esc(c.fornecedor)}</td><td data-col="data">${fmtData(c.data)}</td><td data-col="itens">${c.itens.length}</td><td>${money(c.total)}</td><td><span class="rm" onclick="removerCompra('${c.id}')">remover</span></td>`;
+    tr.innerHTML = `<td style="font-family:'Inter',sans-serif;">${esc(c.fornecedor)}</td><td data-col="data">${fmtData(c.data)}</td><td data-col="itens">${c.itens.length}</td><td>${money(c.total)}</td><td><span class="rm rm-perigo" onclick="removerCompra('${c.id}')">remover</span></td>`;
     tbody.appendChild(tr);
   });
   const dl = document.getElementById('sugestoesFornecedorCompra');
@@ -4455,7 +4467,7 @@ function renderItensVendaFornecedor(){
   itensVendaFornecedorAtual.forEach((it,i)=>{
     total += it.valorVenda;
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${esc(it.telefone)}</td><td>${it.capacidade||'—'}</td><td>${it.cor||'—'}</td><td class="mono" style="font-size:11.5px;">${esc(it.imei||'—')}</td><td>${it.valorCompra!==null?money(it.valorCompra):'—'}</td><td>${money(it.valorVenda)}</td><td><span class="rm" onclick="removerItemVF(${i})">remover</span></td>`;
+    tr.innerHTML = `<td>${esc(it.telefone)}</td><td>${it.capacidade||'—'}</td><td>${it.cor||'—'}</td><td class="mono" style="font-size:11.5px;">${esc(it.imei||'—')}</td><td>${it.valorCompra!==null?money(it.valorCompra):'—'}</td><td>${money(it.valorVenda)}</td><td><span class="rm rm-perigo" onclick="removerItemVF(${i})">remover</span></td>`;
     tbody.appendChild(tr);
   });
   document.getElementById('vfTotalItens').textContent = money(total);
@@ -4695,13 +4707,13 @@ function renderVendasFornecedor(){
         <td data-col="imei"><input type="text" class="editImei" value="${esc(v.imei||'')}" style="width:120px;"></td>
         <td data-col="envio">${ENVIO_LABEL[v.tipoEnvio]||v.tipoEnvio}</td>
         <td><input type="number" step="0.01" class="editValorVenda" value="${v.valorVenda}" style="width:90px;"></td>
-        <td><span class="rm" onclick="salvarEdicaoVF('${v.id}')">salvar</span> · <span class="rm" onclick="cancelarEdicaoVF()">cancelar</span></td>`;
+        <td><span class="rm" onclick="salvarEdicaoVF('${v.id}')">salvar</span><span class="rm" onclick="cancelarEdicaoVF()">cancelar</span></td>`;
     } else {
       const orcamento = ehOrcamentoVF(v);
       const acaoSituacao = orcamento
-        ? `<span class="rm" onclick="abrirAprovarOrcamentoVF('${v.id}')">aprovar</span> · `
-        : `<span class="rm" onclick="voltarParaOrcamentoVF('${v.id}')">voltar p/ orçamento</span> · `;
-      tr.innerHTML = `<td>${v.dataVenda ? new Date(v.dataVenda).toLocaleString('pt-BR') : '—'}</td><td><span class="tag ${orcamento?'pendente':'pago'}">${orcamento?'Orçamento':'Vendido'}</span></td><td>${esc(cliente ? cliente.nome : '—')}</td><td data-col="telefone">${esc(v.telefone)}</td><td data-col="capacidade">${esc(v.capacidade||'—')}</td><td data-col="cor">${esc(v.cor||'—')}</td><td data-col="imei" class="mono" style="font-size:11.5px;">${esc(v.imei||'—')}</td><td data-col="envio">${ENVIO_LABEL[v.tipoEnvio]||v.tipoEnvio}</td><td><b>${money(v.valorVenda)}</b></td><td>${acaoSituacao}<span class="rm" onclick="iniciarEdicaoVF('${v.id}')">editar</span> · <span class="rm" onclick="gerarPdfVendaFornecedor('${v.id}')">compartilhar PDF</span> · <span class="rm" onclick="apagarVendaFornecedor('${v.id}')">apagar</span></td>`;
+        ? `<span class="rm" onclick="abrirAprovarOrcamentoVF('${v.id}')">aprovar</span>`
+        : `<span class="rm" onclick="voltarParaOrcamentoVF('${v.id}')">voltar p/ orçamento</span>`;
+      tr.innerHTML = `<td>${v.dataVenda ? new Date(v.dataVenda).toLocaleString('pt-BR') : '—'}</td><td><span class="tag ${orcamento?'pendente':'pago'}">${orcamento?'Orçamento':'Vendido'}</span></td><td>${esc(cliente ? cliente.nome : '—')}</td><td data-col="telefone">${esc(v.telefone)}</td><td data-col="capacidade">${esc(v.capacidade||'—')}</td><td data-col="cor">${esc(v.cor||'—')}</td><td data-col="imei" class="mono" style="font-size:11.5px;">${esc(v.imei||'—')}</td><td data-col="envio">${ENVIO_LABEL[v.tipoEnvio]||v.tipoEnvio}</td><td><b>${money(v.valorVenda)}</b></td><td>${acaoSituacao}<span class="rm" onclick="iniciarEdicaoVF('${v.id}')">editar</span><span class="rm" onclick="gerarPdfVendaFornecedor('${v.id}')">compartilhar PDF</span><span class="rm rm-perigo" onclick="apagarVendaFornecedor('${v.id}')">apagar</span></td>`;
     }
     tbody.appendChild(tr);
   });
@@ -5963,7 +5975,7 @@ function renderProdutos(){
     const thumb = p.fotoUrl ? `<img src="${esc(p.fotoUrl)}" style="width:32px; height:32px; border-radius:6px; object-fit:cover;">` : `<div style="width:32px; height:32px; border-radius:6px; background:var(--bg-app);"></div>`;
     const tr = document.createElement('tr');
     const acaoAjustar = p.controlaSerie ? '' : `<span class="rm" onclick="abrirAjusteEstoque('${p.id}')">ajustar</span> &nbsp; `;
-    tr.innerHTML = `<td>${thumb}</td><td style="font-family:'Sora',sans-serif;">${esc(p.nome)} ${p.vendidoPorPeso?'<span class="tag pago" style="margin-left:5px;">R$/kg</span>':''} ${p.controlaSerie?'<span class="tag pendente" style="margin-left:5px;">IMEI/série</span>':''}</td><td data-col="codigo" style="font-size:11px; color:var(--ink-soft);">${esc(p.codigoBarras||'—')}</td><td data-col="categoria">${esc(p.categoria)}</td><td>${money(p.preco)}${p.vendidoPorPeso?'/kg':''}</td><td>${estoqueReal!==null?estoqueReal:'—'} ${estoqueBaixo?'<span class="tag pendente" style="margin-left:5px;">baixo</span>':''}</td><td>${acaoAjustar}<span class="rm" onclick="abrirRegistrarPerda('${p.id}')">perda</span> &nbsp; <span class="rm" onclick="removerProduto('${p.id}')">remover</span></td>`;
+    tr.innerHTML = `<td>${thumb}</td><td style="font-family:'Sora',sans-serif;">${esc(p.nome)} ${p.vendidoPorPeso?'<span class="tag pago" style="margin-left:5px;">R$/kg</span>':''} ${p.controlaSerie?'<span class="tag pendente" style="margin-left:5px;">IMEI/série</span>':''}</td><td data-col="codigo" style="font-size:11px; color:var(--ink-soft);">${esc(p.codigoBarras||'—')}</td><td data-col="categoria">${esc(p.categoria)}</td><td>${money(p.preco)}${p.vendidoPorPeso?'/kg':''}</td><td>${estoqueReal!==null?estoqueReal:'—'} ${estoqueBaixo?'<span class="tag pendente" style="margin-left:5px;">baixo</span>':''}</td><td>${acaoAjustar}<span class="rm rm-perigo" onclick="abrirRegistrarPerda('${p.id}')">perda</span><span class="rm rm-perigo" onclick="removerProduto('${p.id}')">remover</span></td>`;
     tbody.appendChild(tr);
   });
   const selCat = document.getElementById('filtroCategoriaProduto');
@@ -6611,7 +6623,7 @@ function renderCarrinho(){
           <td data-label="Vl. Total">${money(item.preco*item.qtd)}</td>
           <td class="acao" data-label="">
             <button class="btn-ghost btn-sm" onclick="repesarLinha('${item.linhaId}')" title="Repesar">⚖</button>
-            <span class="rm" onclick="pedirCancelarItem('${item.linhaId}')" style="color:var(--warn);">✕</span>
+            <span class="rm rm-perigo" onclick="pedirCancelarItem('${item.linhaId}')" style="color:var(--warn);">✕</span>
           </td>`;
       } else {
         tr.innerHTML = `
@@ -6624,7 +6636,7 @@ function renderCarrinho(){
           </td>
           <td data-label="Vl. Unit">${money(item.preco)}</td>
           <td data-label="Vl. Total">${money(item.preco*item.qtd)}</td>
-          <td class="acao" data-label=""><span class="rm" onclick="pedirCancelarItem('${item.linhaId}')" style="color:var(--warn);">✕</span></td>`;
+          <td class="acao" data-label=""><span class="rm rm-perigo" onclick="pedirCancelarItem('${item.linhaId}')" style="color:var(--warn);">✕</span></td>`;
       }
       tbody.appendChild(tr);
     });
@@ -6856,7 +6868,7 @@ function renderHistorico(){
     const dt = new Date(v.dataHora);
     const itensTxt = v.itens.map(i=>`${i.qtd}x ${esc(i.nome)}`).join(', ');
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${dt.toLocaleString('pt-BR')}</td><td style="font-size:11.5px;">${itensTxt}</td><td>${v.desconto>0?money(v.desconto):'—'}</td><td><b>${money(v.total)}</b></td><td style="text-transform:capitalize;">${v.forma}</td><td><span class="rm" onclick="removerVendaPDV('${v.id}')">estornar</span></td>`;
+    tr.innerHTML = `<td>${dt.toLocaleString('pt-BR')}</td><td style="font-size:11.5px;">${itensTxt}</td><td>${v.desconto>0?money(v.desconto):'—'}</td><td><b>${money(v.total)}</b></td><td style="text-transform:capitalize;">${v.forma}</td><td><span class="rm rm-perigo" onclick="removerVendaPDV('${v.id}')">estornar</span></td>`;
     tbody.appendChild(tr);
   });
 }
@@ -7004,7 +7016,7 @@ function renderFuncionarios(){
   document.getElementById('emptyFuncionarios').classList.toggle('hide', funcionarios.length>0);
   funcionarios.forEach(f=>{
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td style="font-family:'Inter',sans-serif;">${esc(f.nome)}</td><td><span class="tag ${f.ativo?'pago':'pendente'}" style="cursor:pointer;" onclick="toggleFuncionarioAtivo('${f.id}')">${f.ativo?'ativo':'inativo'}</span></td><td><span class="rm" onclick="removerFuncionario('${f.id}')">remover</span></td>`;
+    tr.innerHTML = `<td style="font-family:'Inter',sans-serif;">${esc(f.nome)}</td><td><span class="tag ${f.ativo?'pago':'pendente'}" style="cursor:pointer;" onclick="toggleFuncionarioAtivo('${f.id}')">${f.ativo?'ativo':'inativo'}</span></td><td><span class="rm rm-perigo" onclick="removerFuncionario('${f.id}')">remover</span></td>`;
     tbody.appendChild(tr);
   });
   renderSeletorOperador();
