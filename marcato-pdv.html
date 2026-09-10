@@ -1982,11 +1982,11 @@ main:not(#view-pdv) td, .mono{
     <!-- ================= VENDA FORNECEDOR ================= -->
     <section id="view-vendafornecedor" class="hide">
       <div class="topbar">
-        <div><h1>Venda Fornecedor</h1><p>Revenda de aparelhos — registra a venda e gera um PDF pra enviar pro cliente</p></div>
+        <div><h1>Venda Fornecedor</h1><p>Revenda de aparelhos — monta o orçamento, envia o PDF pro cliente e aprova quando fechar</p></div>
       </div>
 
       <div class="tabs2">
-        <div class="tab2 active" data-vftab="nova">Nova venda</div>
+        <div class="tab2 active" data-vftab="nova">Novo orçamento</div>
         <div class="tab2" data-vftab="historico">Histórico</div>
         <div class="tab2" data-vftab="analise">Análise</div>
       </div>
@@ -2014,7 +2014,7 @@ main:not(#view-pdv) td, .mono{
               </select>
             </div>
           </div>
-          <div class="desc" style="margin-bottom:0;">Cliente, data e envio valem pra venda inteira — pode adicionar quantos aparelhos quiser abaixo antes de salvar.</div>
+          <div class="desc" style="margin-bottom:0;">Cliente, data e envio valem pro orçamento inteiro — pode adicionar quantos aparelhos quiser abaixo antes de salvar.</div>
         </div>
 
         <div class="panel" style="margin-top:16px;">
@@ -2036,7 +2036,7 @@ main:not(#view-pdv) td, .mono{
               </select>
             </div>
             <div class="field"><label>Cor</label><input type="text" id="vfCor" placeholder="Ex: Preto" style="min-width:110px;"></div>
-            <div class="field"><label>IMEI</label><input type="text" id="vfImei" placeholder="opcional" style="min-width:160px;"></div>
+            <div class="field"><label>IMEI <span style="text-transform:none; font-weight:400;">informa na aprovação</span></label><input type="text" id="vfImei" placeholder="opcional agora" style="min-width:160px;"></div>
           </div>
           <div class="formrow">
             <div class="field"><label>Valor de compra (R$)</label><input type="number" step="0.01" id="vfValorCompra" placeholder="0,00"></div>
@@ -2051,9 +2051,10 @@ main:not(#view-pdv) td, .mono{
           <div class="empty hide" id="emptyItensVF" style="padding:14px;"><b>Nenhum aparelho adicionado ainda</b>Preencha os campos acima e clique em "+ Adicionar aparelho".</div>
 
           <div style="display:flex; justify-content:space-between; align-items:center; margin:14px 0; font-size:16px; font-weight:700;">
-            <span>Total da venda</span><span class="mono" id="vfTotalItens">R$ 0,00</span>
+            <span>Total do orçamento</span><span class="mono" id="vfTotalItens">R$ 0,00</span>
           </div>
-          <button class="btn-teal" id="btnSalvarVendaFornecedor">Salvar venda</button>
+          <button class="btn-teal" id="btnSalvarVendaFornecedor">Salvar orçamento</button>
+          <div class="desc" style="margin:8px 0 0;">O orçamento ainda não entra no Painel nem no Financeiro. Ele vira venda quando você aprovar, na aba Histórico — é lá que você informa o IMEI de cada aparelho.</div>
           <div id="vfStatus" style="font-size:12px; margin-top:8px; min-height:16px;"></div>
           <div id="vfPdfPronto" class="hide" style="margin-top:8px;"></div>
         </div>
@@ -2078,10 +2079,10 @@ main:not(#view-pdv) td, .mono{
             </div>
           </div>
           <table data-tabela-cols="vendasFornecedor">
-            <thead><tr><th>Data</th><th>Cliente</th><th data-col="telefone">Telefone</th><th data-col="capacidade">Capacidade</th><th data-col="cor">Cor</th><th data-col="imei">IMEI</th><th data-col="envio">Envio</th><th>Valor venda</th><th></th></tr></thead>
+            <thead><tr><th>Data</th><th>Situação</th><th>Cliente</th><th data-col="telefone">Telefone</th><th data-col="capacidade">Capacidade</th><th data-col="cor">Cor</th><th data-col="imei">IMEI</th><th data-col="envio">Envio</th><th>Valor venda</th><th></th></tr></thead>
             <tbody id="tblVendasFornecedor"></tbody>
           </table>
-          <div class="empty hide" id="emptyVendasFornecedor"><b>Nenhuma venda registrada ainda</b>Registre uma na aba "Nova venda".</div>
+          <div class="empty hide" id="emptyVendasFornecedor"><b>Nada registrado ainda</b>Monte um orçamento na aba "Novo orçamento".</div>
         </div>
       </div>
 
@@ -2678,7 +2679,8 @@ const fromDbTeste = r => ({id:r.id, aparelho:r.aparelho, imeiSerial:r.imei_seria
 const fromDbCompra = r => ({id:r.id, fornecedor:r.fornecedor, data:r.data, itens: typeof r.itens==='string' ? JSON.parse(r.itens) : (r.itens||[]), total:num(r.total)||0, observacoes:r.observacoes, criadoEm:r.criado_em});
 const fromDbMovEstoque = r => ({id:r.id, produtoId:r.produto_id, produtoNome:r.produto_nome, tipo:r.tipo, quantidade:num(r.quantidade)||0, motivo:r.motivo, compraId:r.compra_id, criadoEm:r.criado_em});
 const fromDbAssinatura = r => ({id:r.id, status:r.status, trialInicio:r.trial_inicio, trialFim:r.trial_fim, mpPreapprovalId:r.mp_preapproval_id, proximoVencimento:r.proximo_vencimento, pagamentoFalhouEm:r.pagamento_falhou_em, atualizadoEm:r.atualizado_em});
-const fromDbVendaFornecedor = r => ({id:r.id, clienteId:r.cliente_id||null, telefone:r.telefone, capacidade:r.capacidade||null, cor:r.cor||null, imei:r.imei, valorCompra: r.valor_compra!==null?num(r.valor_compra):null, valorVenda:num(r.valor_venda)||0, tipoEnvio:r.tipo_envio, dataVenda:r.data_venda, grupoVenda:r.grupo_venda||null});
+const fromDbVendaFornecedor = r => ({id:r.id, clienteId:r.cliente_id||null, telefone:r.telefone, capacidade:r.capacidade||null, cor:r.cor||null, imei:r.imei, valorCompra: r.valor_compra!==null?num(r.valor_compra):null, valorVenda:num(r.valor_venda)||0, tipoEnvio:r.tipo_envio, dataVenda:r.data_venda, grupoVenda:r.grupo_venda||null, status: r.status || 'aprovada'});
+const ehOrcamentoVF = v => v.status === 'orcamento';
 
 /* ---- Categoria de Produtos sugere os nomes padronizados da árvore mercadológica (referência) ---- */
 let categoriasReferencia = [];
@@ -4496,11 +4498,11 @@ document.getElementById('btnSalvarVendaFornecedor').addEventListener('click', as
   const grupoId = uid();
 
   statusEl.textContent = 'Salvando...'; statusEl.style.color = 'var(--ink-soft)';
-  const payload = itensVendaFornecedorAtual.map(it => comUserId({
+  const base = itensVendaFornecedorAtual.map(it => comUserId({
     cliente_id: clienteId, telefone: it.telefone, capacidade: it.capacidade, cor: it.cor, imei: it.imei,
     valor_compra: it.valorCompra, valor_venda: it.valorVenda, tipo_envio: tipoEnvio, grupo_venda: grupoId
   }));
-  const { data: rows, error } = await sb.from('vendas_fornecedor').insert(payload).select();
+  const { rows, error, semColunaStatus } = await inserirVendasFornecedor(base);
   if(error){ statusEl.textContent = 'Erro ao salvar: ' + error.message; statusEl.style.color = 'var(--warn)'; return; }
   rows.forEach(row => vendasFornecedor.unshift(fromDbVendaFornecedor(row)));
 
@@ -4511,11 +4513,116 @@ document.getElementById('btnSalvarVendaFornecedor').addEventListener('click', as
   clienteSelecionadoVF = null;
   atualizarDataVendaFornecedor();
   renderVendasFornecedor();
-  statusEl.textContent = `✓ Venda salva (${rows.length} aparelho${rows.length>1?'s':''}).`;
-  statusEl.style.color = 'var(--green-dark)';
+  renderPainel();
+  if(semColunaStatus){
+    statusEl.textContent = `✓ Salvo (${rows.length} aparelho${rows.length>1?'s':''}), mas entrou direto como venda: falta a coluna "status" no banco. Rode a migração do README pra ter o fluxo de orçamento.`;
+    statusEl.style.color = 'var(--warn)';
+  } else {
+    statusEl.textContent = `✓ Orçamento salvo (${rows.length} aparelho${rows.length>1?'s':''}). Aprove na aba Histórico quando o cliente fechar.`;
+    statusEl.style.color = 'var(--green-dark)';
+  }
   pdfEl.innerHTML = `<button class="btn-teal btn-sm" onclick="gerarPdfVendaFornecedor('${rows[0].id}')">📤 Compartilhar PDF (WhatsApp)</button>`;
   pdfEl.classList.remove('hide');
 });
+
+/* ---- O fluxo de orcamento depende da coluna "status" em vendas_fornecedor.
+   Se ela ainda nao existir no banco, o insert inteiro falharia e ninguem
+   conseguiria salvar nada — entao aqui a gente tenta de novo sem a coluna e
+   avisa, em vez de travar a tela. ---- */
+const ERRO_COLUNA_AUSENTE = ['PGRST204', '42703'];
+function pareceColunaAusente(erro){
+  if(!erro) return false;
+  return ERRO_COLUNA_AUSENTE.includes(erro.code) || /column .*status.* does not exist|'status' column/i.test(erro.message || '');
+}
+async function inserirVendasFornecedor(linhasBase){
+  const comStatus = linhasBase.map(l => ({ ...l, status: 'orcamento' }));
+  let { data, error } = await sb.from('vendas_fornecedor').insert(comStatus).select();
+  if(error && pareceColunaAusente(error)){
+    ({ data, error } = await sb.from('vendas_fornecedor').insert(linhasBase).select());
+    return { rows: data || [], error, semColunaStatus: true };
+  }
+  return { rows: data || [], error, semColunaStatus: false };
+}
+
+/* ---- Aprovar orcamento: vira venda e e a hora de informar o IMEI de cada
+   aparelho, que so se sabe quando o aparelho e separado pro cliente. ---- */
+function itensDoGrupoVF(id){
+  const v = vendasFornecedor.find(x=>x.id===id);
+  if(!v) return [];
+  return v.grupoVenda ? vendasFornecedor.filter(x=>x.grupoVenda===v.grupoVenda) : [v];
+}
+function abrirAprovarOrcamentoVF(id){
+  const itens = itensDoGrupoVF(id);
+  if(itens.length === 0) return;
+  const cliente = itens[0].clienteId ? clientes.find(c=>c.id===itens[0].clienteId) : null;
+  const total = itens.reduce((s,it)=>s+it.valorVenda,0);
+  const linhas = itens.map((it,i)=>`
+    <div class="field" style="margin-bottom:12px;">
+      <label>${esc(it.telefone)}${it.capacidade?' · '+esc(it.capacidade):''}${it.cor?' · '+esc(it.cor):''} — ${money(it.valorVenda)}</label>
+      <input type="text" class="imeiAprovacao" data-vf-id="${esc(it.id)}" value="${esc(it.imei||'')}"
+             placeholder="IMEI do aparelho" autocomplete="off" style="width:100%;"${i===0?' autofocus':''}>
+    </div>`).join('');
+  abrirModal(`<h3>Aprovar orçamento</h3>
+    <div class="desc">${esc(cliente ? cliente.nome : 'Sem cliente vinculado')} · ${itens.length} aparelho${itens.length>1?'s':''} · ${money(total)}</div>
+    <div class="desc" style="margin-bottom:14px;">Informe o IMEI de cada aparelho. Depois de aprovar, o valor passa a contar no Painel e no Financeiro.</div>
+    ${linhas}
+    <div id="aprovacaoVfStatus" style="font-size:12px; color:var(--warn); min-height:16px;"></div>
+    <div class="modal-close-row">
+      <button class="btn-ghost" onclick="fecharModal()">Cancelar</button>
+      <button class="btn-teal" id="btnConfirmarAprovacaoVF" onclick="confirmarAprovacaoOrcamentoVF('${esc(id)}')">Aprovar e virar venda</button>
+    </div>`);
+  const primeiro = document.querySelector('.imeiAprovacao');
+  if(primeiro) primeiro.focus();
+}
+async function confirmarAprovacaoOrcamentoVF(id){
+  const campos = [...document.querySelectorAll('.imeiAprovacao')];
+  const statusEl = document.getElementById('aprovacaoVfStatus');
+  const botao = document.getElementById('btnConfirmarAprovacaoVF');
+  const vazio = campos.find(c => !c.value.trim());
+  if(vazio){
+    statusEl.textContent = 'Preencha o IMEI de todos os aparelhos antes de aprovar.';
+    vazio.focus();
+    return;
+  }
+  statusEl.style.color = 'var(--ink-soft)';
+  statusEl.textContent = 'Aprovando...';
+  botao.disabled = true;
+  for(const campo of campos){
+    const vfId = campo.dataset.vfId;
+    const { data, error } = await sb.from('vendas_fornecedor')
+      .update({ imei: campo.value.trim(), status: 'aprovada' })
+      .eq('id', vfId).select().maybeSingle();
+    if(error){
+      statusEl.style.color = 'var(--warn)';
+      statusEl.textContent = pareceColunaAusente(error)
+        ? 'Falta a coluna "status" no banco. Rode a migração do README e tente de novo.'
+        : 'Erro ao aprovar: ' + error.message;
+      botao.disabled = false;
+      return;
+    }
+    const idx = vendasFornecedor.findIndex(v=>v.id===vfId);
+    if(idx>-1 && data) vendasFornecedor[idx] = fromDbVendaFornecedor(data);
+  }
+  fecharModal();
+  renderVendasFornecedor();
+  renderAnaliseVendaFornecedor();
+  renderPainel();
+}
+async function voltarParaOrcamentoVF(id){
+  const itens = itensDoGrupoVF(id);
+  if(itens.length === 0) return;
+  if(!confirm('Voltar essa venda pra orçamento? Ela sai do Painel e do Financeiro até ser aprovada de novo.')) return;
+  for(const it of itens){
+    const { data, error } = await sb.from('vendas_fornecedor')
+      .update({ status: 'orcamento' }).eq('id', it.id).select().maybeSingle();
+    if(error){ alert('Erro: ' + error.message); return; }
+    const idx = vendasFornecedor.findIndex(v=>v.id===it.id);
+    if(idx>-1 && data) vendasFornecedor[idx] = fromDbVendaFornecedor(data);
+  }
+  renderVendasFornecedor();
+  renderAnaliseVendaFornecedor();
+  renderPainel();
+}
 
 let editandoVfId = null;
 
@@ -4580,6 +4687,7 @@ function renderVendasFornecedor(){
     tr.setAttribute('data-vf-id', v.id);
     if(v.id === editandoVfId){
       tr.innerHTML = `<td>${v.dataVenda ? new Date(v.dataVenda).toLocaleString('pt-BR') : '—'}</td>
+        <td><span class="tag ${ehOrcamentoVF(v)?'pendente':'pago'}">${ehOrcamentoVF(v)?'Orçamento':'Vendido'}</span></td>
         <td>${esc(cliente ? cliente.nome : '—')}</td>
         <td data-col="telefone"><input type="text" class="editTelefone" value="${esc(v.telefone||'')}" style="width:140px;"></td>
         <td data-col="capacidade"><input type="text" class="editCapacidade" value="${v.capacidade||''}" style="width:80px;"></td>
@@ -4589,7 +4697,11 @@ function renderVendasFornecedor(){
         <td><input type="number" step="0.01" class="editValorVenda" value="${v.valorVenda}" style="width:90px;"></td>
         <td><span class="rm" onclick="salvarEdicaoVF('${v.id}')">salvar</span> · <span class="rm" onclick="cancelarEdicaoVF()">cancelar</span></td>`;
     } else {
-      tr.innerHTML = `<td>${v.dataVenda ? new Date(v.dataVenda).toLocaleString('pt-BR') : '—'}</td><td>${esc(cliente ? cliente.nome : '—')}</td><td data-col="telefone">${esc(v.telefone)}</td><td data-col="capacidade">${esc(v.capacidade||'—')}</td><td data-col="cor">${esc(v.cor||'—')}</td><td data-col="imei" class="mono" style="font-size:11.5px;">${esc(v.imei||'—')}</td><td data-col="envio">${ENVIO_LABEL[v.tipoEnvio]||v.tipoEnvio}</td><td><b>${money(v.valorVenda)}</b></td><td><span class="rm" onclick="iniciarEdicaoVF('${v.id}')">editar</span> · <span class="rm" onclick="gerarPdfVendaFornecedor('${v.id}')">compartilhar PDF</span> · <span class="rm" onclick="apagarVendaFornecedor('${v.id}')">apagar</span></td>`;
+      const orcamento = ehOrcamentoVF(v);
+      const acaoSituacao = orcamento
+        ? `<span class="rm" onclick="abrirAprovarOrcamentoVF('${v.id}')">aprovar</span> · `
+        : `<span class="rm" onclick="voltarParaOrcamentoVF('${v.id}')">voltar p/ orçamento</span> · `;
+      tr.innerHTML = `<td>${v.dataVenda ? new Date(v.dataVenda).toLocaleString('pt-BR') : '—'}</td><td><span class="tag ${orcamento?'pendente':'pago'}">${orcamento?'Orçamento':'Vendido'}</span></td><td>${esc(cliente ? cliente.nome : '—')}</td><td data-col="telefone">${esc(v.telefone)}</td><td data-col="capacidade">${esc(v.capacidade||'—')}</td><td data-col="cor">${esc(v.cor||'—')}</td><td data-col="imei" class="mono" style="font-size:11.5px;">${esc(v.imei||'—')}</td><td data-col="envio">${ENVIO_LABEL[v.tipoEnvio]||v.tipoEnvio}</td><td><b>${money(v.valorVenda)}</b></td><td>${acaoSituacao}<span class="rm" onclick="iniciarEdicaoVF('${v.id}')">editar</span> · <span class="rm" onclick="gerarPdfVendaFornecedor('${v.id}')">compartilhar PDF</span> · <span class="rm" onclick="apagarVendaFornecedor('${v.id}')">apagar</span></td>`;
     }
     tbody.appendChild(tr);
   });
@@ -4611,7 +4723,7 @@ function renderAnaliseVendaFornecedor(){
   // Vendas por mês (últimos 6 meses com dado)
   const porMes = {};
   vendasFornecedor.forEach(v=>{
-    if(!v.dataVenda) return;
+    if(!v.dataVenda || ehOrcamentoVF(v)) return;   // orcamento nao e venda
     const mes = v.dataVenda.slice(0,7);
     porMes[mes] = (porMes[mes]||0) + v.valorVenda;
   });
@@ -4632,7 +4744,7 @@ function renderAnaliseVendaFornecedor(){
   // Lucro por mês (venda - compra, só entra quem tem valor de compra preenchido)
   const lucroPorMes = {};
   vendasFornecedor.forEach(v=>{
-    if(!v.dataVenda || v.valorCompra===null || v.valorCompra===undefined) return;
+    if(!v.dataVenda || ehOrcamentoVF(v) || v.valorCompra===null || v.valorCompra===undefined) return;
     const mes = v.dataVenda.slice(0,7);
     lucroPorMes[mes] = (lucroPorMes[mes]||0) + (v.valorVenda - v.valorCompra);
   });
@@ -4749,8 +4861,11 @@ function montarDadosPdfVendaFornecedor(id){
   const cor = emp.cor_pdf || '#6C3CE9';
   const corEscura = escurecerCor(cor, 0.35);
   const logoHtml = emp.logo_url ? `<img src="${emp.logo_url}" style="max-height:58px; max-width:120px; object-fit:contain; display:block; flex-shrink:0;">` : '';
-  const linhasHtml = itens.map(it=>`<tr><td>${esc(it.telefone)}</td><td>${it.capacidade || '—'}</td><td>${it.cor || '—'}</td><td>${esc(it.imei || '—')}</td><td style="text-align:right;">${money(it.valorVenda)}</td></tr>`).join('');
-  const html = `<!doctype html><html><head><meta charset="UTF-8"><title>Venda — ${esc(v.telefone)}</title>
+  const mostrarImei = itens.some(it => it.imei);
+  const linhasHtml = itens.map(it=>`<tr><td>${esc(it.telefone)}</td><td>${it.capacidade || '—'}</td><td>${it.cor || '—'}</td>${mostrarImei?`<td>${esc(it.imei || '—')}</td>`:''}<td style="text-align:right;">${money(it.valorVenda)}</td></tr>`).join('');
+  const orcamento = ehOrcamentoVF(v);
+  const rotulo = orcamento ? 'Orçamento' : ('Venda de aparelho' + (itens.length>1?'s':''));
+  const html = `<!doctype html><html><head><meta charset="UTF-8"><title>${rotulo} — ${esc(v.telefone)}</title>
     <style>
       @page{ margin:18mm; }
       body{ font-family:-apple-system,'Segoe UI',sans-serif; color:#0E1E1B; max-width:680px; margin:0 auto; }
@@ -4769,6 +4884,7 @@ function montarDadosPdfVendaFornecedor(id){
       .total-box .label{ font-size:12px; text-transform:uppercase; letter-spacing:.05em; opacity:.85; }
       .total-box .valor{ font-size:26px; font-weight:700; }
       .rodape{ margin-top:32px; font-size:11px; color:#5B6E69; text-align:center; }
+      .aviso{ margin-top:14px; font-size:11.5px; color:#5B6E69; text-align:center; }
     </style></head><body>
     <div class="cabecalho">
       <div class="empresa">
@@ -4781,16 +4897,17 @@ function montarDadosPdfVendaFornecedor(id){
         </div>
       </div>
       <div class="titulo">
-        <h1>Venda de aparelho${itens.length>1?'s':''}</h1>
+        <h1>${rotulo}</h1>
         <div>${v.dataVenda ? new Date(v.dataVenda).toLocaleString('pt-BR') : ''}</div>
         <div>Envio: ${ENVIO_LABEL[v.tipoEnvio] || v.tipoEnvio}</div>
       </div>
     </div>
     <table>
-      <thead><tr><th>Aparelho</th><th>Capacidade</th><th>Cor</th><th>IMEI</th><th>Valor</th></tr></thead>
+      <thead><tr><th>Aparelho</th><th>Capacidade</th><th>Cor</th>${mostrarImei?'<th>IMEI</th>':''}<th>Valor</th></tr></thead>
       <tbody>${linhasHtml}</tbody>
     </table>
     <div class="total-box"><span class="label">${itens.length>1?'Total':'Valor'}</span><span class="valor">${money(totalVenda)}</span></div>
+    ${orcamento ? '<div class="aviso">Este documento é um orçamento e não representa venda concluída.</div>' : ''}
     <div class="rodape">Identidade<b>Vision</b></div>
     </body></html>`;
   return {v, itens, totalVenda, html};
@@ -4871,9 +4988,12 @@ async function gerarBlobPdfVendaFornecedor(dados){
     doc.text(linha, xTexto, linhaY); linhaY += 4.5;
   });
 
-  const itens = dados.itens.length>1 ? 'Vendas de aparelhos' : 'Venda de aparelho';
+  const orcamento = ehOrcamentoVF(dados.v);
+  const rotulo = orcamento
+    ? 'Orçamento'
+    : (dados.itens.length>1 ? 'Vendas de aparelhos' : 'Venda de aparelho');
   doc.setFont('helvetica','bold'); doc.setFontSize(15); doc.setTextColor(r,g,b);
-  doc.text(itens, pageWidth-margin, y+5, { align:'right' });
+  doc.text(rotulo, pageWidth-margin, y+5, { align:'right' });
   doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(90,100,95);
   if(dados.v.dataVenda) doc.text(new Date(dados.v.dataVenda).toLocaleString('pt-BR'), pageWidth-margin, y+10, { align:'right' });
   doc.text('Envio: ' + (ENVIO_LABEL[dados.v.tipoEnvio] || dados.v.tipoEnvio), pageWidth-margin, y+14.5, { align:'right' });
@@ -4883,11 +5003,12 @@ async function gerarBlobPdfVendaFornecedor(dados){
   doc.line(margin, y, pageWidth-margin, y);
   y += 9;
 
+  const mostrarImei = dados.itens.some(it => it.imei);
   doc.setFont('helvetica','bold'); doc.setFontSize(8.5); doc.setTextColor(90,100,95);
   doc.text('APARELHO', margin, y);
   doc.text('CAPACIDADE', margin+58, y);
   doc.text('COR', margin+90, y);
-  doc.text('IMEI', margin+115, y);
+  if(mostrarImei) doc.text('IMEI', margin+115, y);
   doc.text('VALOR', pageWidth-margin, y, { align:'right' });
   y += 3;
   doc.setDrawColor(225,233,231); doc.setLineWidth(0.3);
@@ -4899,7 +5020,7 @@ async function gerarBlobPdfVendaFornecedor(dados){
     doc.text(String(it.telefone || '—'), margin, y);
     doc.text(String(it.capacidade || '—'), margin+58, y);
     doc.text(String(it.cor || '—'), margin+90, y);
-    doc.text(String(it.imei || '—'), margin+115, y);
+    if(mostrarImei) doc.text(String(it.imei || '—'), margin+115, y);
     doc.text(money(it.valorVenda), pageWidth-margin, y, { align:'right' });
     y += 4;
     doc.setDrawColor(225,233,231); doc.setLineWidth(0.2);
@@ -4916,7 +5037,12 @@ async function gerarBlobPdfVendaFornecedor(dados){
   doc.setFont('helvetica','bold'); doc.setFontSize(14);
   doc.text(money(dados.totalVenda), pageWidth-margin-6, y+10, { align:'right' });
 
-  y += 26;
+  y += 22;
+  if(orcamento){
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(90,100,95);
+    doc.text('Este documento é um orçamento e não representa venda concluída.', pageWidth/2, y, { align:'center' });
+    y += 8;
+  }
   doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(90,100,95);
   doc.text('Identidade Vision', pageWidth/2, y, { align:'center' });
 
@@ -4931,7 +5057,8 @@ async function gerarPdfVendaFornecedor(id){
   if(!dados) return;
   if(typeof window.jspdf === 'undefined'){ imprimirPdfVendaFornecedor(dados.html); return; }
 
-  const nomeArquivo = `venda-${(dados.v.telefone||'').replace(/\D/g,'') || 'aparelho'}.pdf`;
+  const prefixo = ehOrcamentoVF(dados.v) ? 'orcamento' : 'venda';
+  const nomeArquivo = `${prefixo}-${(dados.v.telefone||'').replace(/[^\w]+/g,'-').toLowerCase() || 'aparelho'}.pdf`;
   try{
     const blob = await gerarBlobPdfVendaFornecedor(dados);
     const file = new File([blob], nomeArquivo, { type: 'application/pdf' });
@@ -5302,7 +5429,8 @@ function abrirModalNovoLancamento(tipoInicial){
    pra dar pra comparar com o mes anterior sem duplicar regra de negocio. */
 function totaisDoMes(mesISO){
   const vendasMes = vendas.filter(v=>v.data && v.data.startsWith(mesISO));
-  const fornecedorMes = vendasFornecedor.filter(v=>v.dataVenda && v.dataVenda.startsWith(mesISO));
+  // Orcamento ainda nao e venda: so entra na conta depois de aprovado.
+  const fornecedorMes = vendasFornecedor.filter(v=>v.dataVenda && v.dataVenda.startsWith(mesISO) && !ehOrcamentoVF(v));
   const entrou = vendasMes.reduce((s,v)=>s+v.pix+v.cartao+v.dinheiro,0)
                + vendasMes.reduce((s,v)=>s+v.pixPdv+v.cartaoPdv+v.dinheiroPdv,0)
                + fornecedorMes.reduce((s,v)=>s+v.valorVenda,0);
@@ -5428,7 +5556,7 @@ function renderPainel(){
   const totalVendasFluxo = vendasMes.reduce((s,v)=>s+v.pix+v.cartao+v.dinheiro,0);
   const totalVendasPdv = vendasMes.reduce((s,v)=>s+v.pixPdv+v.cartaoPdv+v.dinheiroPdv,0);
 
-  const vendasFornecedorMes = vendasFornecedor.filter(v=>v.dataVenda && v.dataVenda.startsWith(mesAtual));
+  const vendasFornecedorMes = vendasFornecedor.filter(v=>v.dataVenda && v.dataVenda.startsWith(mesAtual) && !ehOrcamentoVF(v));
   const totalVendasFornecedor = vendasFornecedorMes.reduce((s,v)=>s+v.valorVenda,0);
   const totalVendas = totalVendasFluxo + totalVendasFornecedor;
 

@@ -15,6 +15,10 @@ Este repositório foi criado puxando o código de produção direto da API do Cl
   `/api/admin/overview`, `/api/admin/enviar-email`, `/api/admin/liberar-acesso`),
   além do cron `scheduled` que avisa trials acabando.
 - `wrangler.toml` — config pra deploy via Wrangler CLI.
+- `migracoes/` — SQL que precisa ser rodado no SQL Editor do Supabase pra
+  liberar alguns recursos (metas financeiras, orçamento na Venda Fornecedor).
+- `email-templates/` — modelos de e-mail de confirmação e redefinição de senha
+  pra colar no painel do Supabase.
 
 ## Variáveis de ambiente / secrets (já configurados no Worker em produção)
 
