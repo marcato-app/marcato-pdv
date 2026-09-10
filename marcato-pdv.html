@@ -2025,6 +2025,11 @@ main:not(#view-pdv) td, .mono{
                 <option value="transportadora">Transportadora</option>
               </select>
             </div>
+            <div class="field"><label>Frete / motoboy (R$)</label><input type="number" step="0.01" min="0" id="vfValorFrete" placeholder="0,00" style="min-width:140px;"></div>
+          </div>
+          <div class="field" style="margin-bottom:10px;">
+            <label>Observação <span style="text-transform:none; font-weight:400;">aparece no PDF do cliente</span></label>
+            <textarea id="vfObservacoes" rows="2" placeholder="Ex: Aparelho com 3 meses de garantia da loja. Entrega em até 2 dias úteis." style="width:100%; resize:vertical;"></textarea>
           </div>
           <div class="desc" style="margin-bottom:0;">Cliente, data e envio valem pro orçamento inteiro — pode adicionar quantos aparelhos quiser abaixo antes de salvar.</div>
         </div>
@@ -2065,6 +2070,7 @@ main:not(#view-pdv) td, .mono{
           <div style="display:flex; justify-content:space-between; align-items:center; margin:14px 0; font-size:16px; font-weight:700;">
             <span>Total do orçamento</span><span class="mono" id="vfTotalItens">R$ 0,00</span>
           </div>
+          <div class="desc hide" id="vfResumoTotal" style="margin:-8px 0 12px; text-align:right;"></div>
           <button class="btn-teal" id="btnSalvarVendaFornecedor">Salvar orçamento</button>
           <div class="desc" style="margin:8px 0 0;">O orçamento ainda não entra no Painel nem no Financeiro. Ele vira venda quando você aprovar, na aba Histórico — é lá que você informa o IMEI de cada aparelho.</div>
           <div id="vfStatus" style="font-size:12px; margin-top:8px; min-height:16px;"></div>
@@ -2691,8 +2697,19 @@ const fromDbTeste = r => ({id:r.id, aparelho:r.aparelho, imeiSerial:r.imei_seria
 const fromDbCompra = r => ({id:r.id, fornecedor:r.fornecedor, data:r.data, itens: typeof r.itens==='string' ? JSON.parse(r.itens) : (r.itens||[]), total:num(r.total)||0, observacoes:r.observacoes, criadoEm:r.criado_em});
 const fromDbMovEstoque = r => ({id:r.id, produtoId:r.produto_id, produtoNome:r.produto_nome, tipo:r.tipo, quantidade:num(r.quantidade)||0, motivo:r.motivo, compraId:r.compra_id, criadoEm:r.criado_em});
 const fromDbAssinatura = r => ({id:r.id, status:r.status, trialInicio:r.trial_inicio, trialFim:r.trial_fim, mpPreapprovalId:r.mp_preapproval_id, proximoVencimento:r.proximo_vencimento, pagamentoFalhouEm:r.pagamento_falhou_em, atualizadoEm:r.atualizado_em});
-const fromDbVendaFornecedor = r => ({id:r.id, clienteId:r.cliente_id||null, telefone:r.telefone, capacidade:r.capacidade||null, cor:r.cor||null, imei:r.imei, valorCompra: r.valor_compra!==null?num(r.valor_compra):null, valorVenda:num(r.valor_venda)||0, tipoEnvio:r.tipo_envio, dataVenda:r.data_venda, grupoVenda:r.grupo_venda||null, status: r.status || 'aprovada'});
+const fromDbVendaFornecedor = r => ({id:r.id, clienteId:r.cliente_id||null, telefone:r.telefone, capacidade:r.capacidade||null, cor:r.cor||null, imei:r.imei, valorCompra: r.valor_compra!==null?num(r.valor_compra):null, valorVenda:num(r.valor_venda)||0, tipoEnvio:r.tipo_envio, dataVenda:r.data_venda, grupoVenda:r.grupo_venda||null, status: r.status || 'aprovada', valorFrete: num(r.valor_frete)||0, observacoes: r.observacoes || ''});
 const ehOrcamentoVF = v => v.status === 'orcamento';
+/* O frete e do orcamento inteiro, mas fica repetido em cada linha do grupo —
+   somar linha a linha cobraria o frete uma vez por aparelho. */
+function totalFreteVF(linhas){
+  const vistos = new Set();
+  return linhas.reduce((soma, v)=>{
+    const chave = v.grupoVenda || v.id;
+    if(vistos.has(chave)) return soma;
+    vistos.add(chave);
+    return soma + (v.valorFrete || 0);
+  }, 0);
+}
 
 /* ---- Categoria de Produtos sugere os nomes padronizados da árvore mercadológica (referência) ---- */
 let categoriasReferencia = [];
@@ -4470,8 +4487,14 @@ function renderItensVendaFornecedor(){
     tr.innerHTML = `<td>${esc(it.telefone)}</td><td>${it.capacidade||'—'}</td><td>${it.cor||'—'}</td><td class="mono" style="font-size:11.5px;">${esc(it.imei||'—')}</td><td>${it.valorCompra!==null?money(it.valorCompra):'—'}</td><td>${money(it.valorVenda)}</td><td><span class="rm rm-perigo" onclick="removerItemVF(${i})">remover</span></td>`;
     tbody.appendChild(tr);
   });
-  document.getElementById('vfTotalItens').textContent = money(total);
+  const frete = parseFloat(document.getElementById('vfValorFrete').value) || 0;
+  document.getElementById('vfTotalItens').textContent = money(total + frete);
+  const resumo = document.getElementById('vfResumoTotal');
+  resumo.classList.toggle('hide', frete <= 0);
+  if(frete > 0) resumo.textContent = `${money(total)} em aparelhos + ${money(frete)} de ${ENVIO_LABEL[document.getElementById('vfTipoEnvio').value] || 'frete'}`;
 }
+document.getElementById('vfValorFrete').addEventListener('input', renderItensVendaFornecedor);
+document.getElementById('vfTipoEnvio').addEventListener('change', renderItensVendaFornecedor);
 document.getElementById('btnAdicionarItemVF').addEventListener('click', ()=>{
   const telefone = document.getElementById('vfTelefone').value.trim();
   const capacidade = document.getElementById('vfCapacidade').value.trim() || null;
@@ -4507,6 +4530,8 @@ document.getElementById('btnSalvarVendaFornecedor').addEventListener('click', as
 
   const tipoEnvio = document.getElementById('vfTipoEnvio').value;
   const clienteId = clienteSelecionadoVF ? clienteSelecionadoVF.id : null;
+  const valorFrete = parseFloat(document.getElementById('vfValorFrete').value) || 0;
+  const observacoes = document.getElementById('vfObservacoes').value.trim();
   const grupoId = uid();
 
   statusEl.textContent = 'Salvando...'; statusEl.style.color = 'var(--ink-soft)';
@@ -4514,20 +4539,27 @@ document.getElementById('btnSalvarVendaFornecedor').addEventListener('click', as
     cliente_id: clienteId, telefone: it.telefone, capacidade: it.capacidade, cor: it.cor, imei: it.imei,
     valor_compra: it.valorCompra, valor_venda: it.valorVenda, tipo_envio: tipoEnvio, grupo_venda: grupoId
   }));
-  const { rows, error, semColunaStatus } = await inserirVendasFornecedor(base);
+  // Frete e observacao valem pro orcamento inteiro. Vao repetidos em todas as
+  // linhas do grupo pra nao sumirem se a primeira linha for apagada; na hora de
+  // somar, o frete e contado uma vez por grupo.
+  const extras = { valor_frete: valorFrete, observacoes: observacoes || null };
+  const { rows, error, semColunaStatus, semExtras } = await inserirVendasFornecedor(base, extras);
   if(error){ statusEl.textContent = 'Erro ao salvar: ' + error.message; statusEl.style.color = 'var(--warn)'; return; }
   rows.forEach(row => vendasFornecedor.unshift(fromDbVendaFornecedor(row)));
 
   itensVendaFornecedorAtual = [];
   renderItensVendaFornecedor();
   document.getElementById('vfTipoEnvio').value = 'retirada';
+  document.getElementById('vfValorFrete').value = '';
+  document.getElementById('vfObservacoes').value = '';
   document.getElementById('vfClienteNome').value = '';
   clienteSelecionadoVF = null;
   atualizarDataVendaFornecedor();
   renderVendasFornecedor();
   renderPainel();
-  if(semColunaStatus){
-    statusEl.textContent = `✓ Salvo (${rows.length} aparelho${rows.length>1?'s':''}), mas entrou direto como venda: falta a coluna "status" no banco. Rode a migração do README pra ter o fluxo de orçamento.`;
+  if(semColunaStatus || semExtras){
+    const faltando = [semColunaStatus && '"status" (fluxo de orçamento)', semExtras && '"valor_frete"/"observacoes"'].filter(Boolean).join(' e ');
+    statusEl.textContent = `✓ Salvo (${rows.length} aparelho${rows.length>1?'s':''}), mas sem ${faltando}: falta rodar a migração em migracoes/README.md no Supabase.`;
     statusEl.style.color = 'var(--warn)';
   } else {
     statusEl.textContent = `✓ Orçamento salvo (${rows.length} aparelho${rows.length>1?'s':''}). Aprove na aba Histórico quando o cliente fechar.`;
@@ -4544,16 +4576,27 @@ document.getElementById('btnSalvarVendaFornecedor').addEventListener('click', as
 const ERRO_COLUNA_AUSENTE = ['PGRST204', '42703'];
 function pareceColunaAusente(erro){
   if(!erro) return false;
-  return ERRO_COLUNA_AUSENTE.includes(erro.code) || /column .*status.* does not exist|'status' column/i.test(erro.message || '');
+  return ERRO_COLUNA_AUSENTE.includes(erro.code) || /column .* does not exist|schema cache/i.test(erro.message || '');
 }
-async function inserirVendasFornecedor(linhasBase){
-  const comStatus = linhasBase.map(l => ({ ...l, status: 'orcamento' }));
-  let { data, error } = await sb.from('vendas_fornecedor').insert(comStatus).select();
-  if(error && pareceColunaAusente(error)){
-    ({ data, error } = await sb.from('vendas_fornecedor').insert(linhasBase).select());
-    return { rows: data || [], error, semColunaStatus: true };
-  }
-  return { rows: data || [], error, semColunaStatus: false };
+/* Tenta com as colunas novas; se o banco ainda nao tem a migracao, tenta de
+   novo so com o basico em vez de deixar a pessoa sem conseguir salvar. */
+async function inserirVendasFornecedor(linhasBase, extras){
+  const completo = linhasBase.map(l => ({ ...l, ...extras, status: 'orcamento' }));
+  let { data, error } = await sb.from('vendas_fornecedor').insert(completo).select();
+  if(!error) return { rows: data, error: null, semColunaStatus: false, semExtras: false };
+  if(!pareceColunaAusente(error)) return { rows: [], error, semColunaStatus: false, semExtras: false };
+
+  // Descobre o que o banco aceita, tentando do mais completo pro mais simples.
+  const soStatus = linhasBase.map(l => ({ ...l, status: 'orcamento' }));
+  ({ data, error } = await sb.from('vendas_fornecedor').insert(soStatus).select());
+  if(!error) return { rows: data, error: null, semColunaStatus: false, semExtras: true };
+
+  const soExtras = linhasBase.map(l => ({ ...l, ...extras }));
+  ({ data, error } = await sb.from('vendas_fornecedor').insert(soExtras).select());
+  if(!error) return { rows: data, error: null, semColunaStatus: true, semExtras: false };
+
+  ({ data, error } = await sb.from('vendas_fornecedor').insert(linhasBase).select());
+  return { rows: data || [], error, semColunaStatus: true, semExtras: true };
 }
 
 /* ---- Aprovar orcamento: vira venda e e a hora de informar o IMEI de cada
@@ -4620,6 +4663,58 @@ async function confirmarAprovacaoOrcamentoVF(id){
   renderAnaliseVendaFornecedor();
   renderPainel();
 }
+/* Frete e observacao normalmente sao acertados depois da conversa com o
+   cliente, entao precisam ser editaveis sem refazer o orcamento. */
+function abrirFreteObsVF(id){
+  const itens = itensDoGrupoVF(id);
+  if(itens.length === 0) return;
+  const atual = itens[0];
+  abrirModal(`<h3>Frete e observação</h3>
+    <div class="desc">Vale pro orçamento inteiro (${itens.length} aparelho${itens.length>1?'s':''}) e aparece no PDF do cliente.</div>
+    <div class="field" style="margin-bottom:12px;">
+      <label>Frete / motoboy (R$)</label>
+      <input type="number" step="0.01" min="0" id="freteObsValor" value="${atual.valorFrete || ''}" placeholder="0,00" style="width:100%;">
+    </div>
+    <div class="field" style="margin-bottom:4px;">
+      <label>Observação</label>
+      <textarea id="freteObsTexto" rows="3" placeholder="Ex: Garantia de 3 meses da loja." style="width:100%; resize:vertical;">${esc(atual.observacoes || '')}</textarea>
+    </div>
+    <div id="freteObsStatus" style="font-size:12px; color:var(--warn); min-height:16px;"></div>
+    <div class="modal-close-row">
+      <button class="btn-ghost" onclick="fecharModal()">Cancelar</button>
+      <button class="btn-teal" id="btnSalvarFreteObs" onclick="salvarFreteObsVF('${esc(id)}')">Salvar</button>
+    </div>`);
+  const el = document.getElementById('freteObsValor');
+  if(el){ el.focus(); el.select(); }
+}
+async function salvarFreteObsVF(id){
+  const itens = itensDoGrupoVF(id);
+  const valorFrete = parseFloat(document.getElementById('freteObsValor').value) || 0;
+  const observacoes = document.getElementById('freteObsTexto').value.trim();
+  const statusEl = document.getElementById('freteObsStatus');
+  const botao = document.getElementById('btnSalvarFreteObs');
+  statusEl.style.color = 'var(--ink-soft)'; statusEl.textContent = 'Salvando...';
+  botao.disabled = true;
+  for(const it of itens){
+    const { data, error } = await sb.from('vendas_fornecedor')
+      .update({ valor_frete: valorFrete, observacoes: observacoes || null })
+      .eq('id', it.id).select().maybeSingle();
+    if(error){
+      statusEl.style.color = 'var(--warn)';
+      statusEl.textContent = pareceColunaAusente(error)
+        ? 'Faltam as colunas "valor_frete"/"observacoes" no banco. Rode a migração do README.'
+        : 'Erro ao salvar: ' + error.message;
+      botao.disabled = false;
+      return;
+    }
+    const idx = vendasFornecedor.findIndex(v=>v.id===it.id);
+    if(idx>-1 && data) vendasFornecedor[idx] = fromDbVendaFornecedor(data);
+  }
+  fecharModal();
+  renderVendasFornecedor();
+  renderPainel();
+}
+
 async function voltarParaOrcamentoVF(id){
   const itens = itensDoGrupoVF(id);
   if(itens.length === 0) return;
@@ -4713,7 +4808,8 @@ function renderVendasFornecedor(){
       const acaoSituacao = orcamento
         ? `<span class="rm" onclick="abrirAprovarOrcamentoVF('${v.id}')">aprovar</span>`
         : `<span class="rm" onclick="voltarParaOrcamentoVF('${v.id}')">voltar p/ orçamento</span>`;
-      tr.innerHTML = `<td>${v.dataVenda ? new Date(v.dataVenda).toLocaleString('pt-BR') : '—'}</td><td><span class="tag ${orcamento?'pendente':'pago'}">${orcamento?'Orçamento':'Vendido'}</span></td><td>${esc(cliente ? cliente.nome : '—')}</td><td data-col="telefone">${esc(v.telefone)}</td><td data-col="capacidade">${esc(v.capacidade||'—')}</td><td data-col="cor">${esc(v.cor||'—')}</td><td data-col="imei" class="mono" style="font-size:11.5px;">${esc(v.imei||'—')}</td><td data-col="envio">${ENVIO_LABEL[v.tipoEnvio]||v.tipoEnvio}</td><td><b>${money(v.valorVenda)}</b></td><td>${acaoSituacao}<span class="rm" onclick="iniciarEdicaoVF('${v.id}')">editar</span><span class="rm" onclick="gerarPdfVendaFornecedor('${v.id}')">compartilhar PDF</span><span class="rm rm-perigo" onclick="apagarVendaFornecedor('${v.id}')">apagar</span></td>`;
+      const marcaFrete = v.valorFrete > 0 ? ` <span class="tag" style="background:var(--tint-neutral);">+${money(v.valorFrete)} frete</span>` : '';
+      tr.innerHTML = `<td>${v.dataVenda ? new Date(v.dataVenda).toLocaleString('pt-BR') : '—'}</td><td><span class="tag ${orcamento?'pendente':'pago'}">${orcamento?'Orçamento':'Vendido'}</span>${marcaFrete}</td><td>${esc(cliente ? cliente.nome : '—')}</td><td data-col="telefone">${esc(v.telefone)}</td><td data-col="capacidade">${esc(v.capacidade||'—')}</td><td data-col="cor">${esc(v.cor||'—')}</td><td data-col="imei" class="mono" style="font-size:11.5px;">${esc(v.imei||'—')}</td><td data-col="envio">${ENVIO_LABEL[v.tipoEnvio]||v.tipoEnvio}</td><td><b>${money(v.valorVenda)}</b></td><td>${acaoSituacao}<span class="rm" onclick="iniciarEdicaoVF('${v.id}')">editar</span><span class="rm" onclick="abrirFreteObsVF('${v.id}')">frete e obs.</span><span class="rm" onclick="gerarPdfVendaFornecedor('${v.id}')">compartilhar PDF</span><span class="rm rm-perigo" onclick="apagarVendaFornecedor('${v.id}')">apagar</span></td>`;
     }
     tbody.appendChild(tr);
   });
@@ -4868,7 +4964,10 @@ function montarDadosPdfVendaFornecedor(id){
   const v = vendasFornecedor.find(x=>x.id===id);
   if(!v) return null;
   const itens = v.grupoVenda ? vendasFornecedor.filter(x=>x.grupoVenda===v.grupoVenda) : [v];
-  const totalVenda = itens.reduce((s,it)=>s+it.valorVenda,0);
+  const totalAparelhos = itens.reduce((s,it)=>s+it.valorVenda,0);
+  const frete = v.valorFrete || 0;
+  const totalVenda = totalAparelhos + frete;
+  const observacoes = v.observacoes || '';
   const emp = empresaAtual || {};
   const cor = emp.cor_pdf || '#6C3CE9';
   const corEscura = escurecerCor(cor, 0.35);
@@ -4897,6 +4996,10 @@ function montarDadosPdfVendaFornecedor(id){
       .total-box .valor{ font-size:26px; font-weight:700; }
       .rodape{ margin-top:32px; font-size:11px; color:#5B6E69; text-align:center; }
       .aviso{ margin-top:14px; font-size:11.5px; color:#5B6E69; text-align:center; }
+      .linha-extra{ display:flex; justify-content:space-between; font-size:14px; padding:0 0 14px; margin-top:-10px; }
+      .linha-extra span:first-child{ color:#5B6E69; }
+      .obs{ margin-top:20px; padding:14px 16px; background:#F4F3F8; border-radius:10px; font-size:12.5px; line-height:1.6; white-space:pre-wrap; }
+      .obs b{ display:block; font-size:10.5px; text-transform:uppercase; letter-spacing:.04em; color:#5B6E69; margin-bottom:6px; }
     </style></head><body>
     <div class="cabecalho">
       <div class="empresa">
@@ -4918,7 +5021,9 @@ function montarDadosPdfVendaFornecedor(id){
       <thead><tr><th>Aparelho</th><th>Capacidade</th><th>Cor</th>${mostrarImei?'<th>IMEI</th>':''}<th>Valor</th></tr></thead>
       <tbody>${linhasHtml}</tbody>
     </table>
-    <div class="total-box"><span class="label">${itens.length>1?'Total':'Valor'}</span><span class="valor">${money(totalVenda)}</span></div>
+    ${frete>0 ? `<div class="linha-extra"><span>${esc(ENVIO_LABEL[v.tipoEnvio] || 'Frete')}</span><span>${money(frete)}</span></div>` : ''}
+    <div class="total-box"><span class="label">Total</span><span class="valor">${money(totalVenda)}</span></div>
+    ${observacoes ? `<div class="obs"><b>Observações</b>${esc(observacoes)}</div>` : ''}
     ${orcamento ? '<div class="aviso">Este documento é um orçamento e não representa venda concluída.</div>' : ''}
     <div class="rodape">Identidade<b>Vision</b></div>
     </body></html>`;
@@ -5040,14 +5145,39 @@ async function gerarBlobPdfVendaFornecedor(dados){
     y += 7;
   });
 
+  const frete = dados.v.valorFrete || 0;
+  if(frete > 0){
+    y += 2;
+    doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(90,100,95);
+    doc.text(String(ENVIO_LABEL[dados.v.tipoEnvio] || 'Frete'), margin, y);
+    doc.setTextColor(20,20,20);
+    doc.text(money(frete), pageWidth-margin, y, { align:'right' });
+    y += 5;
+  }
+
   y += 3;
   doc.setFillColor(r,g,b);
   doc.roundedRect(margin, y, pageWidth-margin*2, 16, 2, 2, 'F');
   doc.setTextColor(255,255,255);
   doc.setFont('helvetica','normal'); doc.setFontSize(9);
-  doc.text(dados.itens.length>1 ? 'TOTAL' : 'VALOR', margin+6, y+10);
+  doc.text('TOTAL', margin+6, y+10);
   doc.setFont('helvetica','bold'); doc.setFontSize(14);
   doc.text(money(dados.totalVenda), pageWidth-margin-6, y+10, { align:'right' });
+
+  const observacoes = (dados.v.observacoes || '').trim();
+  if(observacoes){
+    y += 24;
+    const largura = pageWidth - margin*2;
+    const linhas = doc.splitTextToSize(observacoes, largura - 12);
+    const altura = linhas.length * 4.6 + 14;
+    doc.setFillColor(244,243,248);
+    doc.roundedRect(margin, y, largura, altura, 2, 2, 'F');
+    doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(90,100,95);
+    doc.text('OBSERVAÇÕES', margin+6, y+7);
+    doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(20,20,20);
+    doc.text(linhas, margin+6, y+13);
+    y += altura - 16;
+  }
 
   y += 22;
   if(orcamento){
@@ -5445,7 +5575,8 @@ function totaisDoMes(mesISO){
   const fornecedorMes = vendasFornecedor.filter(v=>v.dataVenda && v.dataVenda.startsWith(mesISO) && !ehOrcamentoVF(v));
   const entrou = vendasMes.reduce((s,v)=>s+v.pix+v.cartao+v.dinheiro,0)
                + vendasMes.reduce((s,v)=>s+v.pixPdv+v.cartaoPdv+v.dinheiroPdv,0)
-               + fornecedorMes.reduce((s,v)=>s+v.valorVenda,0);
+               + fornecedorMes.reduce((s,v)=>s+v.valorVenda,0)
+               + totalFreteVF(fornecedorMes);
   const despesasFixas = despesas.reduce((s,d)=>s+d.valor,0);
   const saiuBoletos = boletos
       .filter(b=>b.vencimento && b.vencimento.startsWith(mesISO) && b.status==='pendente')
@@ -5569,7 +5700,7 @@ function renderPainel(){
   const totalVendasPdv = vendasMes.reduce((s,v)=>s+v.pixPdv+v.cartaoPdv+v.dinheiroPdv,0);
 
   const vendasFornecedorMes = vendasFornecedor.filter(v=>v.dataVenda && v.dataVenda.startsWith(mesAtual) && !ehOrcamentoVF(v));
-  const totalVendasFornecedor = vendasFornecedorMes.reduce((s,v)=>s+v.valorVenda,0);
+  const totalVendasFornecedor = vendasFornecedorMes.reduce((s,v)=>s+v.valorVenda,0) + totalFreteVF(vendasFornecedorMes);
   const totalVendas = totalVendasFluxo + totalVendasFornecedor;
 
   const totalDespesas = despesas.reduce((s,d)=>s+d.valor,0);

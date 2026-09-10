@@ -44,3 +44,19 @@ alter table vendas_fornecedor
 create index if not exists vendas_fornecedor_status_idx
   on vendas_fornecedor (status);
 ```
+
+## 3. Frete e observação na Venda Fornecedor
+
+Guarda o valor do frete/motoboy e uma observação livre que sai no PDF do
+cliente. Os dois valem pro orçamento inteiro e ficam repetidos em todas as
+linhas do mesmo `grupo_venda` — na soma, o frete é contado uma vez por grupo.
+
+Sem isso: os campos aparecem na tela, mas o app avisa que não conseguiu salvar
+os dois e grava o resto normalmente.
+
+```sql
+alter table vendas_fornecedor
+  add column if not exists valor_frete numeric not null default 0,
+  add column if not exists observacoes text;
+```
+
