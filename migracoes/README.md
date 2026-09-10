@@ -47,9 +47,10 @@ create index if not exists vendas_fornecedor_status_idx
 
 ## 3. Frete e observação na Venda Fornecedor
 
-Guarda o valor do frete/motoboy e uma observação livre que sai no PDF do
-cliente. Os dois valem pro orçamento inteiro e ficam repetidos em todas as
-linhas do mesmo `grupo_venda` — na soma, o frete é contado uma vez por grupo.
+Guarda o valor do frete/motoboy e uma observação interna da loja. O frete sai
+no PDF do cliente; a observação **não** — ela só aparece no histórico, pra
+loja. Os dois valem pro orçamento inteiro e ficam repetidos em todas as linhas
+do mesmo `grupo_venda` — na soma, o frete é contado uma vez por grupo.
 
 Sem isso: os campos aparecem na tela, mas o app avisa que não conseguiu salvar
 os dois e grava o resto normalmente.

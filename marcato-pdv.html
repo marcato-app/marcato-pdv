@@ -289,6 +289,18 @@ main{flex:1; padding:28px 34px 60px; max-width:1220px;}
   font-variant-numeric:tabular-nums; letter-spacing:-.01em;
 }
 
+/* Nota interna da Venda Fornecedor: nunca sai no PDF, e so pra loja lembrar
+   do combinado. Corta em duas linhas; o texto todo fica no title. */
+.nota-interna{
+  margin-top:4px; font-size:11px; line-height:1.45; color:var(--ink-soft);
+  font-family:'Inter',sans-serif; max-width:22ch;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+  padding-left:7px; border-left:2px solid var(--line-2);
+}
+@media (max-width:780px){
+  .nota-interna{ max-width:none; -webkit-line-clamp:4; text-align:left; }
+}
+
 /* ---------- Painel: precisa da sua atenção ---------- */
 .atencao-card{
   display:flex; align-items:center; gap:12px; width:100%; background:var(--card); border:1px solid var(--line);
@@ -2028,8 +2040,8 @@ main:not(#view-pdv) td, .mono{
             <div class="field"><label>Frete / motoboy (R$)</label><input type="number" step="0.01" min="0" id="vfValorFrete" placeholder="0,00" style="min-width:140px;"></div>
           </div>
           <div class="field" style="margin-bottom:10px;">
-            <label>Observação <span style="text-transform:none; font-weight:400;">aparece no PDF do cliente</span></label>
-            <textarea id="vfObservacoes" rows="2" placeholder="Ex: Aparelho com 3 meses de garantia da loja. Entrega em até 2 dias úteis." style="width:100%; resize:vertical;"></textarea>
+            <label>Observação interna <span style="text-transform:none; font-weight:400;">só a loja vê — não entra no PDF do cliente</span></label>
+            <textarea id="vfObservacoes" rows="2" placeholder="Ex: Aparelho veio do fornecedor X. Cliente pediu pra entregar depois das 18h." style="width:100%; resize:vertical;"></textarea>
           </div>
           <div class="desc" style="margin-bottom:0;">Cliente, data e envio valem pro orçamento inteiro — pode adicionar quantos aparelhos quiser abaixo antes de salvar.</div>
         </div>
@@ -4670,14 +4682,14 @@ function abrirFreteObsVF(id){
   if(itens.length === 0) return;
   const atual = itens[0];
   abrirModal(`<h3>Frete e observação</h3>
-    <div class="desc">Vale pro orçamento inteiro (${itens.length} aparelho${itens.length>1?'s':''}) e aparece no PDF do cliente.</div>
+    <div class="desc">Vale pro orçamento inteiro (${itens.length} aparelho${itens.length>1?'s':''}). O frete entra no PDF do cliente; a observação é interna, só a loja vê.</div>
     <div class="field" style="margin-bottom:12px;">
       <label>Frete / motoboy (R$)</label>
       <input type="number" step="0.01" min="0" id="freteObsValor" value="${atual.valorFrete || ''}" placeholder="0,00" style="width:100%;">
     </div>
     <div class="field" style="margin-bottom:4px;">
-      <label>Observação</label>
-      <textarea id="freteObsTexto" rows="3" placeholder="Ex: Garantia de 3 meses da loja." style="width:100%; resize:vertical;">${esc(atual.observacoes || '')}</textarea>
+      <label>Observação interna</label>
+      <textarea id="freteObsTexto" rows="3" placeholder="Ex: Cliente pediu entrega depois das 18h." style="width:100%; resize:vertical;">${esc(atual.observacoes || '')}</textarea>
     </div>
     <div id="freteObsStatus" style="font-size:12px; color:var(--warn); min-height:16px;"></div>
     <div class="modal-close-row">
@@ -4809,7 +4821,9 @@ function renderVendasFornecedor(){
         ? `<span class="rm" onclick="abrirAprovarOrcamentoVF('${v.id}')">aprovar</span>`
         : `<span class="rm" onclick="voltarParaOrcamentoVF('${v.id}')">voltar p/ orçamento</span>`;
       const marcaFrete = v.valorFrete > 0 ? ` <span class="tag" style="background:var(--tint-neutral);">+${money(v.valorFrete)} frete</span>` : '';
-      tr.innerHTML = `<td>${v.dataVenda ? new Date(v.dataVenda).toLocaleString('pt-BR') : '—'}</td><td><span class="tag ${orcamento?'pendente':'pago'}">${orcamento?'Orçamento':'Vendido'}</span>${marcaFrete}</td><td>${esc(cliente ? cliente.nome : '—')}</td><td data-col="telefone">${esc(v.telefone)}</td><td data-col="capacidade">${esc(v.capacidade||'—')}</td><td data-col="cor">${esc(v.cor||'—')}</td><td data-col="imei" class="mono" style="font-size:11.5px;">${esc(v.imei||'—')}</td><td data-col="envio">${ENVIO_LABEL[v.tipoEnvio]||v.tipoEnvio}</td><td><b>${money(v.valorVenda)}</b></td><td>${acaoSituacao}<span class="rm" onclick="iniciarEdicaoVF('${v.id}')">editar</span><span class="rm" onclick="abrirFreteObsVF('${v.id}')">frete e obs.</span><span class="rm" onclick="gerarPdfVendaFornecedor('${v.id}')">compartilhar PDF</span><span class="rm rm-perigo" onclick="apagarVendaFornecedor('${v.id}')">apagar</span></td>`;
+      const nota = (v.observacoes || '').trim();
+      const notaHtml = nota ? `<div class="nota-interna" title="${esc(nota)}">${esc(nota)}</div>` : '';
+      tr.innerHTML = `<td>${v.dataVenda ? new Date(v.dataVenda).toLocaleString('pt-BR') : '—'}</td><td><span class="tag ${orcamento?'pendente':'pago'}">${orcamento?'Orçamento':'Vendido'}</span>${marcaFrete}</td><td>${esc(cliente ? cliente.nome : '—')}${notaHtml}</td><td data-col="telefone">${esc(v.telefone)}</td><td data-col="capacidade">${esc(v.capacidade||'—')}</td><td data-col="cor">${esc(v.cor||'—')}</td><td data-col="imei" class="mono" style="font-size:11.5px;">${esc(v.imei||'—')}</td><td data-col="envio">${ENVIO_LABEL[v.tipoEnvio]||v.tipoEnvio}</td><td><b>${money(v.valorVenda)}</b></td><td>${acaoSituacao}<span class="rm" onclick="iniciarEdicaoVF('${v.id}')">editar</span><span class="rm" onclick="abrirFreteObsVF('${v.id}')">frete e obs.</span><span class="rm" onclick="gerarPdfVendaFornecedor('${v.id}')">compartilhar PDF</span><span class="rm rm-perigo" onclick="apagarVendaFornecedor('${v.id}')">apagar</span></td>`;
     }
     tbody.appendChild(tr);
   });
@@ -4967,7 +4981,6 @@ function montarDadosPdfVendaFornecedor(id){
   const totalAparelhos = itens.reduce((s,it)=>s+it.valorVenda,0);
   const frete = v.valorFrete || 0;
   const totalVenda = totalAparelhos + frete;
-  const observacoes = v.observacoes || '';
   const emp = empresaAtual || {};
   const cor = emp.cor_pdf || '#6C3CE9';
   const corEscura = escurecerCor(cor, 0.35);
@@ -4998,8 +5011,6 @@ function montarDadosPdfVendaFornecedor(id){
       .aviso{ margin-top:14px; font-size:11.5px; color:#5B6E69; text-align:center; }
       .linha-extra{ display:flex; justify-content:space-between; font-size:14px; padding:0 0 14px; margin-top:-10px; }
       .linha-extra span:first-child{ color:#5B6E69; }
-      .obs{ margin-top:20px; padding:14px 16px; background:#F4F3F8; border-radius:10px; font-size:12.5px; line-height:1.6; white-space:pre-wrap; }
-      .obs b{ display:block; font-size:10.5px; text-transform:uppercase; letter-spacing:.04em; color:#5B6E69; margin-bottom:6px; }
     </style></head><body>
     <div class="cabecalho">
       <div class="empresa">
@@ -5023,7 +5034,6 @@ function montarDadosPdfVendaFornecedor(id){
     </table>
     ${frete>0 ? `<div class="linha-extra"><span>${esc(ENVIO_LABEL[v.tipoEnvio] || 'Frete')}</span><span>${money(frete)}</span></div>` : ''}
     <div class="total-box"><span class="label">Total</span><span class="valor">${money(totalVenda)}</span></div>
-    ${observacoes ? `<div class="obs"><b>Observações</b>${esc(observacoes)}</div>` : ''}
     ${orcamento ? '<div class="aviso">Este documento é um orçamento e não representa venda concluída.</div>' : ''}
     <div class="rodape">Identidade<b>Vision</b></div>
     </body></html>`;
@@ -5164,20 +5174,6 @@ async function gerarBlobPdfVendaFornecedor(dados){
   doc.setFont('helvetica','bold'); doc.setFontSize(14);
   doc.text(money(dados.totalVenda), pageWidth-margin-6, y+10, { align:'right' });
 
-  const observacoes = (dados.v.observacoes || '').trim();
-  if(observacoes){
-    y += 24;
-    const largura = pageWidth - margin*2;
-    const linhas = doc.splitTextToSize(observacoes, largura - 12);
-    const altura = linhas.length * 4.6 + 14;
-    doc.setFillColor(244,243,248);
-    doc.roundedRect(margin, y, largura, altura, 2, 2, 'F');
-    doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(90,100,95);
-    doc.text('OBSERVAÇÕES', margin+6, y+7);
-    doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(20,20,20);
-    doc.text(linhas, margin+6, y+13);
-    y += altura - 16;
-  }
 
   y += 22;
   if(orcamento){
