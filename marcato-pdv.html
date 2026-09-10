@@ -5197,25 +5197,43 @@ async function gerarPdfVendaFornecedor(id){
 
   const prefixo = ehOrcamentoVF(dados.v) ? 'orcamento' : 'venda';
   const nomeArquivo = `${prefixo}-${(dados.v.telefone||'').replace(/[^\w]+/g,'-').toLowerCase() || 'aparelho'}.pdf`;
-  try{
-    const blob = await gerarBlobPdfVendaFornecedor(dados);
-    const file = new File([blob], nomeArquivo, { type: 'application/pdf' });
+  /* Abre o PDF numa aba nova em vez de <a download>: no iOS em modo "tela de
+     início" não existe barra de navegação, e o download SUBSTITUI a tela pelo
+     PDF, deixando a pessoa presa sem botão de voltar. */
+  const abrirBlob = (blob)=>{
+    const url = URL.createObjectURL(blob);
+    const nova = window.open(url, '_blank');
+    if(!nova){ alert('Não consegui abrir o PDF. Permita pop-ups pra esse site e tente de novo.'); }
+    setTimeout(()=>URL.revokeObjectURL(url), 60000);
+  };
 
-    if(navigator.share && navigator.canShare && navigator.canShare({ files: [file] })){
-      await navigator.share({ files: [file], title: nomeArquivo });
-    } else {
-      /* iOS em modo "tela de início" não tem barra de navegação — um <a download> ali
-         não baixa nada, ele SUBSTITUI a tela pelo PDF e trava o usuário sem volta.
-         Abrir em nova aba (_blank) faz o Safari normal abrir por cima, que tem como fechar/voltar. */
-      const url = URL.createObjectURL(blob);
-      const nova = window.open(url, '_blank');
-      if(!nova){ alert('Não consegui abrir o PDF. Permita pop-ups pra esse site e tente de novo.'); }
-      setTimeout(()=>URL.revokeObjectURL(url), 60000);
-    }
+  let blob;
+  try{
+    blob = await gerarBlobPdfVendaFornecedor(dados);
   } catch(err){
-    if(err && err.name === 'AbortError') return; // usuário cancelou o compartilhamento
-    console.error('Falha ao gerar/compartilhar PDF, caindo pra impressão:', err);
+    console.error('Falha ao gerar o PDF, caindo pra impressão:', err);
     imprimirPdfVendaFornecedor(dados.html);
+    return;
+  }
+
+  const file = new File([blob], nomeArquivo, { type: 'application/pdf' });
+  if(!(navigator.share && navigator.canShare && navigator.canShare({ files: [file] }))){
+    abrirBlob(blob);
+    return;
+  }
+
+  try{
+    /* Só `files`, sem `title`. No macOS/iOS o Safari trata `title` como um item
+       separado da folha de compartilhamento — mandando `files` + `title` junto,
+       o destino recebe DOIS anexos em vez de um. */
+    await navigator.share({ files: [file] });
+  } catch(err){
+    if(err && err.name === 'AbortError') return; // a pessoa cancelou, não é erro
+    /* A folha de compartilhamento falhou (ex: o Safari perde a "ativação do
+       usuário" enquanto o PDF é gerado). Cai pro PDF em si, não pra impressão —
+       mandar a janela de imprimir aqui parece um segundo documento. */
+    console.error('Falha ao compartilhar, abrindo o PDF:', err);
+    abrirBlob(blob);
   }
 }
 
