@@ -66,6 +66,14 @@ function serviceHeaders(env) {
 // Ids que chegam de fora (corpo da requisição, external_reference devolvido pelo
 // Mercado Pago) entram direto na query do Supabase. Um "&" ou vírgula ali muda o
 // filtro inteiro, então só passa o que for UUID de verdade.
+var HTML_ETAG = null;
+async function etagDoHtml() {
+  if (HTML_ETAG) return HTML_ETAG;
+  const digest = await crypto.subtle.digest("SHA-1", new TextEncoder().encode(html));
+  const hex = Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, "0")).join("");
+  HTML_ETAG = `"${hex.slice(0, 16)}"`;
+  return HTML_ETAG;
+}
 var UUID_RE = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
 function idMpSeguro(valor) {
   return typeof valor === "string" && /^[A-Za-z0-9_-]{1,64}$/.test(valor) ? valor : null;
@@ -436,9 +444,16 @@ var worker_default = {
     if (url.pathname === "/icon-192.png") return new Response(base64ParaBytes(ICON_192_B64), { headers: { "content-type": "image/png", "cache-control": "public, max-age=86400" } });
     if (url.pathname === "/apple-touch-icon.png" || url.pathname === "/apple-touch-icon-precomposed.png") return new Response(base64ParaBytes(ICON_180_B64), { headers: { "content-type": "image/png", "cache-control": "public, max-age=86400" } });
     if (url.pathname === "/favicon.ico" || url.pathname === "/favicon-32.png") return new Response(base64ParaBytes(ICON_32_B64), { headers: { "content-type": "image/png", "cache-control": "public, max-age=86400" } });
-    return new Response(html, {
-      headers: { "content-type": "text/html; charset=UTF-8" }
-    });
+    const etag = await etagDoHtml();
+    const cabecalhosHtml = {
+      "content-type": "text/html; charset=UTF-8",
+      "cache-control": "no-cache",
+      etag
+    };
+    if (request.headers.get("if-none-match") === etag) {
+      return new Response(null, { status: 304, headers: { "cache-control": "no-cache", etag } });
+    }
+    return new Response(html, { headers: cabecalhosHtml });
   },
   async scheduled(event, env, ctx) {
     ctx.waitUntil(avisarTrialsAcabando(env));

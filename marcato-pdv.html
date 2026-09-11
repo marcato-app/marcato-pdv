@@ -2665,6 +2665,18 @@ let clienteSelecionadoVF = null; // {id, nome} — cliente escolhido pra venda f
 const esc = (v) => String(v==null ? '' : v)
   .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
   .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+/* Erro de rede vem com o texto cru do navegador ("Load failed" no Safari,
+   "Failed to fetch" no Chrome). Traduz pra algo que diga o que fazer. */
+function mensagemDeErroAuth(error){
+  const bruto = (error && error.message) || 'Erro desconhecido';
+  if(/load failed|failed to fetch|network ?error|networkerror/i.test(bruto)){
+    return 'Não consegui falar com o servidor. Verifique a conexão e tente de novo — se a internet estiver boa, o servidor pode estar fora do ar por alguns minutos.';
+  }
+  if(/invalid login credentials/i.test(bruto)) return 'E-mail ou senha incorretos.';
+  if(/email not confirmed/i.test(bruto)) return 'Confirme seu e-mail antes de entrar — o link foi enviado no cadastro.';
+  if(/rate limit|too many requests/i.test(bruto)) return 'Muitas tentativas seguidas. Espere um minuto e tente de novo.';
+  return bruto;
+}
 const money = (v) => (isNaN(v)?0:v).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const moneyCompacta = (v) => (isNaN(v)?0:v).toLocaleString('pt-BR',{style:'currency',currency:'BRL',notation:'compact',maximumFractionDigits:1});
 const uid = () => (crypto.randomUUID ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c=>{ const r=Math.random()*16|0, v=c=='x'?r:(r&0x3|0x8); return v.toString(16); }));
@@ -7612,8 +7624,11 @@ document.getElementById('btnLogin').addEventListener('click', async ()=>{
   const statusEl = document.getElementById('authStatus');
   statusEl.style.color = 'var(--warn)';
   statusEl.textContent = 'Entrando...';
-  const { data, error } = await sb.auth.signInWithPassword({email, password:senha});
-  if(error){ statusEl.textContent = 'Erro: ' + error.message; return; }
+  let data, error;
+  try{
+    ({ data, error } = await sb.auth.signInWithPassword({email, password:senha}));
+  }catch(err){ error = err; }
+  if(error){ statusEl.textContent = mensagemDeErroAuth(error); return; }
   statusEl.textContent = '';
   await iniciarSessao(data.session);
 });
@@ -7624,8 +7639,11 @@ document.getElementById('btnEsqueciSenha').addEventListener('click', async ()=>{
   if(!email){ statusEl.style.color = 'var(--warn)'; statusEl.textContent = 'Digite seu e-mail no campo acima primeiro.'; return; }
   statusEl.style.color = 'var(--warn)';
   statusEl.textContent = 'Enviando...';
-  const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin });
-  if(error){ statusEl.textContent = 'Erro: ' + error.message; return; }
+  let error;
+  try{
+    ({ error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin }));
+  }catch(err){ error = err; }
+  if(error){ statusEl.textContent = mensagemDeErroAuth(error); return; }
   statusEl.style.color = 'var(--green-dark)';
   statusEl.textContent = 'Se esse e-mail tiver uma conta, enviamos um link pra redefinir a senha.';
 });
@@ -7637,8 +7655,11 @@ document.getElementById('btnCriarConta').addEventListener('click', async ()=>{
   if(senha.length < 6){ statusEl.textContent = 'A senha precisa ter pelo menos 6 caracteres.'; return; }
   statusEl.style.color = 'var(--warn)';
   statusEl.textContent = 'Criando conta...';
-  const { data, error } = await sb.auth.signUp({email, password:senha, options:{ emailRedirectTo: location.origin }});
-  if(error){ statusEl.textContent = 'Erro: ' + error.message; return; }
+  let data, error;
+  try{
+    ({ data, error } = await sb.auth.signUp({email, password:senha, options:{ emailRedirectTo: location.origin }}));
+  }catch(err){ error = err; }
+  if(error){ statusEl.textContent = mensagemDeErroAuth(error); return; }
   if(!data.session){
     statusEl.style.color = 'var(--green-dark)';
     statusEl.textContent = 'Conta criada! Verifique seu e-mail para confirmar antes de entrar.';
