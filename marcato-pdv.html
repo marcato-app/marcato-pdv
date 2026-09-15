@@ -218,6 +218,16 @@ main{flex:1; padding:28px 34px 60px; max-width:1220px;}
 .kpi .sub{font-size:11px; color:var(--ink-soft); margin-top:4px;}
 .kpi:hover{ transform:translateY(-2px); box-shadow:var(--shadow-md); border-color:var(--line-2); }
 
+/* O <form> do login nao pode herdar margem padrao do navegador. */
+.auth-card form{ margin:0; }
+.aviso-conexao{
+  display:flex; align-items:center; gap:12px; justify-content:space-between;
+  background:var(--warn-soft); border-radius:var(--radius-sm); padding:12px 14px; margin-bottom:16px;
+}
+.aviso-conexao b{ display:block; font-size:13px; color:var(--warn); margin-bottom:2px; }
+.aviso-conexao span{ font-size:11.5px; color:var(--ink-soft); line-height:1.45; }
+.aviso-conexao button{ flex-shrink:0; }
+
 /* ---------- Painel: resultado do mês ----------
    Uma pergunta por tela: "sobrou ou faltou?". O valor domina a hierarquia,
    a comparação com o mês passado dá o sentido, e a barra mostra a composição
@@ -1180,17 +1190,21 @@ main:not(#view-pdv) td, .mono{
       <div class="tab2 active" data-atab="entrar">Entrar</div>
       <div class="tab2" data-atab="criar">Criar conta</div>
     </div>
-    <div id="atab-entrar">
-      <div class="field" style="margin-bottom:10px;"><label>E-mail</label><input type="email" id="loginEmail" style="width:100%;" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false"></div>
-      <div class="field" style="margin-bottom:8px;"><label>Senha</label><input type="password" id="loginSenha" style="width:100%;" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false"></div>
+    <div id="authAvisoConexao" class="aviso-conexao hide">
+      <div><b>Você continua conectado</b><span id="authAvisoTexto">Só não consegui falar com o servidor agora.</span></div>
+      <button type="button" class="btn-ghost btn-sm" onclick="location.reload()">Tentar de novo</button>
+    </div>
+    <form id="atab-entrar" autocomplete="on">
+      <div class="field" style="margin-bottom:10px;"><label>E-mail</label><input type="email" name="email" id="loginEmail" style="width:100%;" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false" required></div>
+      <div class="field" style="margin-bottom:8px;"><label>Senha</label><input type="password" name="password" id="loginSenha" style="width:100%;" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false" required></div>
       <div style="text-align:right; margin-bottom:14px;"><span id="btnEsqueciSenha" style="font-size:11.5px; color:var(--brand); cursor:pointer; font-weight:600;">Esqueci minha senha</span></div>
-      <button class="btn-teal" id="btnLogin" style="width:100%;">Entrar</button>
-    </div>
-    <div id="atab-criar" class="hide">
-      <div class="field" style="margin-bottom:10px;"><label>E-mail</label><input type="email" id="cadEmail" style="width:100%;" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false"></div>
-      <div class="field" style="margin-bottom:14px;"><label>Senha (mínimo 6 caracteres)</label><input type="password" id="cadSenha" style="width:100%;" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false"></div>
-      <button class="btn-teal" id="btnCriarConta" style="width:100%;">Criar conta</button>
-    </div>
+      <button type="submit" class="btn-teal" id="btnLogin" style="width:100%;">Entrar</button>
+    </form>
+    <form id="atab-criar" class="hide" autocomplete="on">
+      <div class="field" style="margin-bottom:10px;"><label>E-mail</label><input type="email" name="email" id="cadEmail" style="width:100%;" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false" required></div>
+      <div class="field" style="margin-bottom:14px;"><label>Senha (mínimo 6 caracteres)</label><input type="password" name="password" id="cadSenha" style="width:100%;" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false" required minlength="6"></div>
+      <button type="submit" class="btn-teal" id="btnCriarConta" style="width:100%;">Criar conta</button>
+    </form>
     <div id="authStatus" style="font-size:12px; color:var(--warn); margin-top:12px; min-height:16px;"></div>
     <div style="text-align:center; margin-top:22px; font-size:10.5px; color:var(--ink-soft);">Sistema desenvolvido por <b style="color:var(--ink); font-weight:800;">Identidade<span style="color:var(--brand);">Vision</span></b></div>
   </div>
@@ -7618,7 +7632,8 @@ document.querySelectorAll('.tab2[data-atab]').forEach(tab=>{
   });
 });
 
-document.getElementById('btnLogin').addEventListener('click', async ()=>{
+document.getElementById('atab-entrar').addEventListener('submit', async (ev)=>{
+  ev.preventDefault();
   const email = document.getElementById('loginEmail').value.trim();
   const senha = document.getElementById('loginSenha').value;
   const statusEl = document.getElementById('authStatus');
@@ -7648,7 +7663,8 @@ document.getElementById('btnEsqueciSenha').addEventListener('click', async ()=>{
   statusEl.textContent = 'Se esse e-mail tiver uma conta, enviamos um link pra redefinir a senha.';
 });
 
-document.getElementById('btnCriarConta').addEventListener('click', async ()=>{
+document.getElementById('atab-criar').addEventListener('submit', async (ev)=>{
+  ev.preventDefault();
   const email = document.getElementById('cadEmail').value.trim();
   const senha = document.getElementById('cadSenha').value;
   const statusEl = document.getElementById('authStatus');
@@ -8078,6 +8094,38 @@ document.getElementById('btnSalvarNovaSenha').addEventListener('click', async ()
   await iniciarSessao(sessaoRecuperacaoPendente);
 });
 
+/* O supabase-js guarda a sessao em localStorage numa chave sb-<projeto>-auth-token.
+   Saber que ela existe permite diferenciar "nunca entrou" de "entrou, mas agora
+   nao da pra falar com o servidor" — sem isso, qualquer oscilacao de rede joga
+   a pessoa na tela de login mesmo com a sessao salva e valida. */
+function temSessaoGuardada(){
+  try{
+    for(let i=0; i<localStorage.length; i++){
+      const chave = localStorage.key(i);
+      if(/^sb-.+-auth-token$/.test(chave) && localStorage.getItem(chave)) return true;
+    }
+  }catch(e){}
+  return false;
+}
+async function sessaoComTentativas(){
+  const tentativas = temSessaoGuardada() ? 3 : 1;
+  for(let i=0; i<tentativas; i++){
+    try{
+      const { data, error } = await sb.auth.getSession();
+      if(error) throw error;
+      return data.session;
+    }catch(err){
+      if(i === tentativas - 1) throw err;
+      await new Promise(r => setTimeout(r, 700 * Math.pow(2, i)));
+    }
+  }
+  return null;
+}
+function avisarFalhaDeConexao(){
+  const aviso = document.getElementById('authAvisoConexao');
+  if(aviso) aviso.classList.remove('hide');
+}
+
 (async function initApp(){
   // Link que o proprio Supabase ja recusou (expirado ou usado duas vezes).
   if(marcadorUrlAuth.erro){
@@ -8088,7 +8136,15 @@ document.getElementById('btnSalvarNovaSenha').addEventListener('click', async ()
     return;
   }
 
-  const { data: { session } } = await sb.auth.getSession();
+  let session = null;
+  try{
+    session = await sessaoComTentativas();
+  }catch(err){
+    console.error('Não consegui recuperar a sessão:', err);
+    // A sessao continua salva — o problema e a rede, nao o login. Avisar isso
+    // evita que a pessoa ache que foi deslogada e fique digitando senha.
+    if(temSessaoGuardada()) avisarFalhaDeConexao();
+  }
 
   // No fluxo PKCE a URL nao traz "type=recovery": quem avisa e o evento, que
   // pode chegar um instante depois do getSession. Espera antes de desistir.
