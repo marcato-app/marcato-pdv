@@ -299,6 +299,11 @@ main{flex:1; padding:28px 34px 60px; max-width:1220px;}
   font-variant-numeric:tabular-nums; letter-spacing:-.01em;
 }
 
+/* Verde do WhatsApp — a acao e reconhecida pela cor antes de ler o rotulo. */
+.rm.rm-zap:hover{ background:var(--green-glow); color:var(--green-dark); }
+.btn-zap{ border-color:var(--green); color:var(--green-dark); }
+.btn-zap:hover{ background:var(--green-glow); border-color:var(--green-dark); color:var(--green-dark); }
+
 /* Nota interna da Venda Fornecedor: nunca sai no PDF, e so pra loja lembrar
    do combinado. Corta em duas linhas; o texto todo fica no title. */
 .nota-interna{
@@ -4603,7 +4608,10 @@ document.getElementById('btnSalvarVendaFornecedor').addEventListener('click', as
     statusEl.textContent = `✓ Orçamento salvo (${rows.length} aparelho${rows.length>1?'s':''}). Aprove na aba Histórico quando o cliente fechar.`;
     statusEl.style.color = 'var(--green-dark)';
   }
-  pdfEl.innerHTML = `<button class="btn-teal btn-sm" onclick="gerarPdfVendaFornecedor('${rows[0].id}')">📤 Compartilhar PDF (WhatsApp)</button>`;
+  pdfEl.innerHTML = `<div style="display:flex; gap:8px; flex-wrap:wrap;">
+    <button type="button" class="btn-teal btn-sm" onclick="gerarPdfVendaFornecedor('${rows[0].id}')">Compartilhar PDF</button>
+    <button type="button" class="btn-ghost btn-sm btn-zap" onclick="enviarWhatsappVendaFornecedor('${rows[0].id}')">Enviar resumo no WhatsApp</button>
+  </div>`;
   pdfEl.classList.remove('hide');
 });
 
@@ -4849,7 +4857,7 @@ function renderVendasFornecedor(){
       const marcaFrete = v.valorFrete > 0 ? ` <span class="tag" style="background:var(--tint-neutral);">+${money(v.valorFrete)} frete</span>` : '';
       const nota = (v.observacoes || '').trim();
       const notaHtml = nota ? `<div class="nota-interna" title="${esc(nota)}">${esc(nota)}</div>` : '';
-      tr.innerHTML = `<td>${v.dataVenda ? new Date(v.dataVenda).toLocaleString('pt-BR') : '—'}</td><td><span class="tag ${orcamento?'pendente':'pago'}">${orcamento?'Orçamento':'Vendido'}</span>${marcaFrete}</td><td>${esc(cliente ? cliente.nome : '—')}${notaHtml}</td><td data-col="telefone">${esc(v.telefone)}</td><td data-col="capacidade">${esc(v.capacidade||'—')}</td><td data-col="cor">${esc(v.cor||'—')}</td><td data-col="imei" class="mono" style="font-size:11.5px;">${esc(v.imei||'—')}</td><td data-col="envio">${ENVIO_LABEL[v.tipoEnvio]||v.tipoEnvio}</td><td><b>${money(v.valorVenda)}</b></td><td>${acaoSituacao}<span class="rm" onclick="iniciarEdicaoVF('${v.id}')">editar</span><span class="rm" onclick="abrirFreteObsVF('${v.id}')">frete e obs.</span><span class="rm" onclick="gerarPdfVendaFornecedor('${v.id}')">compartilhar PDF</span><span class="rm rm-perigo" onclick="apagarVendaFornecedor('${v.id}')">apagar</span></td>`;
+      tr.innerHTML = `<td>${v.dataVenda ? new Date(v.dataVenda).toLocaleString('pt-BR') : '—'}</td><td><span class="tag ${orcamento?'pendente':'pago'}">${orcamento?'Orçamento':'Vendido'}</span>${marcaFrete}</td><td>${esc(cliente ? cliente.nome : '—')}${notaHtml}</td><td data-col="telefone">${esc(v.telefone)}</td><td data-col="capacidade">${esc(v.capacidade||'—')}</td><td data-col="cor">${esc(v.cor||'—')}</td><td data-col="imei" class="mono" style="font-size:11.5px;">${esc(v.imei||'—')}</td><td data-col="envio">${ENVIO_LABEL[v.tipoEnvio]||v.tipoEnvio}</td><td><b>${money(v.valorVenda)}</b></td><td>${acaoSituacao}<span class="rm" onclick="iniciarEdicaoVF('${v.id}')">editar</span><span class="rm" onclick="abrirFreteObsVF('${v.id}')">frete e obs.</span><span class="rm" onclick="gerarPdfVendaFornecedor('${v.id}')">compartilhar PDF</span><span class="rm rm-zap" onclick="enviarWhatsappVendaFornecedor('${v.id}')">WhatsApp</span><span class="rm rm-perigo" onclick="apagarVendaFornecedor('${v.id}')">apagar</span></td>`;
     }
     tbody.appendChild(tr);
   });
@@ -5211,6 +5219,64 @@ async function gerarBlobPdfVendaFornecedor(dados){
   doc.text('Identidade Vision', pageWidth/2, y, { align:'center' });
 
   return doc.output('blob');
+}
+
+/* ---- Resumo do pedido pra mandar no WhatsApp junto com o PDF ----
+   Vai só o que o cliente pode ver: aparelhos, preço de venda, frete e total.
+   Fora: valor de compra e a observação interna da loja. ---- */
+function resumoTextoVendaFornecedor(dados){
+  const emp = empresaAtual || {};
+  const cliente = dados.v.clienteId ? clientes.find(c=>c.id===dados.v.clienteId) : null;
+  const orcamento = ehOrcamentoVF(dados.v);
+  const frete = dados.v.valorFrete || 0;
+
+  const linhas = [];
+  if(emp.razao_social) linhas.push(`*${emp.razao_social}*`);
+  linhas.push(`${orcamento ? 'Orçamento' : 'Pedido'}${cliente ? ' para ' + cliente.nome : ''}`);
+  linhas.push('');
+  dados.itens.forEach(it=>{
+    const detalhe = [it.capacidade, it.cor].filter(Boolean).join(' ');
+    linhas.push(`• ${it.telefone}${detalhe ? ' ' + detalhe : ''} — ${money(it.valorVenda)}`);
+  });
+  if(frete > 0){
+    linhas.push('');
+    linhas.push(`${ENVIO_LABEL[dados.v.tipoEnvio] || 'Frete'}: ${money(frete)}`);
+  }
+  linhas.push('');
+  linhas.push(`*Total: ${money(dados.totalVenda)}*`);
+  linhas.push('');
+  linhas.push('Segue o PDF com os detalhes.');
+  return linhas.join('\n');
+}
+
+/* wa.me exige só dígitos com DDI. O telefone do cadastro vem formatado
+   ("(11) 98888-1111") e normalmente sem o 55 na frente. */
+function telefoneParaWhatsapp(bruto){
+  const digitos = String(bruto || '').replace(/\D/g, '');
+  if(!digitos) return '';
+  if(digitos.length === 10 || digitos.length === 11) return '55' + digitos;  // BR sem DDI
+  if(digitos.length >= 12) return digitos;                                   // já tem DDI
+  return '';                                                                 // curto demais pra ser telefone
+}
+
+/* ---- Abre o WhatsApp (app no Mac/celular, ou o Web) já com o resumo escrito
+   e, quando o cliente tem telefone no cadastro, já na conversa dele.
+   O WhatsApp não aceita anexo por link — nenhum app aceita — então o PDF
+   continua indo pelo botão de compartilhar, num passo separado. ---- */
+function enviarWhatsappVendaFornecedor(id){
+  const dados = montarDadosPdfVendaFornecedor(id);
+  if(!dados) return;
+  const texto = resumoTextoVendaFornecedor(dados);
+  const cliente = dados.v.clienteId ? clientes.find(c=>c.id===dados.v.clienteId) : null;
+  const numero = telefoneParaWhatsapp(cliente && cliente.telefone);
+
+  // Rede de segurança: se o WhatsApp abrir sem o texto (acontece em algumas
+  // versões do app de desktop), o resumo já está na área de transferência.
+  try{ if(navigator.clipboard) navigator.clipboard.writeText(texto); }catch(e){}
+
+  const url = `https://wa.me/${numero}?text=${encodeURIComponent(texto)}`;
+  const aberta = window.open(url, '_blank');
+  if(!aberta) alert('Não consegui abrir o WhatsApp. O resumo foi copiado — é só colar na conversa.');
 }
 
 /* ---- Gera o PDF de verdade (via jsPDF) e abre o menu de compartilhamento nativo do
