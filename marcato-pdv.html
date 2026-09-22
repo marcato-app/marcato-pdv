@@ -2686,9 +2686,22 @@ const esc = (v) => String(v==null ? '' : v)
   .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 /* Erro de rede vem com o texto cru do navegador ("Load failed" no Safari,
    "Failed to fetch" no Chrome). Traduz pra algo que diga o que fazer. */
+function ehErroDeRede(error){
+  const bruto = (error && error.message) || '';
+  return /load failed|failed to fetch|network ?error|networkerror/i.test(bruto);
+}
+/* Vale pra qualquer gravação, não só pro login: o texto cru não diz se a pessoa
+   perdeu o que digitou, se deve tentar de novo, ou se o problema é dela. */
+function mensagemDeErro(error, acao){
+  if(ehErroDeRede(error)){
+    return 'Não consegui falar com o servidor — nada foi alterado. Confira a internet e tente de novo; o que você preencheu continua aqui.';
+  }
+  const bruto = (error && error.message) || 'Erro desconhecido';
+  return acao ? `${acao}: ${bruto}` : bruto;
+}
 function mensagemDeErroAuth(error){
   const bruto = (error && error.message) || 'Erro desconhecido';
-  if(/load failed|failed to fetch|network ?error|networkerror/i.test(bruto)){
+  if(ehErroDeRede(error)){
     return 'Não consegui falar com o servidor. Verifique a conexão e tente de novo — se a internet estiver boa, o servidor pode estar fora do ar por alguns minutos.';
   }
   if(/invalid login credentials/i.test(bruto)) return 'E-mail ou senha incorretos.';
@@ -3140,7 +3153,7 @@ function abrirModalNovaVenda(){
     if(!data){ statusEl.style.color='var(--warn)'; statusEl.textContent = 'Escolha a data antes de adicionar.'; return; }
     if((pix+cartao+dinheiro)===0){ statusEl.style.color='var(--warn)'; statusEl.textContent = 'Preencha ao menos um valor (Pix, Cartão ou Dinheiro).'; return; }
     const { data: row, error } = await sb.from('vendas').insert(comUserId({data, pix, cartao, dinheiro})).select().single();
-    if(error){ statusEl.style.color='var(--warn)'; statusEl.textContent = 'Erro ao salvar: '+error.message; return; }
+    if(error){ statusEl.style.color='var(--warn)'; statusEl.textContent = mensagemDeErro(error, 'Erro ao salvar'); return; }
     vendas.push(fromDbVenda(row));
     vendas.sort((a,b)=> a.data < b.data ? 1 : -1);
     fecharModal();
@@ -3150,7 +3163,7 @@ function abrirModalNovaVenda(){
 
 async function removerVenda(id){
   const { error } = await sb.from('vendas').delete().eq('id', id);
-  if(error){ alert('Erro ao remover: '+error.message); return; }
+  if(error){ alert(mensagemDeErro(error, 'Erro ao remover')); return; }
   vendas = vendas.filter(v=>v.id!==id);
   renderTudo();
 }
@@ -3196,7 +3209,7 @@ function abrirModalNovaDespesa(){
     if(!nome){ statusEl.style.color='var(--warn)'; statusEl.textContent = 'Escreva a descrição da despesa.'; return; }
     if(valor<=0){ statusEl.style.color='var(--warn)'; statusEl.textContent = 'Preencha o valor mensal.'; return; }
     const { data: row, error } = await sb.from('despesas').insert(comUserId({nome, valor, dia})).select().single();
-    if(error){ statusEl.style.color='var(--warn)'; statusEl.textContent = 'Erro ao salvar: '+error.message; return; }
+    if(error){ statusEl.style.color='var(--warn)'; statusEl.textContent = mensagemDeErro(error, 'Erro ao salvar'); return; }
     despesas.push(fromDbDespesa(row));
     fecharModal();
     renderTudo();
@@ -3204,7 +3217,7 @@ function abrirModalNovaDespesa(){
 }
 async function removerDespesa(id){
   const { error } = await sb.from('despesas').delete().eq('id', id);
-  if(error){ alert('Erro ao remover: '+error.message); return; }
+  if(error){ alert(mensagemDeErro(error, 'Erro ao remover')); return; }
   despesas = despesas.filter(d=>d.id!==id);
   renderTudo();
 }
@@ -3264,14 +3277,14 @@ document.getElementById('btnAddBoleto').addEventListener('click', async ()=>{
   }
 
   const { data: row, error } = await sb.from('boletos').insert(comUserId({beneficiario, valor, data_documento:dataDocumento, vencimento, status:'pendente'})).select().single();
-  if(error){ alert('Erro ao salvar boleto: '+error.message); return; }
+  if(error){ alert(mensagemDeErro(error, 'Erro ao salvar boleto')); return; }
   boletos.push(fromDbBoleto(row));
   ['bBenef','bValor','bDataDoc','bVenc'].forEach(id=>document.getElementById(id).value='');
   renderTudo();
 });
 async function removerBoleto(id){
   const { error } = await sb.from('boletos').delete().eq('id', id);
-  if(error){ alert('Erro ao remover: '+error.message); return; }
+  if(error){ alert(mensagemDeErro(error, 'Erro ao remover')); return; }
   boletos = boletos.filter(b=>b.id!==id);
   renderTudo();
 }
@@ -3280,7 +3293,7 @@ async function togglePago(id){
   if(!b) return;
   const novoStatus = b.status==='pago' ? 'pendente' : 'pago';
   const { error } = await sb.from('boletos').update({status:novoStatus}).eq('id', id);
-  if(error){ alert('Erro ao atualizar: '+error.message); return; }
+  if(error){ alert(mensagemDeErro(error, 'Erro ao atualizar')); return; }
   b.status = novoStatus;
   renderTudo();
 }
@@ -3558,14 +3571,14 @@ function abrirModalNovoCliente(){
     }catch(e){
       console.error('Erro ao salvar cliente:', e);
       statusEl.style.color = 'var(--warn)';
-      statusEl.textContent = 'Erro ao salvar: ' + e.message;
+      statusEl.textContent = mensagemDeErro(e, 'Erro ao salvar');
     }
   });
 }
 async function removerCliente(id){
   if(!confirm('Remover esse cliente? Orçamentos já feitos continuam guardados, só perdem o vínculo.')) return;
   const { error } = await sb.from('clientes').delete().eq('id', id);
-  if(error){ alert('Erro ao remover: '+error.message); return; }
+  if(error){ alert(mensagemDeErro(error, 'Erro ao remover')); return; }
   clientes = clientes.filter(c=>c.id!==id);
   renderTudo();
 }
@@ -3701,7 +3714,7 @@ document.getElementById('btnSalvarOrcamento').addEventListener('click', async ()
   }catch(e){
     console.error('Erro ao salvar orçamento:', e);
     statusEl.style.color = 'var(--warn)';
-    statusEl.textContent = 'Erro ao salvar: ' + e.message;
+    statusEl.textContent = mensagemDeErro(e, 'Erro ao salvar');
   }
 });
 
@@ -3710,14 +3723,14 @@ async function alternarStatusOrcamento(id){
   if(!o || o.status==='convertido') return;
   const proximo = {pendente:'aprovado', aprovado:'recusado', recusado:'pendente'}[o.status] || 'pendente';
   const { error } = await sb.from('orcamentos').update({status:proximo}).eq('id', id);
-  if(error){ alert('Erro ao atualizar: '+error.message); return; }
+  if(error){ alert(mensagemDeErro(error, 'Erro ao atualizar')); return; }
   o.status = proximo;
   renderTudo();
 }
 async function removerOrcamento(id){
   if(!confirm('Remover esse orçamento?')) return;
   const { error } = await sb.from('orcamentos').delete().eq('id', id);
-  if(error){ alert('Erro ao remover: '+error.message); return; }
+  if(error){ alert(mensagemDeErro(error, 'Erro ao remover')); return; }
   orcamentos = orcamentos.filter(o=>o.id!==id);
   renderTudo();
 }
@@ -3956,7 +3969,7 @@ function abrirModalNovaOS(){
     }catch(e){
       console.error('Erro ao abrir ordem de serviço:', e);
       statusEl.style.color = 'var(--warn)';
-      statusEl.textContent = 'Erro ao salvar: ' + e.message;
+      statusEl.textContent = mensagemDeErro(e, 'Erro ao salvar');
     }
   });
 }
@@ -3967,7 +3980,7 @@ async function atualizarStatusOS(id, novoStatus){
   const payload = {status: novoStatus};
   if(novoStatus==='entregue' && !o.dataEntrega) payload.data_entrega = new Date().toISOString();
   const { error } = await sb.from('ordens_servico').update(payload).eq('id', id);
-  if(error){ alert('Erro ao atualizar: '+error.message); renderOrdensServico(); return; }
+  if(error){ alert(mensagemDeErro(error, 'Erro ao atualizar')); renderOrdensServico(); return; }
   Object.assign(o, {status:novoStatus, dataEntrega: payload.data_entrega || o.dataEntrega});
   renderOrdensServico();
 }
@@ -3985,7 +3998,7 @@ async function confirmarValorFinalOS(id){
   const valor = parseFloat(document.getElementById('osValorFinalInput').value);
   if(isNaN(valor) || valor<0) return;
   const { error } = await sb.from('ordens_servico').update({valor_final: valor}).eq('id', id);
-  if(error){ alert('Erro ao salvar: '+error.message); return; }
+  if(error){ alert(mensagemDeErro(error, 'Erro ao salvar')); return; }
   const o = ordensServico.find(x=>x.id===id);
   if(o) o.valorFinal = valor;
   fecharModal();
@@ -3995,7 +4008,7 @@ async function confirmarValorFinalOS(id){
 async function removerOS(id){
   if(!confirm('Remover essa ordem de serviço?')) return;
   const { error } = await sb.from('ordens_servico').delete().eq('id', id);
-  if(error){ alert('Erro ao remover: '+error.message); return; }
+  if(error){ alert(mensagemDeErro(error, 'Erro ao remover')); return; }
   ordensServico = ordensServico.filter(o=>o.id!==id);
   renderOrdensServico();
 }
@@ -4182,7 +4195,7 @@ function abrirModalNovoTeste(){
   }catch(e){
     console.error('Erro ao salvar teste:', e);
     statusEl.style.color = 'var(--warn)';
-    statusEl.textContent = 'Erro ao salvar: ' + e.message;
+    statusEl.textContent = mensagemDeErro(e, 'Erro ao salvar');
   }
   });
 }
@@ -4190,7 +4203,7 @@ function abrirModalNovoTeste(){
 async function removerTeste(id){
   if(!confirm('Remover esse teste?')) return;
   const { error } = await sb.from('testes_aparelho').delete().eq('id', id);
-  if(error){ alert('Erro ao remover: '+error.message); return; }
+  if(error){ alert(mensagemDeErro(error, 'Erro ao remover')); return; }
   testesAparelho = testesAparelho.filter(t=>t.id!==id);
   renderTestes();
 }
@@ -4318,14 +4331,14 @@ document.getElementById('btnSalvarCompra').addEventListener('click', async ()=>{
   }catch(e){
     console.error('Erro ao registrar compra:', e);
     statusEl.style.color = 'var(--warn)';
-    statusEl.textContent = 'Erro ao salvar: ' + e.message;
+    statusEl.textContent = mensagemDeErro(e, 'Erro ao salvar');
   }
 });
 
 async function removerCompra(id){
   if(!confirm('Remover essa compra? O estoque já somado não será revertido automaticamente.')) return;
   const { error } = await sb.from('compras').delete().eq('id', id);
-  if(error){ alert('Erro ao remover: '+error.message); return; }
+  if(error){ alert(mensagemDeErro(error, 'Erro ao remover')); return; }
   compras = compras.filter(c=>c.id!==id);
   renderTudo();
 }
@@ -4397,7 +4410,7 @@ async function confirmarAjusteEstoque(produtoId){
   const delta = novoEstoque - (p.estoque||0);
   if(delta===0){ fecharModal(); return; }
   const { error } = await sb.from('produtos').update({estoque:novoEstoque}).eq('id', produtoId);
-  if(error){ alert('Erro ao ajustar estoque: '+error.message); return; }
+  if(error){ alert(mensagemDeErro(error, 'Erro ao ajustar estoque')); return; }
   p.estoque = novoEstoque;
   const { data: movRow, error: erroMov } = await sb.from('movimentacoes_estoque').insert(comUserId({
     produto_id: produtoId, produto_nome: p.nome, tipo:'ajuste', quantidade: delta, motivo
@@ -4493,6 +4506,8 @@ function abrirNovoClienteVF(){
         <option value="atacado">Atacado</option>
       </select>
     </div>
+    <div class="field" style="margin-bottom:10px;"><label>Telefone / WhatsApp</label><input type="tel" id="ncTelefone" placeholder="(00) 00000-0000" style="width:100%;" autocomplete="tel"></div>
+    <div class="field" style="margin-bottom:10px;"><label>E-mail</label><input type="email" id="ncEmail" placeholder="opcional" style="width:100%;" autocapitalize="off" autocorrect="off" spellcheck="false"></div>
     <div class="field" style="margin-bottom:10px;"><label>CPF/CNPJ</label><input type="text" id="ncCpfCnpj" placeholder="opcional" style="width:100%;"></div>
     <div class="field" style="margin-bottom:14px;"><label>Endereço completo (com CEP)</label><input type="text" id="ncEndereco" placeholder="opcional" style="width:100%;"></div>
     <button class="btn-teal" id="btnSalvarNovoClienteVF" style="width:100%;">Salvar cliente</button>
@@ -4502,16 +4517,19 @@ function abrirNovoClienteVF(){
     const statusEl = document.getElementById('ncStatus');
     const nome = document.getElementById('ncNome').value.trim();
     const tipoCliente = document.getElementById('ncTipoCliente').value;
+    const telefone = document.getElementById('ncTelefone').value.trim();
+    const email = document.getElementById('ncEmail').value.trim();
     const cpfCnpj = document.getElementById('ncCpfCnpj').value.trim();
     const endereco = document.getElementById('ncEndereco').value.trim();
     try{
-      const c = await salvarClienteNoBanco({nome, tipoCliente, cpfCnpj, endereco});
+      const c = await salvarClienteNoBanco({nome, telefone, email, cpfCnpj, endereco, tipoCliente});
       clienteSelecionadoVF = c;
       document.getElementById('vfClienteNome').value = c.nome;
       fecharModal();
     }catch(e){
+      console.error('Erro ao salvar cliente:', e);
       statusEl.style.color = 'var(--warn)';
-      statusEl.textContent = e.message;
+      statusEl.textContent = mensagemDeErro(e);
     }
   });
   document.getElementById('ncNome').focus();
@@ -4587,7 +4605,7 @@ document.getElementById('btnSalvarVendaFornecedor').addEventListener('click', as
   // somar, o frete e contado uma vez por grupo.
   const extras = { valor_frete: valorFrete, observacoes: observacoes || null };
   const { rows, error, semColunaStatus, semExtras } = await inserirVendasFornecedor(base, extras);
-  if(error){ statusEl.textContent = 'Erro ao salvar: ' + error.message; statusEl.style.color = 'var(--warn)'; return; }
+  if(error){ statusEl.textContent = mensagemDeErro(error, 'Erro ao salvar'); statusEl.style.color = 'var(--warn)'; return; }
   rows.forEach(row => vendasFornecedor.unshift(fromDbVendaFornecedor(row)));
 
   itensVendaFornecedorAtual = [];
@@ -4697,7 +4715,7 @@ async function confirmarAprovacaoOrcamentoVF(id){
       statusEl.style.color = 'var(--warn)';
       statusEl.textContent = pareceColunaAusente(error)
         ? 'Falta a coluna "status" no banco. Rode a migração do README e tente de novo.'
-        : 'Erro ao aprovar: ' + error.message;
+        : mensagemDeErro(error, 'Erro ao aprovar');
       botao.disabled = false;
       return;
     }
@@ -4749,7 +4767,7 @@ async function salvarFreteObsVF(id){
       statusEl.style.color = 'var(--warn)';
       statusEl.textContent = pareceColunaAusente(error)
         ? 'Faltam as colunas "valor_frete"/"observacoes" no banco. Rode a migração do README.'
-        : 'Erro ao salvar: ' + error.message;
+        : mensagemDeErro(error, 'Erro ao salvar');
       botao.disabled = false;
       return;
     }
@@ -4768,7 +4786,7 @@ async function voltarParaOrcamentoVF(id){
   for(const it of itens){
     const { data, error } = await sb.from('vendas_fornecedor')
       .update({ status: 'orcamento' }).eq('id', it.id).select().maybeSingle();
-    if(error){ alert('Erro: ' + error.message); return; }
+    if(error){ alert(mensagemDeErro(error, 'Erro')); return; }
     const idx = vendasFornecedor.findIndex(v=>v.id===it.id);
     if(idx>-1 && data) vendasFornecedor[idx] = fromDbVendaFornecedor(data);
   }
@@ -4798,7 +4816,7 @@ async function salvarEdicaoVF(id){
   const { data, error } = await sb.from('vendas_fornecedor')
     .update({ telefone, capacidade, cor, imei, valor_venda: valorVenda })
     .eq('id', id).select().maybeSingle();
-  if(error){ alert('Erro ao salvar edição: ' + error.message); return; }
+  if(error){ alert(mensagemDeErro(error, 'Erro ao salvar edição')); return; }
   const idx = vendasFornecedor.findIndex(v=>v.id===id);
   if(idx>-1) vendasFornecedor[idx] = fromDbVendaFornecedor(data);
   editandoVfId = null;
@@ -4809,7 +4827,7 @@ async function salvarEdicaoVF(id){
 async function apagarVendaFornecedor(id){
   if(!confirm('Apagar essa venda? Isso não pode ser desfeito.')) return;
   const { error } = await sb.from('vendas_fornecedor').delete().eq('id', id);
-  if(error){ alert('Erro ao apagar: ' + error.message); return; }
+  if(error){ alert(mensagemDeErro(error, 'Erro ao apagar')); return; }
   vendasFornecedor = vendasFornecedor.filter(v=>v.id!==id);
   renderVendasFornecedor();
   renderPainel();
@@ -5667,7 +5685,7 @@ function abrirModalNovoLancamento(tipoInicial){
     }catch(e){
       console.error('Erro ao salvar lançamento:', e);
       statusEl.style.color = 'var(--warn)';
-      statusEl.textContent = 'Erro ao salvar: ' + e.message;
+      statusEl.textContent = mensagemDeErro(e, 'Erro ao salvar');
     }
   });
 }
@@ -6167,7 +6185,7 @@ document.getElementById('btnAddProduto').addEventListener('click', async ()=>{
     nome, preco, estoque: isNaN(estoque)?null:estoque, categoria: categoria||'Geral', codigo_barras: codigoBarras||null,
     vendido_por_peso: porPeso, foto_url: fotoUrl, fornecedor: fornecedor||null, controla_serie: controlaSerie, garantia_meses: garantiaMeses
   })).select().single();
-  if(error){ alert('Erro ao salvar produto: '+error.message); return; }
+  if(error){ alert(mensagemDeErro(error, 'Erro ao salvar produto')); return; }
   produtos.push(fromDbProduto(row));
 
   if(controlaSerie && imeis.length>0){
@@ -6187,7 +6205,7 @@ document.getElementById('btnAddProduto').addEventListener('click', async ()=>{
 });
 async function removerProduto(id){
   const { error } = await sb.from('produtos').delete().eq('id', id);
-  if(error){ alert('Erro ao remover: '+error.message); return; }
+  if(error){ alert(mensagemDeErro(error, 'Erro ao remover')); return; }
   produtos = produtos.filter(p=>p.id!==id);
   renderTudo();
 }
@@ -6256,7 +6274,7 @@ document.getElementById('btnConfirmarPerda').addEventListener('click', async ()=
   const { data: row, error } = await sb.from('perdas').insert(comUserId({
     produto_id: produtoPerdaAtual.id, produto_nome: produtoPerdaAtual.nome, quantidade, unidade, motivo
   })).select().single();
-  if(error){ alert('Erro ao registrar perda: '+error.message); return; }
+  if(error){ alert(mensagemDeErro(error, 'Erro ao registrar perda')); return; }
   perdas.unshift(fromDbPerda(row));
 
   if(produtoPerdaAtual.estoque !== null && !produtoPerdaAtual.controlaSerie){
@@ -6578,7 +6596,7 @@ async function adicionarAoCarrinhoPorPeso(produto){
     mostrarStatusBalanca(`✓ Peso lido: ${peso.toFixed(3)} kg — ${produto.nome}`, 'var(--green-dark)');
     renderCarrinho();
   }catch(e){
-    mostrarStatusBalanca('Erro na balança: ' + e.message, 'var(--warn)');
+    mostrarStatusBalanca(mensagemDeErro(e, 'Erro na balança'), 'var(--warn)');
   }
 }
 async function repesarLinha(linhaId){
@@ -6592,7 +6610,7 @@ async function repesarLinha(linhaId){
     mostrarStatusBalanca(`✓ Peso atualizado: ${peso.toFixed(3)} kg`, 'var(--green-dark)');
     renderCarrinho();
   }catch(e){
-    mostrarStatusBalanca('Erro na balança: ' + e.message, 'var(--warn)');
+    mostrarStatusBalanca(mensagemDeErro(e, 'Erro na balança'), 'var(--warn)');
   }
 }
 
@@ -6938,13 +6956,13 @@ async function finalizarVenda(forma, opts){
   if(vendaHoje){
     const novoValor = vendaHoje[campoPdvCamel] + total;
     const { error } = await sb.from('vendas').update({[campoPdv]: novoValor}).eq('id', vendaHoje.id);
-    if(error){ alert('Erro ao atualizar vendas do dia: '+error.message); return; }
+    if(error){ alert(mensagemDeErro(error, 'Erro ao atualizar vendas do dia')); return; }
     vendaHoje[campoPdvCamel] = novoValor;
   } else {
     const payload = {data:hoje, pix:0, cartao:0, dinheiro:0, pix_pdv:0, cartao_pdv:0, dinheiro_pdv:0};
     payload[campoPdv] = total;
     const { data: row, error } = await sb.from('vendas').insert(comUserId(payload)).select().single();
-    if(error){ alert('Erro ao lançar venda do dia: '+error.message); return; }
+    if(error){ alert(mensagemDeErro(error, 'Erro ao lançar venda do dia')); return; }
     vendaHoje = fromDbVenda(row);
     vendas.push(vendaHoje);
   }
@@ -7111,7 +7129,7 @@ function renderHistorico(){
 }
 async function removerVendaPDV(id){
   const { error } = await sb.from('vendas_pdv').delete().eq('id', id);
-  if(error){ alert('Erro ao estornar: '+error.message); return; }
+  if(error){ alert(mensagemDeErro(error, 'Erro ao estornar')); return; }
   vendasPDV = vendasPDV.filter(v=>v.id!==id);
   renderTudo();
 }
@@ -7120,7 +7138,7 @@ async function removerVendaPDV(id){
 document.getElementById('btnAbrirCaixa').addEventListener('click', async ()=>{
   const valor = parseFloat(document.getElementById('caixaAberturaValor').value) || 0;
   const { data: row, error } = await sb.from('caixa_sessoes').insert(comUserId({status:'aberto', abertura:valor})).select().single();
-  if(error){ alert('Erro ao abrir caixa: '+error.message); return; }
+  if(error){ alert(mensagemDeErro(error, 'Erro ao abrir caixa')); return; }
   caixa = fromDbCaixa(row);
   document.getElementById('caixaAberturaValor').value='';
   renderCaixa();
@@ -7134,7 +7152,7 @@ document.getElementById('btnFecharCaixa').addEventListener('click', async ()=>{
   const { data: row, error } = await sb.from('caixa_sessoes').update({
     status:'fechado', fechamento:contado, fechamento_data:new Date().toISOString(), esperado, diferenca
   }).eq('id', caixa.id).select().single();
-  if(error){ alert('Erro ao fechar caixa: '+error.message); return; }
+  if(error){ alert(mensagemDeErro(error, 'Erro ao fechar caixa')); return; }
   caixa = fromDbCaixa(row);
   document.getElementById('caixaFechamentoValor').value='';
   renderCaixa();
@@ -7173,7 +7191,7 @@ async function confirmarMovimentoCaixa(){
   const motivo = document.getElementById('movMotivo').value.trim();
   if(valor<=0) return;
   const { data: row, error } = await sb.from('movimentos_caixa').insert(comUserId({caixa_sessao_id:caixa.id, tipo, valor, motivo: motivo||null})).select().single();
-  if(error){ alert('Erro ao registrar movimento: '+error.message); return; }
+  if(error){ alert(mensagemDeErro(error, 'Erro ao registrar movimento')); return; }
   movimentosCaixa.unshift(fromDbMovimento(row));
   fecharModal();
   renderCaixa();
@@ -7228,7 +7246,7 @@ function abrirModalNovoFuncionario(){
     }catch(e){
       console.error('Erro ao salvar funcionário:', e);
       statusEl.style.color = 'var(--warn)';
-      statusEl.textContent = 'Erro ao salvar: ' + e.message;
+      statusEl.textContent = mensagemDeErro(e, 'Erro ao salvar');
     }
   });
 }
@@ -7236,13 +7254,13 @@ async function toggleFuncionarioAtivo(id){
   const f = funcionarios.find(x=>x.id===id);
   if(!f) return;
   const { error } = await sb.from('funcionarios').update({ativo: !f.ativo}).eq('id', id);
-  if(error){ alert('Erro: '+error.message); return; }
+  if(error){ alert(mensagemDeErro(error, 'Erro')); return; }
   f.ativo = !f.ativo;
   renderTudo();
 }
 async function removerFuncionario(id){
   const { error } = await sb.from('funcionarios').delete().eq('id', id);
-  if(error){ alert('Erro ao remover: '+error.message); return; }
+  if(error){ alert(mensagemDeErro(error, 'Erro ao remover')); return; }
   funcionarios = funcionarios.filter(f=>f.id!==id);
   renderTudo();
 }
@@ -7403,7 +7421,7 @@ document.getElementById('btnSalvarEmpresaConfig').addEventListener('click', asyn
   }catch(e){
     console.error('Erro ao salvar dados da empresa:', e);
     statusEl.style.color = 'var(--warn)';
-    statusEl.textContent = 'Erro ao salvar: ' + e.message;
+    statusEl.textContent = mensagemDeErro(e, 'Erro ao salvar');
   }
 });
 
@@ -7426,7 +7444,7 @@ document.getElementById('btnSalvarMetasConfig').addEventListener('click', async 
   }catch(e){
     console.error('Erro ao salvar metas:', e);
     statusEl.style.color = 'var(--warn)';
-    statusEl.textContent = 'Erro ao salvar: ' + e.message;
+    statusEl.textContent = mensagemDeErro(e, 'Erro ao salvar');
   }
 });
 // Preenche automaticamente os campos de meta (Painel e Simulador de boleto) com o que
@@ -7459,7 +7477,7 @@ document.getElementById('btnSalvarSenhaGerente').addEventListener('click', async
   }catch(e){
     console.error('Erro ao salvar senha do gerente:', e);
     statusEl.style.color = 'var(--warn)';
-    statusEl.textContent = 'Erro ao salvar: ' + e.message;
+    statusEl.textContent = mensagemDeErro(e, 'Erro ao salvar');
   }
 });
 
@@ -7487,8 +7505,8 @@ document.getElementById('btnBackup').addEventListener('click', ()=>{
     if(statusEl){ statusEl.style.color = 'var(--green-dark)'; statusEl.textContent = '✓ Backup baixado'; }
   }catch(e){
     console.error('Erro ao gerar backup:', e);
-    if(statusEl){ statusEl.style.color = 'var(--warn)'; statusEl.textContent = 'Erro ao gerar backup: ' + e.message; }
-    alert('Não consegui gerar o backup: ' + e.message);
+    if(statusEl){ statusEl.style.color = 'var(--warn)'; statusEl.textContent = mensagemDeErro(e, 'Erro ao gerar backup'); }
+    alert(mensagemDeErro(e, 'Não consegui gerar o backup'));
   }
 });
 
@@ -7614,7 +7632,7 @@ fileFoto.addEventListener('change', async (e)=>{
         if(!confirmar) return;
       }
       const { data: row, error } = await sb.from('boletos').insert(comUserId({beneficiario, valor, vencimento, status:'pendente'})).select().single();
-      if(error){ alert('Erro ao salvar boleto: '+error.message); return; }
+      if(error){ alert(mensagemDeErro(error, 'Erro ao salvar boleto')); return; }
       boletos.push(fromDbBoleto(row));
       renderTudo();
       box.innerHTML = '<div class="upload-item"><span class="status-badge ok">adicionado</span><div class="info">Boleto salvo com sucesso</div></div>';
@@ -7678,7 +7696,7 @@ fileMassa.addEventListener('change', async (e)=>{
       }
       if(novos.length===0){ document.getElementById('massaLista').innerHTML = '<div class="upload-item"><span class="status-badge fail">nada adicionado</span><div class="info">Todos eram duplicados e foram pulados</div></div>'; btn.classList.add('hide'); return; }
       const { data: rows, error } = await sb.from('boletos').insert(novos.map(comUserId)).select();
-      if(error){ alert('Erro ao salvar boletos: '+error.message); return; }
+      if(error){ alert(mensagemDeErro(error, 'Erro ao salvar boletos')); return; }
       rows.forEach(row => boletos.push(fromDbBoleto(row)));
       renderTudo();
       btn.classList.add('hide');
@@ -7881,7 +7899,7 @@ async function abrirCheckoutAssinatura(){
     location.href = init_point;
   }catch(e){
     console.error('Erro ao abrir checkout:', e);
-    if(statusEl){ statusEl.style.color = 'var(--warn)'; statusEl.textContent = 'Erro ao abrir pagamento: ' + e.message; }
+    if(statusEl){ statusEl.style.color = 'var(--warn)'; statusEl.textContent = mensagemDeErro(e, 'Erro ao abrir pagamento'); }
   }
 }
 
@@ -7931,7 +7949,7 @@ async function carregarContaMestre(){
     status.textContent = '';
   }catch(e){
     status.style.color = 'var(--warn)';
-    status.textContent = 'Erro: ' + e.message;
+    status.textContent = mensagemDeErro(e, 'Erro');
   }
 }
 
@@ -7955,7 +7973,7 @@ async function liberarAcessoAdmin(empresaId, btnEl){
     if(!resp.ok) throw new Error(data.error || 'Erro ao liberar acesso');
     await carregarContaMestre();
   }catch(e){
-    alert('Erro: ' + e.message);
+    alert(mensagemDeErro(e, 'Erro'));
     btnEl.disabled = false;
     btnEl.textContent = textoOriginal;
   }
@@ -7986,7 +8004,7 @@ document.getElementById('btnEnviarEmailAdmin').addEventListener('click', async (
     status.textContent = `✓ Enviado pra ${data.enviados} empresa(s).`;
   }catch(e){
     status.style.color = 'var(--warn)';
-    status.textContent = 'Erro: ' + e.message;
+    status.textContent = mensagemDeErro(e, 'Erro');
   }
 });
 
@@ -8081,7 +8099,7 @@ document.getElementById('btnSalvarEmpresa').addEventListener('click', async ()=>
   const { data: row, error } = await sb.from('empresas').insert({
     user_id: usuarioAtual.id, cnpj, razao_social: razaoSocial||null, nome_completo: nomeCompleto, telefone: telefone||null, email, segmento
   }).select().single();
-  if(error){ statusEl.textContent = 'Erro ao salvar: ' + error.message; return; }
+  if(error){ statusEl.textContent = mensagemDeErro(error, 'Erro ao salvar'); return; }
 
   empresaAtual = row;
   segmentoAtual = segmento;
@@ -8154,7 +8172,7 @@ document.getElementById('btnSalvarNovaSenha').addEventListener('click', async ()
   statusEl.style.color = 'var(--warn)';
   statusEl.textContent = 'Salvando...';
   const { error } = await sb.auth.updateUser({ password: novaSenha });
-  if(error){ statusEl.textContent = 'Erro: ' + error.message; return; }
+  if(error){ statusEl.textContent = mensagemDeErro(error, 'Erro'); return; }
   statusEl.textContent = '';
   document.getElementById('recoveryScreen').classList.add('hide');
   await iniciarSessao(sessaoRecuperacaoPendente);
