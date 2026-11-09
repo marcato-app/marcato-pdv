@@ -281,6 +281,12 @@ main{flex:1; padding:28px 34px 60px; max-width:1220px;}
 .barra-composicao .parte.despesa{ background:var(--brand-2); }
 .barra-composicao .parte.boleto{ background:var(--brand); }
 
+.nota-pdv{
+  display:flex; align-items:center; justify-content:space-between; gap:12px; margin:2px 0 12px;
+  padding:10px 12px; border-radius:var(--radius-sm); background:var(--tint-neutral);
+  font-size:12px; color:var(--ink-soft); line-height:1.45;
+}
+.nota-pdv button{ flex-shrink:0; }
 .composicao-legenda{ display:grid; grid-template-columns:repeat(3,1fr); gap:4px; }
 .parcela{
   display:flex; align-items:flex-start; gap:8px; background:none; border:0; padding:9px 8px;
@@ -882,6 +888,65 @@ main:not(#view-pdv) td, .mono{
 /* Titulo de secao com a mesma respiracao em toda tela. */
 .section-title-lg + .chip-row, .section-title-lg + .panel{ margin-top:0; }
 
+/* ---------- Relatórios ---------- */
+.rel-filtros{ margin-bottom:16px; }
+.rel-filtros .rotulo-grupo{ display:block; font-size:10.5px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--ink-soft); margin-bottom:8px; }
+.rel-filtros .chip-row{ margin-bottom:12px; }
+.rel-filtros .formrow{ align-items:flex-end; margin-bottom:2px; }
+.rel-ajuda{ font-size:11.5px; color:var(--ink-soft); margin-top:8px; }
+.rel-resumo{ display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px; margin-bottom:16px; }
+.rel-card{ background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:14px 16px; box-shadow:var(--shadow-sm); min-width:0; }
+.rel-card.destaque{ border-color:var(--brand); background:linear-gradient(180deg, var(--brand-glow), transparent 75%), var(--card); }
+.rel-card .k{ font-size:10.5px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--ink-soft); }
+.rel-card .v{ font-family:'IBM Plex Mono',monospace; font-size:20px; font-weight:700; margin-top:6px; letter-spacing:-.018em; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
+.rel-card .v.ok{ color:var(--green-dark); }
+.rel-card .v.alerta{ color:var(--warn); }
+html.tema-escuro .rel-card .v.ok{ color:var(--green); }
+.rel-card .sub{ font-size:11.5px; color:var(--ink-soft); margin-top:3px; }
+.rel-acoes{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:8px; }
+.rel-status{ font-size:12.5px; min-height:18px; margin-bottom:12px; line-height:1.45; }
+.rel-tabela-panel{ padding:8px 8px 4px; }
+.rel-tabela-wrap{ overflow-x:auto; }
+.rel-tabela-wrap td.nw{ white-space:nowrap; }
+.rel-tag{ display:inline-block; padding:3px 9px; border-radius:99px; font-size:11px; font-weight:600; font-family:'Inter',sans-serif; white-space:nowrap; line-height:1.3; }
+.rel-tag.pago{ background:var(--green-glow); color:var(--green-dark); }
+.rel-tag.vencido{ background:var(--warn-soft); color:var(--warn); }
+.rel-tag.avencer{ background:var(--tint-neutral); color:var(--ink-soft); }
+html.tema-escuro .rel-tag.pago{ color:var(--green); }
+.rel-lista{ display:flex; flex-direction:column; gap:8px; padding:6px 4px 8px; }
+.rel-item{ display:flex; align-items:flex-start; justify-content:space-between; gap:12px; padding:12px 14px; border:1px solid var(--line); border-radius:var(--radius-sm); background:var(--card); }
+.rel-item .corpo{ min-width:0; flex:1; }
+.rel-item .titulo{ font-size:13.5px; font-weight:600; color:var(--ink); line-height:1.35; overflow-wrap:anywhere; font-family:'Inter',sans-serif; }
+.rel-item .meta{ display:flex; flex-wrap:wrap; align-items:center; margin-top:5px; font-size:11.5px; color:var(--ink-soft); font-family:'Inter',sans-serif; }
+.rel-item .meta > span:not(:last-child)::after{ content:'·'; margin:0 7px; color:var(--ink-dim); }
+.rel-item .valor{ font-family:'IBM Plex Mono',monospace; font-size:14px; font-weight:700; white-space:nowrap; font-variant-numeric:tabular-nums; letter-spacing:-.01em; }
+.rel-item.rel-total{ background:var(--tint-neutral); border-color:var(--line-2); align-items:center; }
+.rel-item.rel-total .titulo{ font-weight:700; }
+.rel-item.rel-total .valor{ font-size:16px; }
+.rel-mais-card{ text-align:center; font-size:12px; color:var(--ink-soft); padding:10px; font-style:italic; font-family:'Inter',sans-serif; }
+.rel-tabela-wrap table{ min-width:560px; }
+.rel-tabela-wrap th.al-dir, .rel-tabela-wrap td.al-dir{ text-align:right; white-space:nowrap; }
+.rel-tabela-wrap th.al-centro, .rel-tabela-wrap td.al-centro{ text-align:center; white-space:nowrap; }
+.rel-tabela-wrap td{ vertical-align:top; }
+.rel-tabela-wrap td.txt{ font-family:'Inter',sans-serif; }
+.rel-tabela-wrap tfoot td{ font-weight:700; border-top:2px solid var(--line-2); border-bottom:none; background:var(--tint-neutral); }
+.rel-mais td{ text-align:center; color:var(--ink-soft); font-family:'Inter',sans-serif; font-size:12px; font-style:italic; }
+.rel-secao{ margin-top:16px; }
+.rel-secao h3{ margin-bottom:10px; }
+.rel-nota{ font-size:12px; line-height:1.55; color:var(--ink-soft); padding:10px 12px; border-left:3px solid var(--line-2); margin-top:10px; background:var(--card); border-radius:0 var(--radius-sm) var(--radius-sm) 0; }
+@media (max-width:640px){
+  /* Abas e chips do app têm 30–34px de altura; no celular, aqui, ficam com área de toque decente.
+     Escopado na tela de relatórios pra não mexer nas outras telas que usam os mesmos componentes. */
+  #relTipos .tab2{ padding:12px 16px; }
+  #relPresets .chip{ min-height:40px; }
+  .rel-tabela-wrap table{ min-width:0; }
+  .rel-secao td, .rel-secao th{ padding:9px 6px; font-size:12px; }
+  .rel-resumo{ grid-template-columns:1fr 1fr; gap:10px; }
+  .rel-card{ padding:12px 13px; }
+  .rel-card .v{ font-size:17px; }
+  .rel-acoes .btn-teal, .rel-acoes .btn-ghost{ flex:1 1 140px; }
+}
+
 /* ================= RESPONSIVO (celular / tablet) ================= */
 @media (max-width:900px){
   .kpis{grid-template-columns:repeat(2,1fr) !important;}
@@ -1375,6 +1440,7 @@ main:not(#view-pdv) td, .mono{
     <div class="navitem" data-view="boletos"><div class="n"><svg viewBox="0 0 24 24"><line x1="3" y1="4" x2="3" y2="20" stroke-width="2"></line><line x1="6.5" y1="4" x2="6.5" y2="20" stroke-width="1"></line><line x1="9" y1="4" x2="9" y2="20" stroke-width="3"></line><line x1="13" y1="4" x2="13" y2="20" stroke-width="1"></line><line x1="16" y1="4" x2="16" y2="20" stroke-width="2"></line><line x1="19.5" y1="4" x2="19.5" y2="20" stroke-width="1"></line></svg></div> Boletos</div>
     <div class="navitem hide" data-view="compras" id="navCompras"><div class="n"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg></div> Compras e Entradas</div>
     <div class="navitem hide" data-view="vendafornecedor" id="navVendaFornecedor"><div class="n"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"></path></svg></div> Venda Fornecedor</div>
+    <div class="navitem" data-view="relatorios" id="navRelatorios"><div class="n"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></div> Relatórios</div>
 
     <div class="nav-group-label hide" id="navGroupOperacao">Operação</div>
     <div class="navitem hide" data-view="orcamentos" id="navOrcamentos"><div class="n"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg></div> Orçamentos</div>
@@ -1431,6 +1497,10 @@ main:not(#view-pdv) td, .mono{
             <span class="parte despesa" id="faixaDespesas"></span>
             <span class="parte boleto" id="faixaBoletos"></span>
           </div>
+        </div>
+        <div class="nota-pdv hide" id="notaPdvPainel">
+          <span id="notaPdvTexto"></span>
+          <button type="button" class="btn-ghost btn-sm" onclick="abrirRelatorio('vendas', { mes: mesSelecionadoPainel })">Ver nas vendas</button>
         </div>
         <div class="composicao-legenda">
           <button type="button" class="parcela" onclick="irParaView('fluxo')">
@@ -2403,6 +2473,47 @@ main:not(#view-pdv) td, .mono{
     </section>
 
     <!-- ================= CONFIGURAÇÕES ================= -->
+    <!-- ================= RELATÓRIOS ================= -->
+    <section id="view-relatorios" class="hide">
+      <div class="topbar">
+        <div><h1>Relatórios</h1><p>Boleto por boleto, venda por venda, custo por custo — pra conferir, imprimir ou mandar pro contador</p></div>
+      </div>
+
+      <div class="tabs2" id="relTipos" role="tablist">
+        <div class="tab2 active" data-reltipo="boletos" role="tab">Boletos</div>
+        <div class="tab2" data-reltipo="vendas" role="tab">Vendas</div>
+        <div class="tab2" data-reltipo="fixos" role="tab">Custos fixos</div>
+      </div>
+
+      <div class="panel rel-filtros">
+        <span class="rotulo-grupo">Período</span>
+        <div class="chip-row" id="relPresets">
+          <div class="chip" data-relpreset="mes">Este mês</div>
+          <div class="chip" data-relpreset="mesPassado">Mês passado</div>
+          <div class="chip" data-relpreset="3meses">Últimos 3 meses</div>
+          <div class="chip" data-relpreset="ano">Este ano</div>
+        </div>
+        <div class="formrow">
+          <div class="field"><label for="relDe">De</label><input type="date" id="relDe"></div>
+          <div class="field"><label for="relAte">Até</label><input type="date" id="relAte"></div>
+          <div class="field" id="relCampoFiltro"><label for="relFiltro" id="relFiltroRotulo">Situação</label><select id="relFiltro"></select></div>
+        </div>
+        <div class="rel-ajuda" id="relAjuda"></div>
+      </div>
+
+      <div class="rel-resumo" id="relResumo"></div>
+
+      <div class="rel-acoes">
+        <button type="button" class="btn-teal" id="btnRelPdf">Baixar PDF</button>
+        <button type="button" class="btn-ghost" id="btnRelXlsx">Baixar Excel</button>
+      </div>
+      <div class="rel-status" id="relStatus" role="status" aria-live="polite"></div>
+
+      <div class="panel rel-tabela-panel" id="relCorpo"></div>
+      <div id="relSecoes"></div>
+      <div id="relNotas"></div>
+    </section>
+
     <section id="view-config" class="hide">
       <div class="topbar">
         <div><h1>Configurações</h1><p>Dados da empresa, funcionários, backup e outros ajustes</p></div>
@@ -2519,6 +2630,7 @@ main:not(#view-pdv) td, .mono{
         <div class="msub-item" data-view="boletos"><span class="msub-ico"><svg viewBox="0 0 24 24"><line x1="3" y1="4" x2="3" y2="20" stroke-width="2"></line><line x1="6.5" y1="4" x2="6.5" y2="20" stroke-width="1"></line><line x1="9" y1="4" x2="9" y2="20" stroke-width="3"></line><line x1="13" y1="4" x2="13" y2="20" stroke-width="1"></line><line x1="16" y1="4" x2="16" y2="20" stroke-width="2"></line></svg></span><span>Boletos<span class="msub-sub">Cadastre e acompanhe vencimentos</span></span></div>
         <div class="msub-item" data-view="compras" id="msubCompras"><span class="msub-ico"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg></span><span>Compras e Entradas<span class="msub-sub">Registre compras de mercadoria</span></span></div>
         <div class="msub-item" data-view="vendafornecedor" id="msubVendaFornecedor"><span class="msub-ico"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"></path></svg></span><span>Venda Fornecedor<span class="msub-sub">Compra e venda de aparelhos</span></span></div>
+        <div class="msub-item" data-view="relatorios"><span class="msub-ico"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></span><span>Relatórios<span class="msub-sub">Boletos, vendas e custos em PDF ou Excel</span></span></div>
       </div>
     </div>
   </div>
@@ -2856,6 +2968,7 @@ function irParaView(viewName){
   document.querySelectorAll('main > section').forEach(s=>s.classList.add('hide'));
   const el = document.getElementById('view-'+viewName);
   if(el) el.classList.remove('hide');
+  if(viewName === 'relatorios' && typeof renderRelatorios === 'function') renderRelatorios();
   atualizarModoCaixa();
   fecharMenuMobile();
   if(typeof fecharSubmenuMobile==='function') fecharSubmenuMobile();
@@ -2907,7 +3020,7 @@ const MTAB_ICONS = {
 const MTAB_LABELS = { painel:'Painel', pdv:'Vender', clientes:'Clientes', financeiro:'Financeiro', mais:'Mais' };
 const VIEW_PARA_MTAB = {
   painel:'painel', pdv:'pdv', clientes:'clientes',
-  fluxo:'financeiro', despesas:'financeiro', boletos:'financeiro', compras:'financeiro', vendafornecedor:'financeiro',
+  fluxo:'financeiro', despesas:'financeiro', boletos:'financeiro', compras:'financeiro', vendafornecedor:'financeiro', relatorios:'financeiro',
   orcamentos:'mais', assistencia:'mais', testes:'mais', calculadora:'mais', config:'mais',
 };
 
@@ -5697,16 +5810,20 @@ function totaisDoMes(mesISO){
   const vendasMes = vendas.filter(v=>v.data && v.data.startsWith(mesISO));
   // Orcamento ainda nao e venda: so entra na conta depois de aprovado.
   const fornecedorMes = vendasFornecedor.filter(v=>v.dataVenda && v.dataVenda.startsWith(mesISO) && !ehOrcamentoVF(v));
+  // Mesma conta do renderPainel: lancamento manual + aparelhos aprovados (+ frete).
+  // As vendas do PDV NAO entram — ficam em colunas separadas de proposito — e vao
+  // em `entrouPdv` so pra tela poder avisar. Antes isso somava o PDV aqui e nao no
+  // Painel, entao o comparativo "vs mes passado" misturava duas bases.
   const entrou = vendasMes.reduce((s,v)=>s+v.pix+v.cartao+v.dinheiro,0)
-               + vendasMes.reduce((s,v)=>s+v.pixPdv+v.cartaoPdv+v.dinheiroPdv,0)
                + fornecedorMes.reduce((s,v)=>s+v.valorVenda,0)
                + totalFreteVF(fornecedorMes);
+  const entrouPdv = vendasMes.reduce((s,v)=>s+v.pixPdv+v.cartaoPdv+v.dinheiroPdv,0);
   const despesasFixas = despesas.reduce((s,d)=>s+d.valor,0);
   const saiuBoletos = boletos
       .filter(b=>b.vencimento && b.vencimento.startsWith(mesISO) && b.status==='pendente')
       .reduce((s,b)=>s+b.valor,0)
     + fornecedorMes.reduce((s,v)=>s+(v.valorCompra||0),0);
-  return { entrou, despesasFixas, saiuBoletos, lucro: entrou - despesasFixas - saiuBoletos };
+  return { entrou, entrouPdv, despesasFixas, saiuBoletos, lucro: entrou - despesasFixas - saiuBoletos };
 }
 
 function mesAnteriorDe(mesISO){
@@ -5769,6 +5886,13 @@ function renderResultadoDoMes(mesISO, atual){
   document.getElementById('composEntrou').textContent = money(atual.totalVendas);
   document.getElementById('composDespesas').textContent = money(atual.totalDespesas);
   document.getElementById('composBoletos').textContent = money(atual.totalBoletosMes);
+
+  // O PDV nao entra nesta conta (decisao original do app). Sem avisar, quem vende
+  // so pelo PDV ve "Entrou R$ 0,00" e acha que o sistema esta errado.
+  const pdv = totaisDoMes(mesISO).entrouPdv;
+  const nota = document.getElementById('notaPdvPainel');
+  nota.classList.toggle('hide', !(pdv > 0));
+  if(pdv > 0) document.getElementById('notaPdvTexto').textContent = `Não inclui ${money(pdv)} de vendas feitas pelo PDV neste mês.`;
 }
 
 /* ---- "Precisa da sua atencao": o que vence agora, nao o mes inteiro ----
@@ -5776,9 +5900,9 @@ function renderResultadoDoMes(mesISO, atual){
 function renderPainelAtencao(){
   const wrap = document.getElementById('painelAtencao');
   if(!wrap) return;
-  const hojeISO = new Date().toISOString().slice(0,10);
+  const hojeISO = hojeLocalISO();
   const limite = new Date(); limite.setDate(limite.getDate()+7);
-  const limiteISO = limite.toISOString().slice(0,10);
+  const limiteISO = dataLocalISO(limite);
 
   const relevantes = boletos
     .filter(b=> b.status==='pendente' && b.vencimento && b.vencimento <= limiteISO)
@@ -5795,7 +5919,7 @@ function renderPainelAtencao(){
   const totalVencido = relevantes.filter(b=>b.vencimento < hojeISO).reduce((s,b)=>s+b.valor,0);
   wrap.innerHTML = relevantes.slice(0,6).map(b=>{
     const vencido = b.vencimento < hojeISO;
-    const dias = Math.round((new Date(b.vencimento+'T00:00:00') - new Date(hojeISO+'T00:00:00'))/86400000);
+    const dias = diasEntre(hojeISO, b.vencimento);
     const quando = vencido
       ? `venceu há ${Math.abs(dias)} dia${Math.abs(dias)===1?'':'s'}`
       : (dias===0 ? 'vence hoje' : `vence em ${dias} dia${dias===1?'':'s'}`);
@@ -6086,6 +6210,8 @@ function renderTudo(){
   renderCompras();
   renderMovimentacoesEstoque();
   renderVendasFornecedor();
+  // Se a pessoa estiver olhando um relatório quando os dados mudam, ele acompanha.
+  if(!document.getElementById('view-relatorios').classList.contains('hide')) renderRelatorios();
   prepararTabelasMobile();
 }
 
@@ -6364,6 +6490,829 @@ fileExcel.addEventListener('change', async (e)=>{
   }
   fileExcel.value = '';
 });
+
+/* ===================== RELATÓRIOS: boletos, vendas e custos fixos =====================
+   Três relatórios itemizados (boleto por boleto, venda por venda, custo fixo por custo
+   fixo), com prévia na tela, totais e exportação em PDF e Excel.
+
+   Arquitetura: cada relatório é montado UMA vez num "modelo" puro (colunas, linhas,
+   resumo, seções, notas) e os três destinos — tela, PDF, Excel — só desenham esse
+   modelo. Assim o que aparece na tela é, por construção, o que sai no arquivo, e os
+   totais podem ser conferidos contra o Painel sem passar por HTML nem PDF. */
+
+const pad2 = (n) => String(n).padStart(2, '0');
+const r2 = (x) => Math.round((x + Number.EPSILON) * 100) / 100;           // centavos, sem lixo de ponto flutuante
+const plural = (n, s, p) => `${n} ${n === 1 ? s : p}`;
+const ehDataISO = (v) => /^\d{4}-\d{2}-\d{2}$/.test(String(v || ''));
+
+/* Datas pela hora LOCAL de quem usa. O resto do app usa toISOString() (UTC), o que
+   joga uma venda das 23h30 no dia seguinte; aqui o relatório mostra o dia em que a
+   venda de fato aconteceu. */
+function dataLocalISO(d){ return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`; }
+function hojeLocalISO(){ return dataLocalISO(new Date()); }
+function dataLocalDeTimestamp(ts){
+  if(!ts) return '';
+  if(ehDataISO(ts)) return String(ts);          // só data: não converte, senão o fuso empurra um dia
+  const d = new Date(ts);
+  return isNaN(d.getTime()) ? '' : dataLocalISO(d);
+}
+function horaLocalDeTimestamp(ts){
+  if(!ts || ehDataISO(ts)) return '';
+  const d = new Date(ts);
+  return isNaN(d.getTime()) ? '' : `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+}
+function diasEntre(isoA, isoB){                  // B - A, em dias de calendário
+  const [ya, ma, da] = isoA.split('-').map(Number), [yb, mb, db] = isoB.split('-').map(Number);
+  return Math.round((Date.UTC(yb, mb - 1, db) - Date.UTC(ya, ma - 1, da)) / 86400000);
+}
+function ultimoDiaDoMes(ano, mes1a12){ return new Date(Date.UTC(ano, mes1a12, 0)).getUTCDate(); }
+function mesesDoPeriodo(de, ate){                // ['2026-10', '2026-11', ...]
+  const out = [];
+  let [y, m] = de.slice(0, 7).split('-').map(Number);
+  const [yf, mf] = ate.slice(0, 7).split('-').map(Number);
+  while(y < yf || (y === yf && m <= mf)){ out.push(`${y}-${pad2(m)}`); m++; if(m > 12){ m = 1; y++; } }
+  return out;
+}
+function nomeMesAno(m){
+  const [y, mm] = m.split('-').map(Number);
+  const s = new Date(Date.UTC(y, mm - 1, 1)).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+function textoDataRel(v){ return ehDataISO(v) ? fmtData(v) : (v ? String(v) : '—'); }
+
+function periodoPreset(nome, hoje){
+  const [y, m] = (hoje || hojeLocalISO()).split('-').map(Number);
+  const ini = (yy, mm) => `${yy}-${pad2(mm)}-01`;
+  const fim = (yy, mm) => `${yy}-${pad2(mm)}-${pad2(ultimoDiaDoMes(yy, mm))}`;
+  const deslocado = (n) => { const d = new Date(Date.UTC(y, m - 1 + n, 1)); return [d.getUTCFullYear(), d.getUTCMonth() + 1]; };
+  if(nome === 'mes') return { de: ini(y, m), ate: fim(y, m) };
+  if(nome === 'mesPassado'){ const [yy, mm] = deslocado(-1); return { de: ini(yy, mm), ate: fim(yy, mm) }; }
+  if(nome === '3meses'){ const [yy, mm] = deslocado(-2); return { de: ini(yy, mm), ate: fim(y, m) }; }
+  if(nome === 'ano') return { de: `${y}-01-01`, ate: `${y}-12-31` };
+  return null;
+}
+
+/* Soma por mês, pra seção "Totais por mês" — só faz sentido quando o período cruza meses. */
+function secaoTotaisPorMes(linhas, chaveData, titulo){
+  const mapa = new Map();
+  linhas.forEach(l => {
+    const d = l[chaveData];
+    if(!ehDataISO(d) && !/^\d{4}-\d{2}$/.test(String(d || ''))) return;
+    const m = String(d).slice(0, 7);
+    const o = mapa.get(m) || { qtd: 0, total: 0 };
+    o.qtd++; o.total = r2(o.total + l.valor);
+    mapa.set(m, o);
+  });
+  const meses = [...mapa.keys()].sort();
+  if(meses.length < 2) return null;
+  return {
+    titulo: titulo || 'Totais por mês',
+    colunas: [
+      { chave: 'mes', titulo: 'Mês', tipo: 'texto', largura: 50 },
+      { chave: 'qtd', titulo: 'Lançamentos', tipo: 'inteiro', largura: 22 },
+      { chave: 'total', titulo: 'Total', tipo: 'moeda', largura: 28 },
+    ],
+    linhas: meses.map(m => ({ mes: nomeMesAno(m), qtd: mapa.get(m).qtd, total: mapa.get(m).total })),
+    total: { rotulo: 'Total', chave: 'mes', valores: { qtd: meses.reduce((s, m) => s + mapa.get(m).qtd, 0), total: r2(meses.reduce((s, m) => s + mapa.get(m).total, 0)) } },
+  };
+}
+
+/* ------------------------------ BOLETOS ------------------------------ */
+const REL_SITUACOES_BOLETO = { todas: 'Todas', pagos: 'Pagos', avencer: 'A vencer', vencidos: 'Vencidos' };
+
+function situacaoDoBoleto(b, hoje){
+  if(b.status === 'pago') return { chave: 'pago', texto: 'Pago' };
+  const dias = diasEntre(hoje, String(b.vencimento).slice(0, 10));       // >0 faltam, 0 hoje, <0 venceu
+  if(dias < 0) return { chave: 'vencido', texto: `Vencido há ${plural(-dias, 'dia', 'dias')}` };
+  if(dias === 0) return { chave: 'avencer', texto: 'Vence hoje' };
+  return { chave: 'avencer', texto: `Vence em ${plural(dias, 'dia', 'dias')}` };
+}
+
+function montarRelatorioBoletos({ de, ate, filtro = 'todas', hoje } = {}){
+  hoje = hoje || hojeLocalISO();
+  const itens = boletos
+    .filter(b => b.vencimento)
+    .map(b => ({ b, venc: String(b.vencimento).slice(0, 10), sit: situacaoDoBoleto(b, hoje) }))
+    .filter(x => x.venc >= de && x.venc <= ate)
+    .filter(x => filtro === 'todas'
+      || (filtro === 'pagos' && x.sit.chave === 'pago')
+      || (filtro === 'avencer' && x.sit.chave === 'avencer')
+      || (filtro === 'vencidos' && x.sit.chave === 'vencido'))
+    .sort((a, b) => a.venc < b.venc ? -1 : a.venc > b.venc ? 1 : String(a.b.beneficiario).localeCompare(String(b.b.beneficiario), 'pt-BR'));
+
+  const linhas = itens.map((x, i) => ({
+    n: i + 1, vencimento: x.venc, beneficiario: x.b.beneficiario || '—', dataDocumento: x.b.dataDocumento || '',
+    valor: r2(x.b.valor), situacao: x.sit.texto, situacaoChave: x.sit.chave,
+  }));
+  const soma = (k) => r2(linhas.filter(l => l.situacaoChave === k).reduce((s, l) => s + l.valor, 0));
+  const qtd = (k) => linhas.filter(l => l.situacaoChave === k).length;
+  const total = r2(linhas.reduce((s, l) => s + l.valor, 0));
+
+  return {
+    tipo: 'boletos', titulo: 'Relatório de Boletos', arquivo: 'boletos', periodo: { de, ate },
+    filtrosTexto: `Por data de vencimento · Situação: ${REL_SITUACOES_BOLETO[filtro] || 'Todas'}`,
+    resumo: [
+      { rotulo: 'Total no período', valor: total, detalhe: plural(linhas.length, 'boleto', 'boletos'), destaque: true },
+      { rotulo: 'Pagos', valor: soma('pago'), detalhe: plural(qtd('pago'), 'boleto', 'boletos'), tom: 'ok' },
+      { rotulo: 'A vencer', valor: soma('avencer'), detalhe: plural(qtd('avencer'), 'boleto', 'boletos') },
+      { rotulo: 'Vencidos', valor: soma('vencido'), detalhe: plural(qtd('vencido'), 'boleto', 'boletos'), tom: soma('vencido') > 0 ? 'alerta' : '' },
+    ],
+    colunas: [
+      { chave: 'n', titulo: 'Nº', tipo: 'inteiro', largura: 8, alinhar: 'centro' },
+      { chave: 'vencimento', titulo: 'Vencimento', tipo: 'data', largura: 22 },
+      { chave: 'beneficiario', titulo: 'Beneficiário', tipo: 'texto', largura: 52 },
+      { chave: 'dataDocumento', titulo: 'Data do documento', tipo: 'data', largura: 26 },
+      { chave: 'valor', titulo: 'Valor', tipo: 'moeda', largura: 26 },
+      { chave: 'situacao', titulo: 'Situação', tipo: 'texto', largura: 34, semQuebra: true, etiqueta: 'situacaoChave' },
+    ],
+    cartao: { titulo: 'beneficiario', valor: 'valor', meta: [['vencimento'], ['situacao']] },
+    linhas,
+    total: { rotulo: 'Total', chave: 'beneficiario', valores: { valor: total } },
+    secoes: [secaoTotaisPorMes(linhas, 'vencimento')].filter(Boolean),
+    notas: ['Os boletos são listados pela data de vencimento. "Vencido" é o boleto que venceu antes de hoje e ainda não foi marcado como pago.'],
+  };
+}
+
+/* ------------------------------ VENDAS ------------------------------ */
+const REL_ORIGENS_VENDA = { todas: 'Todas as origens', pdv: 'PDV', fluxo: 'Fluxo de Caixa', aparelhos: 'Aparelhos (Venda Fornecedor)' };
+const REL_FORMA = { pix: 'Pix', cartao: 'Cartão', dinheiro: 'Dinheiro' };
+
+function rotuloPagamentoPDV(v){
+  const base = REL_FORMA[v.forma] || v.forma || '—';
+  return (v.forma === 'cartao' && v.parcelas > 1) ? `${base} ${v.parcelas}x` : base;
+}
+function descricaoVendaPDV(v){
+  const itens = (v.itens || []).map(it => {
+    const qtd = it.unidade === 'kg' ? `${Number(it.qtd).toFixed(3).replace('.', ',')} kg` : `${it.qtd}x`;
+    return `${qtd} ${it.nome}`;
+  }).join(', ');
+  const desconto = v.desconto > 0 ? ` (desconto de ${money(v.desconto)})` : '';
+  return `Venda #${String(v.id || '').slice(0, 6).toUpperCase()}${itens ? ' — ' + itens : ''}${desconto}`;
+}
+
+function montarRelatorioVendas({ de, ate, filtro = 'todas' } = {}){
+  const quer = (o) => filtro === 'todas' || filtro === o;
+  const linhas = [];
+
+  if(quer('pdv')){
+    vendasPDV.forEach(v => {
+      const data = dataLocalDeTimestamp(v.dataHora);
+      if(!data || data < de || data > ate) return;
+      linhas.push({ data, hora: horaLocalDeTimestamp(v.dataHora), origem: 'PDV', descricao: descricaoVendaPDV(v),
+                    pagamento: rotuloPagamentoPDV(v), valor: r2(v.total), formaChave: v.forma || '', rank: 0 });
+    });
+  }
+
+  if(quer('fluxo')){
+    // Só o que foi lançado à mão: a parte do PDV desses mesmos dias já aparece venda a venda acima.
+    vendas.forEach(v => {
+      if(!v.data || v.data < de || v.data > ate) return;
+      [['pix', v.pix], ['cartao', v.cartao], ['dinheiro', v.dinheiro]].forEach(([forma, valor]) => {
+        if(valor > 0) linhas.push({ data: v.data, hora: '', origem: 'Fluxo de Caixa', descricao: 'Lançamento manual do dia',
+                                    pagamento: REL_FORMA[forma], valor: r2(valor), formaChave: forma, rank: 1 });
+      });
+    });
+  }
+
+  let orcamentosAbertos = { grupos: 0, total: 0 };
+  if(quer('aparelhos')){
+    const grupos = new Set(), gruposOrc = new Set();
+    vendasFornecedor.forEach(v => {
+      const data = dataLocalDeTimestamp(v.dataVenda);
+      if(!data || data < de || data > ate) return;
+      const chave = v.grupoVenda || v.id;
+      const cliente = v.clienteId ? clientes.find(c => c.id === v.clienteId) : null;
+      if(ehOrcamentoVF(v)){
+        orcamentosAbertos.total = r2(orcamentosAbertos.total + v.valorVenda + (gruposOrc.has(chave) ? 0 : (v.valorFrete || 0)));
+        gruposOrc.add(chave);
+        return;
+      }
+      const detalhe = [v.telefone, v.capacidade, v.cor].filter(Boolean).join(' ');
+      linhas.push({ data, hora: horaLocalDeTimestamp(v.dataVenda), origem: 'Aparelhos',
+                    descricao: `${detalhe}${v.imei ? ' — IMEI ' + v.imei : ''}${cliente ? ' — ' + cliente.nome : ''}`,
+                    pagamento: '—', valor: r2(v.valorVenda), formaChave: '', rank: 2 });
+      // O frete é do orçamento inteiro e vai repetido em cada linha do grupo: entra uma vez só.
+      if(!grupos.has(chave) && v.valorFrete > 0){
+        grupos.add(chave);
+        linhas.push({ data, hora: horaLocalDeTimestamp(v.dataVenda), origem: 'Aparelhos',
+                      descricao: `Frete — ${ENVIO_LABEL[v.tipoEnvio] || 'envio'}${cliente ? ' — ' + cliente.nome : ''}`,
+                      pagamento: '—', valor: r2(v.valorFrete), formaChave: '', rank: 2 });
+      }
+    });
+    orcamentosAbertos.grupos = gruposOrc.size;
+  }
+
+  // Empate devolve 0: um comparador que devolve 1 pros dois lados deixa a ordem ao acaso.
+  const chaveOrdem = (l) => `${l.data} ${l.hora || '00:00'} ${l.rank}`;
+  linhas.sort((a, b) => chaveOrdem(a) < chaveOrdem(b) ? -1 : chaveOrdem(a) > chaveOrdem(b) ? 1 : 0);
+  linhas.forEach((l, i) => { l.n = i + 1; });
+
+  const somaOrigem = (o) => r2(linhas.filter(l => l.origem === o).reduce((s, l) => s + l.valor, 0));
+  const qtdOrigem = (o) => linhas.filter(l => l.origem === o).length;
+  const total = r2(linhas.reduce((s, l) => s + l.valor, 0));
+
+  const resumo = [{ rotulo: 'Total no período', valor: total, detalhe: plural(linhas.length, 'lançamento', 'lançamentos'), destaque: true }];
+  if(quer('pdv')) resumo.push({ rotulo: 'PDV', valor: somaOrigem('PDV'), detalhe: plural(qtdOrigem('PDV'), 'venda', 'vendas') });
+  if(quer('fluxo')) resumo.push({ rotulo: 'Fluxo de Caixa', valor: somaOrigem('Fluxo de Caixa'), detalhe: plural(qtdOrigem('Fluxo de Caixa'), 'lançamento', 'lançamentos') });
+  if(quer('aparelhos')) resumo.push({ rotulo: 'Aparelhos', valor: somaOrigem('Aparelhos'), detalhe: plural(qtdOrigem('Aparelhos'), 'lançamento', 'lançamentos') });
+
+  // Por forma de pagamento (as vendas de aparelho não guardam a forma, então ficam à parte).
+  const porForma = ['pix', 'cartao', 'dinheiro'].map(f => {
+    const ls = linhas.filter(l => l.formaChave === f);
+    return { forma: REL_FORMA[f], qtd: ls.length, total: r2(ls.reduce((s, l) => s + l.valor, 0)) };
+  });
+  const semForma = linhas.filter(l => !l.formaChave);
+  if(semForma.length) porForma.push({ forma: 'Sem forma informada (aparelhos)', qtd: semForma.length, total: r2(semForma.reduce((s, l) => s + l.valor, 0)) });
+  const secaoForma = linhas.length ? {
+    titulo: 'Por forma de pagamento',
+    colunas: [
+      { chave: 'forma', titulo: 'Forma', tipo: 'texto', largura: 50 },
+      { chave: 'qtd', titulo: 'Lançamentos', tipo: 'inteiro', largura: 22 },
+      { chave: 'total', titulo: 'Total', tipo: 'moeda', largura: 28 },
+    ],
+    linhas: porForma.filter(f => f.qtd > 0),
+    total: { rotulo: 'Total', chave: 'forma', valores: { qtd: linhas.length, total } },
+  } : null;
+
+  const notas = [];
+  const painelBase = r2(somaOrigem('Fluxo de Caixa') + somaOrigem('Aparelhos'));
+  if(filtro === 'todas' && somaOrigem('PDV') > 0){
+    notas.push(`O Painel soma só o Fluxo de Caixa e a Venda Fornecedor (${money(painelBase)} neste período). As vendas do PDV (${money(somaOrigem('PDV'))}) ficam fora dessa conta e aparecem aqui separadas.`);
+  }
+  if(orcamentosAbertos.grupos > 0){
+    notas.push(`${plural(orcamentosAbertos.grupos, 'orçamento de aparelhos ainda não aprovado', 'orçamentos de aparelhos ainda não aprovados')} (${money(orcamentosAbertos.total)}) não entra${orcamentosAbertos.grupos === 1 ? '' : 'm'} no relatório: só conta depois de aprovado.`);
+  }
+
+  return {
+    tipo: 'vendas', titulo: 'Relatório de Vendas', arquivo: 'vendas', periodo: { de, ate },
+    filtrosTexto: `Origem: ${REL_ORIGENS_VENDA[filtro] || 'Todas as origens'}`,
+    resumo,
+    colunas: [
+      { chave: 'n', titulo: 'Nº', tipo: 'inteiro', largura: 7, alinhar: 'centro' },
+      { chave: 'data', titulo: 'Data', tipo: 'data', largura: 19 },
+      { chave: 'hora', titulo: 'Hora', tipo: 'texto', largura: 11, alinhar: 'centro' },
+      { chave: 'origem', titulo: 'Origem', tipo: 'texto', largura: 22, semQuebra: true },
+      { chave: 'descricao', titulo: 'Descrição', tipo: 'texto', largura: 58 },
+      { chave: 'pagamento', titulo: 'Pagamento', tipo: 'texto', largura: 20, semQuebra: true },
+      { chave: 'valor', titulo: 'Valor', tipo: 'moeda', largura: 24 },
+    ],
+    cartao: { titulo: 'descricao', valor: 'valor', meta: [['data', 'hora'], ['origem'], ['pagamento']] },
+    linhas,
+    total: { rotulo: 'Total', chave: 'descricao', valores: { valor: total } },
+    secoes: [secaoForma, secaoTotaisPorMes(linhas, 'data')].filter(Boolean),
+    notas,
+    // números auxiliares, só pra conferência (testes e nota acima)
+    auditoria: { painelBase, pdv: somaOrigem('PDV'), fluxo: somaOrigem('Fluxo de Caixa'), aparelhos: somaOrigem('Aparelhos') },
+  };
+}
+
+/* ------------------------------ CUSTOS FIXOS ------------------------------ */
+function montarRelatorioFixos({ de, ate } = {}){
+  const meses = mesesDoPeriodo(de, ate);
+  if(meses.length > 60) return { erro: 'Escolha um período de até 5 anos pra esse relatório.' };
+  const linhas = [];
+  meses.forEach(m => {
+    const [y, mm] = m.split('-').map(Number);
+    const ultimo = ultimoDiaDoMes(y, mm);
+    despesas.forEach(d => {
+      const dia = parseInt(d.dia, 10);
+      if(dia >= 1){
+        // Dia 31 num mês de 30 (ou 28) dias vence no último dia do mês.
+        const data = `${m}-${pad2(Math.min(dia, ultimo))}`;
+        if(data >= de && data <= ate) linhas.push({ data, mes: m, vencimento: data, nome: d.nome || '—', valor: r2(d.valor), semDia: false });
+      } else {
+        linhas.push({ data: `${m}-01`, mes: m, vencimento: 'Sem dia fixo', nome: d.nome || '—', valor: r2(d.valor), semDia: true });
+      }
+    });
+  });
+  linhas.sort((a, b) => a.mes < b.mes ? -1 : a.mes > b.mes ? 1
+    : (a.semDia - b.semDia) || (a.data < b.data ? -1 : a.data > b.data ? 1 : String(a.nome).localeCompare(String(b.nome), 'pt-BR')));
+  linhas.forEach((l, i) => { l.n = i + 1; });
+
+  const total = r2(linhas.reduce((s, l) => s + l.valor, 0));
+  const multi = meses.length > 1;
+  const maior = linhas.reduce((mx, l) => (!mx || l.valor > mx.valor) ? l : mx, null);
+
+  let porCusto = null;
+  if(multi && linhas.length){
+    const mapa = new Map();
+    linhas.forEach(l => { const o = mapa.get(l.nome) || { nome: l.nome, qtd: 0, total: 0 }; o.qtd++; o.total = r2(o.total + l.valor); mapa.set(l.nome, o); });
+    porCusto = {
+      titulo: 'Por custo fixo',
+      colunas: [
+        { chave: 'nome', titulo: 'Custo fixo', tipo: 'texto', largura: 52 },
+        { chave: 'qtd', titulo: 'Vezes no período', tipo: 'inteiro', largura: 22 },
+        { chave: 'total', titulo: 'Total', tipo: 'moeda', largura: 26 },
+      ],
+      linhas: [...mapa.values()].sort((a, b) => b.total - a.total),
+      total: { rotulo: 'Total', chave: 'nome', valores: { qtd: linhas.length, total } },
+    };
+  }
+
+  return {
+    tipo: 'fixos', titulo: 'Relatório de Custos Fixos', arquivo: 'custos-fixos', periodo: { de, ate },
+    filtrosTexto: `${plural(meses.length, 'mês', 'meses')} no período`,
+    resumo: [
+      { rotulo: 'Total no período', valor: total, detalhe: plural(linhas.length, 'lançamento', 'lançamentos'), destaque: true },
+      multi
+        ? { rotulo: 'Média por mês', valor: r2(total / meses.length), detalhe: plural(meses.length, 'mês', 'meses') }
+        : (maior ? { rotulo: 'Maior custo', valor: maior.valor, detalhe: maior.nome } : { rotulo: 'Custos cadastrados', valor: 0, detalhe: '0 custos' }),
+    ],
+    colunas: [
+      { chave: 'n', titulo: 'Nº', tipo: 'inteiro', largura: 8, alinhar: 'centro' },
+      { chave: 'vencimento', titulo: 'Vencimento', tipo: 'data', largura: 28 },
+      { chave: 'nome', titulo: 'Custo fixo', tipo: 'texto', largura: 84 },
+      { chave: 'valor', titulo: 'Valor', tipo: 'moeda', largura: 30 },
+    ],
+    cartao: { titulo: 'nome', valor: 'valor', meta: [['vencimento']] },
+    linhas,
+    total: { rotulo: 'Total', chave: 'nome', valores: { valor: total } },
+    secoes: [secaoTotaisPorMes(linhas, 'mes', 'Totais por mês'), porCusto].filter(Boolean),
+    notas: ['O sistema guarda cada custo fixo só com o dia do vencimento, então ele se repete todo mês: este relatório lista cada custo em todos os meses do período. Custo sem dia fixo aparece uma vez por mês.'],
+  };
+}
+
+function montarRelatorio(tipo, params){
+  if(!params.de || !params.ate) return { erro: 'Escolha as duas datas do período.' };
+  if(params.de > params.ate) return { erro: 'A data inicial é depois da data final.' };
+  if(tipo === 'vendas') return montarRelatorioVendas(params);
+  if(tipo === 'fixos') return montarRelatorioFixos(params);
+  return montarRelatorioBoletos(params);
+}
+
+/* ------------------------------ TELA ------------------------------ */
+const REL_PREVIA_MAX = 400;     // linhas na tela; o PDF e o Excel levam todas
+
+const REL_TIPOS = {
+  boletos: { filtroRotulo: 'Situação', filtros: Object.entries(REL_SITUACOES_BOLETO), ajuda: 'Os boletos entram pela data de vencimento.' },
+  vendas:  { filtroRotulo: 'Origem', filtros: Object.entries(REL_ORIGENS_VENDA), ajuda: 'Cada venda no dia em que aconteceu: PDV, Fluxo de Caixa e aparelhos.' },
+  fixos:   { filtroRotulo: '', filtros: null, ajuda: 'Cada custo fixo no dia do vencimento, mês a mês.' },
+};
+let relTipoAtual = 'boletos';
+const relEstado = { de: '', ate: '', filtro: { boletos: 'todas', vendas: 'todas', fixos: '' } };
+let relUltimo = null;           // modelo que está na tela agora
+
+function alinhamentoColuna(c){ return c.alinhar || ((c.tipo === 'moeda' || c.tipo === 'inteiro') ? 'dir' : 'esq'); }
+
+const REL_TOM_ETIQUETA = { pago: 'pago', vencido: 'vencido', avencer: 'avencer' };
+function htmlEtiquetaRel(texto, tom){
+  return `<span class="rel-tag ${REL_TOM_ETIQUETA[tom] || ''}">${esc(texto)}</span>`;
+}
+function htmlCelulaRel(col, valor){
+  if(col.tipo === 'moeda') return money(valor);
+  if(col.tipo === 'data') return esc(textoDataRel(valor));
+  if(col.tipo === 'inteiro') return esc(valor == null ? '' : valor);
+  return esc(valor == null || valor === '' ? '—' : valor);
+}
+function htmlTabelaRel(def, limite){
+  const cols = def.colunas;
+  const th = cols.map(c => `<th class="al-${alinhamentoColuna(c)}">${esc(c.titulo)}</th>`).join('');
+  const visiveis = limite ? def.linhas.slice(0, limite) : def.linhas;
+  const corpo = visiveis.map(l => `<tr>${cols.map(c => {
+    const classe = `al-${alinhamentoColuna(c)}${c.tipo === 'texto' ? ' txt' : ''}${c.semQuebra ? ' nw' : ''}`;
+    const conteudo = c.etiqueta ? htmlEtiquetaRel(textoCelulaPlano(c, l[c.chave]), l[c.etiqueta]) : htmlCelulaRel(c, l[c.chave]);
+    return `<td class="${classe}">${conteudo}</td>`;
+  }).join('')}</tr>`).join('');
+  const resto = limite && def.linhas.length > limite
+    ? `<tr class="rel-mais"><td colspan="${cols.length}">… e mais ${plural(def.linhas.length - limite, 'linha', 'linhas')}. O PDF e o Excel trazem todas.</td></tr>` : '';
+  let rodape = '';
+  if(def.total){
+    rodape = `<tfoot><tr>${cols.map(c => {
+      const v = def.total.valores && def.total.valores[c.chave];
+      const conteudo = c.chave === def.total.chave ? esc(def.total.rotulo) : (v != null ? htmlCelulaRel(c, v) : '');
+      return `<td class="al-${alinhamentoColuna(c)}">${conteudo}</td>`;
+    }).join('')}</tr></tfoot>`;
+  }
+  return `<thead><tr>${th}</tr></thead><tbody>${corpo}${resto}</tbody>${rodape}`;
+}
+
+/* No celular uma tabela de 6 colunas esconde o valor atras da rolagem — justamente o que
+   quem abre um relatório quer ver. Lá o relatório vira lista de cartões: descrição e valor
+   lado a lado, data e situação embaixo. É o mesmo modelo, só desenhado diferente. */
+function cartaoPadraoRel(def){
+  // Seções não declaram `cartao`: o título é a 1ª coluna, o valor é a última coluna de dinheiro,
+  // e as colunas de quantidade entram embaixo com o nome ("Lançamentos: 4").
+  const moeda = [...def.colunas].reverse().find(c => c.tipo === 'moeda');
+  return { titulo: def.colunas[0].chave, valor: moeda.chave, meta: def.colunas.filter(c => c.tipo === 'inteiro').map(c => [c.chave]), comRotulo: true };
+}
+function htmlCartoesRel(def, limite){
+  const c = def.cartao || cartaoPadraoRel(def);
+  const col = (k) => def.colunas.find(x => x.chave === k);
+  const visiveis = limite ? def.linhas.slice(0, limite) : def.linhas;
+  const itens = visiveis.map(l => {
+    const meta = c.meta.map(grupo => {
+      const partes = grupo.map(k => {
+        const cc = col(k);
+        const t = textoCelulaPlano(cc, l[k]);
+        if(!t || t === '—') return '';
+        if(cc.etiqueta) return htmlEtiquetaRel(t, l[cc.etiqueta]);
+        return c.comRotulo ? `${esc(cc.titulo)}: ${esc(t)}` : esc(t);
+      }).filter(Boolean);
+      return partes.length ? `<span>${partes.join(' ')}</span>` : '';
+    }).join('');
+    return `<div class="rel-item"><div class="corpo"><div class="titulo">${esc(textoCelulaPlano(col(c.titulo), l[c.titulo]))}</div><div class="meta">${meta}</div></div><div class="valor">${money(l[c.valor])}</div></div>`;
+  }).join('');
+  const resto = limite && def.linhas.length > limite
+    ? `<div class="rel-mais-card">… e mais ${plural(def.linhas.length - limite, 'linha', 'linhas')}. O PDF e o Excel trazem todas.</div>` : '';
+  const total = def.total ? `<div class="rel-item rel-total"><div class="corpo"><div class="titulo">${esc(def.total.rotulo)}</div></div><div class="valor">${money(def.total.valores[c.valor])}</div></div>` : '';
+  return `<div class="rel-lista">${itens}${resto}${total}</div>`;
+}
+
+const REL_MOVEL = window.matchMedia('(max-width: 640px)');
+function sincronizarControlesRel(){
+  document.querySelectorAll('#relTipos .tab2').forEach(t => t.classList.toggle('active', t.dataset.reltipo === relTipoAtual));
+  document.getElementById('relDe').value = relEstado.de;
+  document.getElementById('relAte').value = relEstado.ate;
+  ['mes', 'mesPassado', '3meses', 'ano'].forEach(nome => {
+    const p = periodoPreset(nome);
+    const chip = document.querySelector(`#relPresets .chip[data-relpreset="${nome}"]`);
+    if(chip) chip.classList.toggle('active', p.de === relEstado.de && p.ate === relEstado.ate);
+  });
+  const def = REL_TIPOS[relTipoAtual];
+  const campo = document.getElementById('relCampoFiltro');
+  campo.classList.toggle('hide', !def.filtros);
+  if(def.filtros){
+    document.getElementById('relFiltroRotulo').textContent = def.filtroRotulo;
+    const sel = document.getElementById('relFiltro');
+    sel.innerHTML = def.filtros.map(([v, rot]) => `<option value="${esc(v)}">${esc(rot)}</option>`).join('');
+    sel.value = relEstado.filtro[relTipoAtual];
+  }
+  document.getElementById('relAjuda').textContent = def.ajuda;
+}
+
+function renderRelatorios(){
+  if(!relEstado.de || !relEstado.ate){ const p = periodoPreset('mes'); relEstado.de = p.de; relEstado.ate = p.ate; }
+  sincronizarControlesRel();
+
+  const m = montarRelatorio(relTipoAtual, { de: relEstado.de, ate: relEstado.ate, filtro: relEstado.filtro[relTipoAtual] });
+  relUltimo = m;
+  const status = document.getElementById('relStatus');
+  const btnPdf = document.getElementById('btnRelPdf'), btnXlsx = document.getElementById('btnRelXlsx');
+  const corpo = document.getElementById('relCorpo');
+  status.textContent = ''; status.style.color = '';
+
+  if(m.erro){
+    document.getElementById('relResumo').innerHTML = '';
+    document.getElementById('relSecoes').innerHTML = '';
+    document.getElementById('relNotas').innerHTML = '';
+    corpo.innerHTML = `<div class="empty"><b>${esc(m.erro)}</b></div>`;
+    btnPdf.disabled = btnXlsx.disabled = true;
+    return;
+  }
+
+  document.getElementById('relResumo').innerHTML = m.resumo.map(c => `
+    <div class="rel-card${c.destaque ? ' destaque' : ''}">
+      <div class="k">${esc(c.rotulo)}</div>
+      <div class="v ${c.tom || ''}">${money(c.valor)}</div>
+      ${c.detalhe ? `<div class="sub">${esc(c.detalhe)}</div>` : ''}
+    </div>`).join('');
+
+  if(m.linhas.length === 0){
+    corpo.innerHTML = `<div class="empty"><b>Nada encontrado nesse período</b>Ajuste as datas ou o filtro acima.</div>`;
+  } else if(REL_MOVEL.matches){
+    corpo.innerHTML = htmlCartoesRel(m, REL_PREVIA_MAX);
+  } else {
+    corpo.innerHTML = `<div class="rel-tabela-wrap"><table class="sem-cards-mobile" id="relTabela">${htmlTabelaRel(m, REL_PREVIA_MAX)}</table></div>`;
+  }
+  document.getElementById('relSecoes').innerHTML = m.linhas.length === 0 ? '' : m.secoes.map(s => `
+    <div class="panel rel-secao">
+      <h3>${esc(s.titulo)}</h3>
+      ${REL_MOVEL.matches ? htmlCartoesRel(s) : `<div class="rel-tabela-wrap"><table class="sem-cards-mobile">${htmlTabelaRel(s)}</table></div>`}
+    </div>`).join('');
+  document.getElementById('relNotas').innerHTML = (m.notas || []).map(n => `<div class="rel-nota">${esc(n)}</div>`).join('');
+  btnPdf.disabled = btnXlsx.disabled = m.linhas.length === 0;
+}
+
+/* Abre a tela já num relatório (e, se quiser, num mês específico) — usado por atalhos de outras telas. */
+function abrirRelatorio(tipo, opcoes){
+  if(REL_TIPOS[tipo]) relTipoAtual = tipo;
+  if(opcoes && opcoes.mes){
+    const [y, m] = opcoes.mes.split('-').map(Number);
+    relEstado.de = `${opcoes.mes}-01`;
+    relEstado.ate = `${opcoes.mes}-${pad2(ultimoDiaDoMes(y, m))}`;
+  }
+  irParaView('relatorios');
+}
+
+document.querySelectorAll('#relTipos .tab2').forEach(t => t.addEventListener('click', () => { relTipoAtual = t.dataset.reltipo; renderRelatorios(); }));
+{
+  const aoMudarLargura = () => { if(!document.getElementById('view-relatorios').classList.contains('hide')) renderRelatorios(); };
+  if(REL_MOVEL.addEventListener) REL_MOVEL.addEventListener('change', aoMudarLargura); else REL_MOVEL.addListener(aoMudarLargura);
+}
+document.querySelectorAll('#relPresets .chip').forEach(c => c.addEventListener('click', () => {
+  const p = periodoPreset(c.dataset.relpreset);
+  relEstado.de = p.de; relEstado.ate = p.ate; renderRelatorios();
+}));
+document.getElementById('relDe').addEventListener('change', (e) => { relEstado.de = e.target.value; renderRelatorios(); });
+document.getElementById('relAte').addEventListener('change', (e) => { relEstado.ate = e.target.value; renderRelatorios(); });
+document.getElementById('relFiltro').addEventListener('change', (e) => { relEstado.filtro[relTipoAtual] = e.target.value; renderRelatorios(); });
+
+/* ------------------------------ ENTREGA DO ARQUIVO ------------------------------ */
+function nomeArquivoRelatorio(m, extensao){
+  const { de, ate } = m.periodo;
+  const [y, mes] = de.split('-').map(Number);
+  const mesCheio = de.slice(0, 7) === ate.slice(0, 7) && de.endsWith('-01') && ate === `${de.slice(0, 7)}-${pad2(ultimoDiaDoMes(y, mes))}`;
+  return `relatorio-${m.arquivo}_${mesCheio ? de.slice(0, 7) : `${de}_a_${ate}`}.${extensao}`;
+}
+
+/* No celular abre a folha de compartilhar (é o único jeito de "salvar" arquivo num
+   iPhone/Android). No computador baixa direto — a folha de compartilhar do desktop
+   atrapalha mais do que ajuda. Só vai `files`, sem `title`: o Safari trata o título
+   como um segundo anexo. */
+async function entregarArquivo(blob, nome){
+  const arquivo = new File([blob], nome, { type: blob.type });
+  const toque = !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+  if(toque && navigator.share && navigator.canShare && navigator.canShare({ files: [arquivo] })){
+    try{ await navigator.share({ files: [arquivo] }); return 'compartilhado'; }
+    catch(err){ if(err && err.name === 'AbortError') return 'cancelado'; /* outro erro: cai pro download */ }
+  }
+  const url = URL.createObjectURL(blob);
+  if(navigator.standalone === true){
+    // iOS em modo "tela de início": um link de download troca a tela inteira pelo arquivo, sem botão de voltar.
+    if(!window.open(url, '_blank')) alert('Não consegui abrir o arquivo. Permita pop-ups pra esse site e tente de novo.');
+  } else {
+    const a = document.createElement('a');
+    a.href = url; a.download = nome; a.rel = 'noopener';
+    document.body.appendChild(a); a.click(); a.remove();
+  }
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+  return 'baixado';
+}
+
+async function exportarRelatorio(formato){
+  const status = document.getElementById('relStatus');
+  const botoes = [document.getElementById('btnRelPdf'), document.getElementById('btnRelXlsx')];
+  // Reconstrói do zero a partir dos dados de agora, não do que ficou na tela.
+  const m = montarRelatorio(relTipoAtual, { de: relEstado.de, ate: relEstado.ate, filtro: relEstado.filtro[relTipoAtual] });
+  if(m.erro || m.linhas.length === 0) return;
+  status.style.color = 'var(--ink-soft)';
+  status.textContent = formato === 'pdf' ? 'Gerando o PDF…' : 'Gerando a planilha…';
+  botoes.forEach(b => b.disabled = true);
+  try{
+    const blob = formato === 'pdf' ? await gerarBlobPdfRelatorio(m) : gerarBlobXlsxRelatorio(m);
+    const nome = nomeArquivoRelatorio(m, formato === 'pdf' ? 'pdf' : 'xlsx');
+    const resultado = await entregarArquivo(blob, nome);
+    if(resultado === 'cancelado'){ status.textContent = ''; }
+    else {
+      status.style.color = 'var(--green-dark)';
+      status.textContent = resultado === 'baixado' ? `✓ ${nome} foi salvo na sua pasta de Downloads.` : `✓ ${nome} pronto — escolha pra onde enviar.`;
+    }
+  }catch(err){
+    console.error('Erro ao gerar o relatório:', err);
+    status.style.color = 'var(--warn)';
+    status.textContent = mensagemDeErro(err, 'Não consegui gerar o arquivo');
+  }finally{
+    botoes.forEach(b => b.disabled = false);
+  }
+}
+document.getElementById('btnRelPdf').addEventListener('click', () => exportarRelatorio('pdf'));
+document.getElementById('btnRelXlsx').addEventListener('click', () => exportarRelatorio('xlsx'));
+
+/* ------------------------------ PDF ------------------------------ */
+/* A fonte padrão do PDF (Helvetica) só tem o alfabeto latino: letras acentuadas
+   funcionam, emoji e outros alfabetos viram "?". Tira também quebras e espaços
+   estranhos, que desalinham a tabela. */
+const pdfTexto = (s) => String(s == null ? '' : s).replace(/\s+/g, ' ')
+  .replace(/[^\x20-\x7E -ÿ–—‘’“”•…€]/gu, '?').trim();
+
+function textoCelulaPlano(col, valor){
+  if(col.tipo === 'moeda') return money(valor);
+  if(col.tipo === 'data') return textoDataRel(valor);
+  if(col.tipo === 'inteiro') return valor == null ? '' : String(valor);
+  return valor == null || valor === '' ? '—' : String(valor);
+}
+
+async function gerarBlobPdfRelatorio(m){
+  if(typeof window.jspdf === 'undefined') throw new Error('A biblioteca de PDF não carregou. Confira a internet e recarregue a página.');
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  const W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight();
+  const M = 14, LARG = W - M * 2, LIMITE = H - 18;
+  const emp = empresaAtual || {};
+  const [cr, cg, cb] = hexParaRgb(emp.cor_pdf);
+  const CINZA = [90, 100, 95];
+  const clarear = (f) => [cr, cg, cb].map(c => Math.round(c + (255 - c) * f));
+  let y = M;
+
+  const txt = (s, x, yy, opts) => doc.text(pdfTexto(s), x, yy, opts);
+  const garantir = (altura, aoQuebrar) => {
+    if(y + altura <= LIMITE) return false;
+    doc.addPage(); y = M;
+    if(aoQuebrar) aoQuebrar();
+    return true;
+  };
+
+  doc.setProperties({ title: m.titulo, subject: `Período ${fmtData(m.periodo.de)} a ${fmtData(m.periodo.ate)}`,
+                      author: emp.razao_social || 'Marcato PDV', creator: 'Marcato PDV' });
+
+  /* ---- cabeçalho: logo e dados da empresa à esquerda, título e período à direita ---- */
+  let xTexto = M;
+  if(emp.logo_url){
+    const logo = await carregarImagemComoDataURL(emp.logo_url);
+    if(logo){
+      const escala = Math.min(18 / logo.h, 38 / logo.w, 1);
+      const w = logo.w * escala, h = logo.h * escala;
+      if(isFinite(w) && isFinite(h) && w > 0 && h > 0){
+        try{ doc.addImage(logo.dataUrl, 'PNG', M, y, w, h); xTexto = M + w + 5; }catch(e){}
+      }
+    }
+  }
+  const larguraEsq = LARG * 0.5 - (xTexto - M);
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(13); doc.setTextColor(20, 20, 20);
+  let yEsq = y + 5;
+  doc.splitTextToSize(pdfTexto(emp.razao_social || 'Marcato PDV'), larguraEsq).forEach(l => { doc.text(l, xTexto, yEsq); yEsq += 5.4; });
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(...CINZA);
+  [emp.cnpj && `CNPJ: ${emp.cnpj}`, emp.endereco, emp.telefone].filter(Boolean).forEach(l => {
+    doc.splitTextToSize(pdfTexto(l), larguraEsq).forEach(s => { doc.text(s, xTexto, yEsq); yEsq += 4; });
+  });
+
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(15); doc.setTextColor(cr, cg, cb);
+  txt(m.titulo, W - M, y + 5.5, { align: 'right' });
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(...CINZA);
+  let yDir = y + 11;
+  txt(`Período: ${fmtData(m.periodo.de)} a ${fmtData(m.periodo.ate)}`, W - M, yDir, { align: 'right' });
+  doc.splitTextToSize(pdfTexto(m.filtrosTexto), LARG * 0.5).forEach(l => { yDir += 4.5; doc.text(l, W - M, yDir, { align: 'right' }); });
+
+  y = Math.max(yEsq, yDir, y + 18) + 3;
+  doc.setDrawColor(cr, cg, cb); doc.setLineWidth(0.7); doc.line(M, y, W - M, y);
+  y += 7;
+
+  /* ---- resumo: caixinhas com os totais ---- */
+  const porLinha = Math.min(4, m.resumo.length), gap = 3, hBox = 16.5;
+  const wBox = (LARG - gap * (porLinha - 1)) / porLinha;
+  const corTom = { ok: [14, 130, 95], alerta: [190, 50, 40] };
+  for(let i = 0; i < m.resumo.length; i += porLinha){
+    garantir(hBox + 2);
+    m.resumo.slice(i, i + porLinha).forEach((c, k) => {
+      const x = M + k * (wBox + gap);
+      doc.setFillColor(...(c.destaque ? [cr, cg, cb] : [245, 246, 250]));
+      doc.roundedRect(x, y, wBox, hBox, 1.8, 1.8, 'F');
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(6.8);
+      doc.setTextColor(...(c.destaque ? [255, 255, 255] : CINZA));
+      txt(c.rotulo.toUpperCase(), x + 3, y + 4.6);
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(11.5);
+      doc.setTextColor(...(c.destaque ? [255, 255, 255] : (corTom[c.tom] || [20, 20, 20])));
+      txt(money(c.valor), x + 3, y + 10.3);
+      if(c.detalhe){
+        doc.setFont('helvetica', 'normal'); doc.setFontSize(7.2);
+        doc.setTextColor(...(c.destaque ? [235, 235, 245] : CINZA));
+        txt(c.detalhe, x + 3, y + 14.2);
+      }
+    });
+    y += hBox + gap;
+  }
+  y += 3;
+
+  /* ---- tabela: quebra de página com cabeçalho repetido ---- */
+  function desenharTabela(def){
+    const cols = def.colunas;
+    const pesos = cols.reduce((s, c) => s + c.largura, 0);
+    const larguras = cols.map(c => LARG * c.largura / pesos);
+    const xs = []; let acc = M; larguras.forEach(w => { xs.push(acc); acc += w; });
+    const PAD = 1.8, LH = 3.7;
+    const xDe = (c, i) => { const a = alinhamentoColuna(c); return a === 'dir' ? xs[i] + larguras[i] - PAD : a === 'centro' ? xs[i] + larguras[i] / 2 : xs[i] + PAD; };
+    const optDe = (c) => { const a = alinhamentoColuna(c); return a === 'dir' ? { align: 'right' } : a === 'centro' ? { align: 'center' } : undefined; };
+
+    const cabecalho = () => {
+      doc.setFillColor(236, 239, 245); doc.rect(M, y, LARG, 7, 'F');
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(7); doc.setTextColor(...CINZA);
+      cols.forEach((c, i) => txt(c.titulo.toUpperCase(), xDe(c, i), y + 4.6, optDe(c)));
+      y += 7;
+    };
+    const fonteCorpo = () => { doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); };
+
+    garantir(7 + 9);                // o cabeçalho nunca fica sozinho no fim da página
+    cabecalho(); fonteCorpo();
+    def.linhas.forEach((l, idx) => {
+      const celulas = cols.map((c, i) => {
+        const bruto = pdfTexto(textoCelulaPlano(c, l[c.chave]));
+        return c.tipo === 'texto' ? doc.splitTextToSize(bruto, larguras[i] - PAD * 2) : [bruto];
+      });
+      const altura = Math.max(...celulas.map(x => x.length)) * LH + PAD * 2 - 0.6;
+      if(garantir(altura, cabecalho)) fonteCorpo();
+      if(idx % 2 === 1){ doc.setFillColor(248, 249, 252); doc.rect(M, y, LARG, altura, 'F'); }
+      doc.setTextColor(20, 20, 20);
+      cols.forEach((c, i) => celulas[i].forEach((ln, k) => doc.text(ln, xDe(c, i), y + PAD + 2.5 + k * LH, optDe(c))));
+      doc.setDrawColor(228, 232, 238); doc.setLineWidth(0.15); doc.line(M, y + altura, M + LARG, y + altura);
+      y += altura;
+    });
+
+    if(def.total){
+      const alt = 8;
+      if(garantir(alt + 1, cabecalho)) fonteCorpo();
+      doc.setFillColor(...clarear(0.86)); doc.rect(M, y, LARG, alt, 'F');
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(8.8); doc.setTextColor(20, 20, 20);
+      cols.forEach((c, i) => {
+        const v = def.total.valores && def.total.valores[c.chave];
+        if(c.chave === def.total.chave) txt(def.total.rotulo, xDe(c, i), y + 5.2, optDe(c));
+        else if(v != null) txt(textoCelulaPlano(c, v), xDe(c, i), y + 5.2, optDe(c));
+      });
+      y += alt;
+    }
+  }
+  desenharTabela(m);
+
+  /* ---- seções (totais por mês, por forma de pagamento...) ---- */
+  (m.secoes || []).forEach(s => {
+    y += 8;
+    garantir(7 + 9 + 8);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(20, 20, 20);
+    txt(s.titulo, M, y + 3); y += 6.5;
+    desenharTabela(s);
+  });
+
+  /* ---- observações ---- */
+  if(m.notas && m.notas.length){
+    y += 8;
+    garantir(14);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); doc.setTextColor(...CINZA);
+    txt('OBSERVAÇÕES', M, y); y += 4.5;
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8.2);
+    m.notas.forEach(n => {
+      const ls = doc.splitTextToSize('• ' + pdfTexto(n), LARG - 2);
+      garantir(ls.length * 3.6 + 1.5);
+      ls.forEach(l => { doc.text(l, M + 1, y + 2.6); y += 3.6; });
+      y += 1.4;
+    });
+  }
+
+  /* ---- rodapé em todas as páginas (só dá pra saber o "de N" no fim) ---- */
+  const paginas = doc.getNumberOfPages();
+  const geradoEm = new Date().toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+  for(let p = 1; p <= paginas; p++){
+    doc.setPage(p);
+    doc.setDrawColor(225, 229, 236); doc.setLineWidth(0.2); doc.line(M, H - 12.5, W - M, H - 12.5);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(...CINZA);
+    txt(`Gerado em ${geradoEm}`, M, H - 8);
+    txt('Identidade Vision', W / 2, H - 8, { align: 'center' });
+    txt(`Página ${p} de ${paginas}`, W - M, H - 8, { align: 'right' });
+  }
+  return doc.output('blob');
+}
+
+/* ------------------------------ EXCEL ------------------------------ */
+/* Data como número de série do Excel (dias desde 30/12/1899) com formato de data:
+   passar um Date do JavaScript faria o fuso horário empurrar a data um dia. */
+function serialExcel(iso){
+  const [y, m, d] = iso.split('-').map(Number);
+  return (Date.UTC(y, m - 1, d) - Date.UTC(1899, 11, 30)) / 86400000;
+}
+function celulaXlsx(col, valor){
+  if(col.tipo === 'moeda') return { t: 'n', v: Number(valor) || 0, z: '"R$" #,##0.00' };
+  if(col.tipo === 'inteiro') return { t: 'n', v: Number(valor) || 0, z: '0' };
+  if(col.tipo === 'data' && ehDataISO(valor)) return { t: 'n', v: serialExcel(valor), z: 'dd/mm/yyyy' };
+  return { t: 's', v: valor == null ? '' : String(valor) };
+}
+function planilhaDeTabela(def){
+  const cab = def.colunas.map(c => ({ t: 's', v: c.titulo }));
+  const corpo = def.linhas.map(l => def.colunas.map(c => celulaXlsx(c, l[c.chave])));
+  const aoa = [cab, ...corpo];
+  if(def.total){
+    aoa.push(def.colunas.map(c => c.chave === def.total.chave ? { t: 's', v: def.total.rotulo }
+      : (def.total.valores && def.total.valores[c.chave] != null ? celulaXlsx(c, def.total.valores[c.chave]) : { t: 's', v: '' })));
+  }
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  ws['!cols'] = def.colunas.map(c => {
+    const maior = def.linhas.slice(0, 500).reduce((mx, l) => Math.max(mx, textoCelulaPlano(c, l[c.chave]).length), c.titulo.length);
+    return { wch: Math.min(Math.max(maior + 2, 8), 60) };
+  });
+  // O filtro cobre só as linhas de dados: a linha de total fica de fora, senão ordenar a embaralha.
+  ws['!autofilter'] = { ref: XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: def.linhas.length, c: def.colunas.length - 1 } }) };
+  return ws;
+}
+
+function gerarBlobXlsxRelatorio(m){
+  if(typeof XLSX === 'undefined') throw new Error('A biblioteca de Excel não carregou. Confira a internet e recarregue a página.');
+  const emp = empresaAtual || {};
+  const geradoEm = new Date().toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+  const wb = XLSX.utils.book_new();
+
+  // Primeira aba = os dados, pra quem abre o arquivo já cair na lista pronta pra filtrar.
+  const nomeAba = { boletos: 'Boletos', vendas: 'Vendas', fixos: 'Custos fixos' }[m.tipo] || 'Dados';
+  XLSX.utils.book_append_sheet(wb, planilhaDeTabela(m), nomeAba);
+
+  const s = (v) => ({ t: 's', v });
+  const resumo = [
+    [s(emp.razao_social || 'Marcato PDV')],
+    [s(m.titulo)],
+    [s(`Período: ${fmtData(m.periodo.de)} a ${fmtData(m.periodo.ate)}`)],
+    [s(m.filtrosTexto)],
+    [s(`Gerado em ${geradoEm}`)],
+    [],
+    [s('Resumo'), s('Valor'), s('Detalhe')],
+    ...m.resumo.map(c => [s(c.rotulo), { t: 'n', v: c.valor, z: '"R$" #,##0.00' }, s(c.detalhe || '')]),
+    [],
+    ...(m.notas || []).map(n => [s(n)]),
+  ];
+  const wsResumo = XLSX.utils.aoa_to_sheet(resumo);
+  wsResumo['!cols'] = [{ wch: 28 }, { wch: 18 }, { wch: 26 }];
+  XLSX.utils.book_append_sheet(wb, wsResumo, 'Resumo');
+
+  (m.secoes || []).forEach(sec => XLSX.utils.book_append_sheet(wb, planilhaDeTabela(sec), sec.titulo.slice(0, 31)));
+
+  const saida = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+  return new Blob([saida], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+}
 
 /* ===================== VENDER / CARRINHO ===================== */
 /* ---- Buscar produto e adicionar (F1) — pra vender sem código de barras ---- */
