@@ -1297,6 +1297,18 @@ html.tema-escuro .rel-tag.pago{ color:var(--green); }
 </div>
 
 <!-- ================= CADASTRO INICIAL DA EMPRESA ================= -->
+<div id="empresaErroScreen" class="auth-screen hide">
+  <div class="auth-card" style="text-align:center;">
+    <div class="brand" style="justify-content:center; padding-bottom:6px;">
+      <div class="dot"></div>
+      <div><b style="color:var(--ink);">Marcato PDV</b></div>
+    </div>
+    <p style="font-size:14px; color:var(--ink); margin:6px 0 8px; font-weight:600;">Não consegui carregar sua empresa</p>
+    <p id="empresaErroTexto" style="font-size:12.5px; color:var(--ink-soft); margin:0 0 16px;">Sua conta e seus dados estão salvos. Confira a internet e tente de novo.</p>
+    <button type="button" class="btn btn-teal" id="btnTentarEmpresaDeNovo" style="width:100%;">Tentar de novo</button>
+    <button type="button" class="btn btn-ghost" id="btnSairEmpresaErro" style="width:100%; margin-top:8px;">Sair da conta</button>
+  </div>
+</div>
 <div id="onboardingScreen" class="auth-screen hide">
   <div class="auth-card">
     <div class="brand" style="justify-content:center; padding-bottom:6px;">
@@ -8975,15 +8987,47 @@ async function iniciarSessao(session){
     return;
   }
 
-  // Verifica se já tem empresa cadastrada
-  const { data: empresa, error } = await sb.from('empresas').select('*').eq('user_id', usuarioAtual.id).maybeSingle();
-  if(error){ console.error('Erro ao verificar empresa:', error.message); }
+  // Verifica se já tem empresa cadastrada. Falha na consulta NÃO quer dizer
+  // "não tem empresa": antes isso mandava quem já era cliente pro cadastro de novo,
+  // e o "Concluir cadastro" batia em empresas_user_id_key.
+  document.getElementById('empresaErroScreen').classList.add('hide');
+  let empresa = null;
+  try{
+    empresa = await buscarEmpresaDoUsuario();
+  }catch(err){
+    console.error('Erro ao verificar empresa:', err && err.message);
+    document.getElementById('empresaErroTexto').textContent = ehErroDeRede(err)
+      ? 'Não consegui falar com o servidor. Sua conta e seus dados estão salvos — confira a internet e toque em "Tentar de novo".'
+      : 'Sua conta e seus dados estão salvos, mas o servidor respondeu com erro (' + ((err && err.message) || 'desconhecido') + '). Tente de novo em instantes.';
+    document.getElementById('empresaErroScreen').classList.remove('hide');
+    return;
+  }
 
   if(!empresa){
     document.getElementById('obEmail').value = usuarioAtual.email || '';
     document.getElementById('onboardingScreen').classList.remove('hide');
     return;
   }
+  await entrarComEmpresa(empresa);
+}
+
+/* 3 tentativas com espera crescente: a conexão desse público cai e volta toda hora. */
+async function buscarEmpresaDoUsuario(){
+  let ultimoErro = null;
+  for(let i=0; i<3; i++){
+    try{
+      const { data, error } = await sb.from('empresas').select('*').eq('user_id', usuarioAtual.id).maybeSingle();
+      if(!error) return data;
+      ultimoErro = error;
+    }catch(err){ ultimoErro = err; }
+    if(i < 2) await new Promise(r => setTimeout(r, 700 * Math.pow(2, i)));
+  }
+  throw ultimoErro;
+}
+
+async function entrarComEmpresa(empresa){
+  document.getElementById('onboardingScreen').classList.add('hide');
+  document.getElementById('empresaErroScreen').classList.add('hide');
   empresaAtual = empresa;
   segmentoAtual = empresa.segmento || 'mercado';
   aplicarCorMarca(empresa.cor_pdf);
@@ -9045,28 +9089,38 @@ document.getElementById('btnSalvarEmpresa').addEventListener('click', async ()=>
   const statusEl = document.getElementById('onboardingStatus');
   if(!nomeCompleto){ statusEl.textContent = 'Preencha seu nome completo.'; return; }
 
-  const { data: row, error } = await sb.from('empresas').insert({
-    user_id: usuarioAtual.id, cnpj, razao_social: razaoSocial||null, nome_completo: nomeCompleto, telefone: telefone||null, email, segmento
-  }).select().single();
-  if(error){ statusEl.textContent = mensagemDeErro(error, 'Erro ao salvar'); return; }
-
-  empresaAtual = row;
-  segmentoAtual = segmento;
-
-  assinaturaAtual = await garantirAssinatura(row.id);
-  const acesso = statusAcessoAssinatura(assinaturaAtual);
-  document.getElementById('onboardingScreen').classList.add('hide');
-  if(!acesso.liberado){
-    mostrarPaywall(acesso.motivo);
-    return;
+  const btn = document.getElementById('btnSalvarEmpresa');
+  btn.disabled = true;
+  statusEl.textContent = 'Salvando...';
+  try{
+    const { data: row, error } = await sb.from('empresas').insert({
+      user_id: usuarioAtual.id, cnpj, razao_social: razaoSocial||null, nome_completo: nomeCompleto, telefone: telefone||null, email, segmento
+    }).select().single();
+    if(error){
+      // Essa conta já tem empresa (o app só não conseguiu ler antes) — entra nela.
+      const jaExiste = error.code === '23505' || /empresas_user_id_key|duplicate key/i.test(error.message||'');
+      if(jaExiste){
+        try{
+          const existente = await buscarEmpresaDoUsuario();
+          if(existente){ statusEl.textContent = ''; await entrarComEmpresa(existente); return; }
+        }catch(e){ statusEl.textContent = mensagemDeErro(e, 'Sua empresa já está cadastrada, mas não consegui abrir'); return; }
+      }
+      statusEl.textContent = mensagemDeErro(error, 'Erro ao salvar');
+      return;
+    }
+    statusEl.textContent = '';
+    await entrarComEmpresa(row);
+  }finally{
+    btn.disabled = false;
   }
+});
 
-  aplicarTerminologiaSegmento(segmentoAtual);
-  renderConfigEmpresa();
-  exibirNomeEmpresa(razaoSocial || email);
-  document.getElementById('appShell').classList.remove('hide');
-  atualizarBannerAssinatura(acesso);
-  carregarDados();
+document.getElementById('btnTentarEmpresaDeNovo').addEventListener('click', ()=>{
+  if(sessaoAtual) iniciarSessao(sessaoAtual);
+});
+document.getElementById('btnSairEmpresaErro').addEventListener('click', async ()=>{
+  try{ await sb.auth.signOut(); }catch(e){}
+  location.reload();
 });
 
 /* ---- Relógio ao vivo (tela de venda) ---- */
