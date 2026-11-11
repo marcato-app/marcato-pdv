@@ -61,3 +61,45 @@ alter table vendas_fornecedor
   add column if not exists observacoes text;
 ```
 
+
+## 4. Nota fiscal anexada na Venda Fornecedor
+
+Deixa anexar o PDF ou a foto da nota fiscal de compra em cada venda (botão
+"anexar nota fiscal" no histórico da Venda Fornecedor). Vale pra venda inteira
+e fica repetida em todas as linhas do mesmo `grupo_venda`, igual ao frete.
+
+Os arquivos ficam num bucket **privado** (`notas-fiscais`): nota tem CNPJ/CPF e
+valores, então não tem link público. Cada loja só enxerga a pasta da própria
+empresa. O app abre a nota por um link que expira em 1 hora.
+
+Sem isso: o botão aparece, mas ao anexar o app avisa que falta rodar esta migração.
+
+```sql
+alter table vendas_fornecedor
+  add column if not exists notas_fiscais jsonb not null default '[]'::jsonb;
+
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('notas-fiscais', 'notas-fiscais', false, 10485760,
+        array['application/pdf','image/jpeg','image/png','image/heic','image/heif','image/webp'])
+on conflict (id) do update set public = false;
+
+-- Caminho do arquivo: <empresa_id>/<venda>/<arquivo>. A primeira pasta tem que
+-- ser uma empresa do usuário logado.
+drop policy if exists "notas fiscais: ler da propria empresa" on storage.objects;
+create policy "notas fiscais: ler da propria empresa" on storage.objects
+  for select to authenticated
+  using (bucket_id = 'notas-fiscais' and (storage.foldername(name))[1] in
+         (select id::text from public.empresas where user_id = auth.uid()));
+
+drop policy if exists "notas fiscais: enviar pra propria empresa" on storage.objects;
+create policy "notas fiscais: enviar pra propria empresa" on storage.objects
+  for insert to authenticated
+  with check (bucket_id = 'notas-fiscais' and (storage.foldername(name))[1] in
+              (select id::text from public.empresas where user_id = auth.uid()));
+
+drop policy if exists "notas fiscais: apagar da propria empresa" on storage.objects;
+create policy "notas fiscais: apagar da propria empresa" on storage.objects
+  for delete to authenticated
+  using (bucket_id = 'notas-fiscais' and (storage.foldername(name))[1] in
+         (select id::text from public.empresas where user_id = auth.uid()));
+```

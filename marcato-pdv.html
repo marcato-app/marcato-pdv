@@ -2877,7 +2877,7 @@ const fromDbTeste = r => ({id:r.id, aparelho:r.aparelho, imeiSerial:r.imei_seria
 const fromDbCompra = r => ({id:r.id, fornecedor:r.fornecedor, data:r.data, itens: typeof r.itens==='string' ? JSON.parse(r.itens) : (r.itens||[]), total:num(r.total)||0, observacoes:r.observacoes, criadoEm:r.criado_em});
 const fromDbMovEstoque = r => ({id:r.id, produtoId:r.produto_id, produtoNome:r.produto_nome, tipo:r.tipo, quantidade:num(r.quantidade)||0, motivo:r.motivo, compraId:r.compra_id, criadoEm:r.criado_em});
 const fromDbAssinatura = r => ({id:r.id, status:r.status, trialInicio:r.trial_inicio, trialFim:r.trial_fim, mpPreapprovalId:r.mp_preapproval_id, proximoVencimento:r.proximo_vencimento, pagamentoFalhouEm:r.pagamento_falhou_em, atualizadoEm:r.atualizado_em});
-const fromDbVendaFornecedor = r => ({id:r.id, clienteId:r.cliente_id||null, telefone:r.telefone, capacidade:r.capacidade||null, cor:r.cor||null, imei:r.imei, valorCompra: r.valor_compra!==null?num(r.valor_compra):null, valorVenda:num(r.valor_venda)||0, tipoEnvio:r.tipo_envio, dataVenda:r.data_venda, grupoVenda:r.grupo_venda||null, status: r.status || 'aprovada', valorFrete: num(r.valor_frete)||0, observacoes: r.observacoes || ''});
+const fromDbVendaFornecedor = r => ({id:r.id, clienteId:r.cliente_id||null, telefone:r.telefone, capacidade:r.capacidade||null, cor:r.cor||null, imei:r.imei, valorCompra: r.valor_compra!==null?num(r.valor_compra):null, valorVenda:num(r.valor_venda)||0, tipoEnvio:r.tipo_envio, dataVenda:r.data_venda, grupoVenda:r.grupo_venda||null, status: r.status || 'aprovada', valorFrete: num(r.valor_frete)||0, observacoes: r.observacoes || '', notasFiscais: Array.isArray(r.notas_fiscais) ? r.notas_fiscais : []});
 const ehOrcamentoVF = v => v.status === 'orcamento';
 /* O frete e do orcamento inteiro, mas fica repetido em cada linha do grupo —
    somar linha a linha cobraria o frete uma vez por aparelho. */
@@ -4951,12 +4951,162 @@ async function salvarEdicaoVF(id){
 
 async function apagarVendaFornecedor(id){
   if(!confirm('Apagar essa venda? Isso não pode ser desfeito.')) return;
+  const alvo = vendasFornecedor.find(v=>v.id===id);
+  const ultimaDoGrupo = alvo && itensDoGrupoVF(id).length <= 1;
   const { error } = await sb.from('vendas_fornecedor').delete().eq('id', id);
   if(error){ alert(mensagemDeErro(error, 'Erro ao apagar')); return; }
+  if(ultimaDoGrupo && alvo.notasFiscais.length){
+    // Sem nenhuma linha apontando pra eles, os arquivos virariam lixo pago no Storage.
+    try{ await sb.storage.from(BUCKET_NOTAS).remove(alvo.notasFiscais.map(n=>n.path)); }catch(e){ console.warn('Notas não removidas:', e); }
+  }
   vendasFornecedor = vendasFornecedor.filter(v=>v.id!==id);
   renderVendasFornecedor();
   renderPainel();
   renderAnaliseVendaFornecedor();
+}
+
+/* ===================== NOTA FISCAL ANEXADA NA VENDA FORNECEDOR =====================
+   A loja recebe a NF de compra do fornecedor (PDF ou foto) e guarda junto da venda.
+   Vale pra venda inteira (grupo_venda) — igual frete/observação, a lista fica
+   repetida em cada linha do grupo. Os arquivos ficam num bucket PRIVADO: nota tem
+   CNPJ/CPF e valores, não pode ter link público. Pra abrir, gera link assinado
+   que expira em 1 hora. */
+const BUCKET_NOTAS = 'notas-fiscais';
+const TAMANHO_MAX_NOTA = 10 * 1024 * 1024;
+const TIPOS_NOTA = /^(application\/pdf|image\/(jpeg|png|heic|heif|webp))$/i;
+
+function nomeArquivoSeguro(nome){
+  const limpo = String(nome || 'nota').normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-zA-Z0-9._-]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+  return (limpo || 'nota').slice(-80);
+}
+function tamanhoLegivel(bytes){
+  if(!(bytes > 0)) return '';
+  return bytes < 1024*1024 ? Math.max(1, Math.round(bytes/1024)) + ' KB' : (bytes/1024/1024).toFixed(1).replace('.', ',') + ' MB';
+}
+function erroDeBucketAusente(error){
+  return /bucket not found|not found/i.test((error && (error.message || error.error)) || '') || (error && (error.statusCode === '404' || error.status === 404));
+}
+function erroDePermissaoStorage(error){
+  return /row-level security|unauthorized|permission|403/i.test((error && (error.message || error.error)) || '') || (error && (error.statusCode === '403' || error.status === 403));
+}
+function mensagemErroNota(error, acao){
+  if(ehErroDeRede(error)) return mensagemDeErro(error, acao);
+  if(pareceColunaAusente(error)) return 'Falta a coluna "notas_fiscais" no banco. Rode a migração 4 do README no Supabase e tente de novo.';
+  if(erroDeBucketAusente(error) || erroDePermissaoStorage(error)) return 'O espaço pra guardar notas ainda não foi criado no Supabase. Rode a migração 4 do README e tente de novo.';
+  return mensagemDeErro(error, acao);
+}
+
+async function abrirNotasFiscaisVF(id){
+  const itens = itensDoGrupoVF(id);
+  if(itens.length === 0) return;
+  const notas = itens[0].notasFiscais || [];
+  const cliente = itens[0].clienteId ? clientes.find(c=>c.id===itens[0].clienteId) : null;
+  const lista = notas.length ? notas.map((n, i)=>`
+      <div class="nf-item" style="display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--line);">
+        <div style="font-size:20px;" aria-hidden="true">${/pdf/i.test(n.tipo||'') ? '📄' : '🖼'}</div>
+        <div style="flex:1; min-width:0;">
+          <div style="font-weight:600; font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${esc(n.nome)}">${esc(n.nome)}</div>
+          <div style="font-size:11.5px; color:var(--ink-soft);">${n.enviado_em ? new Date(n.enviado_em).toLocaleDateString('pt-BR') : ''}${n.tamanho ? ' · ' + tamanhoLegivel(n.tamanho) : ''}</div>
+        </div>
+        <a class="btn-ghost btn-sm nf-abrir" data-nf-i="${i}" target="_blank" rel="noopener" aria-disabled="true" style="pointer-events:none; opacity:.5; text-decoration:none; border-radius:999px; display:inline-flex; align-items:center;">Abrir</a>
+        <button type="button" class="btn-ghost btn-sm" onclick="removerNotaFiscalVF('${esc(id)}', ${i})" aria-label="Remover ${esc(n.nome)}">Remover</button>
+      </div>`).join('')
+    : '<div class="empty" style="padding:16px 0;"><b>Nenhuma nota anexada</b>Anexe o PDF ou a foto da nota fiscal de compra.</div>';
+  abrirModal(`<h3>Nota fiscal</h3>
+    <div class="desc">${esc(cliente ? cliente.nome : 'Sem cliente vinculado')} · ${itens.length} aparelho${itens.length>1?'s':''}. Fica guardada só pra loja — não vai no PDF do cliente.</div>
+    <div id="nfLista" style="margin:6px 0 12px;">${lista}</div>
+    <input type="file" id="nfArquivo" accept="application/pdf,image/*" multiple style="display:none;">
+    <div id="nfStatus" style="font-size:12px; color:var(--warn); min-height:16px;" role="status"></div>
+    <div class="modal-close-row">
+      <button class="btn-ghost" onclick="fecharModal()">Fechar</button>
+      <button class="btn-teal" id="btnAnexarNota" onclick="document.getElementById('nfArquivo').click()">${notas.length ? 'Anexar outra' : 'Anexar nota (PDF ou foto)'}</button>
+    </div>`);
+  document.getElementById('nfArquivo').addEventListener('change', (e)=>anexarNotasFiscaisVF(id, [...e.target.files]));
+
+  // Link real (<a href>) em vez de abrir depois de um await: no iPhone, abrir aba
+  // fora do toque do dedo é bloqueado como pop-up.
+  if(notas.length){
+    const { data, error } = await sb.storage.from(BUCKET_NOTAS).createSignedUrls(notas.map(n=>n.path), 3600);
+    if(error){ const st = document.getElementById('nfStatus'); if(st) st.textContent = mensagemErroNota(error, 'Não consegui preparar os links'); return; }
+    (data || []).forEach((d, i)=>{
+      const a = document.querySelector(`.nf-abrir[data-nf-i="${i}"]`);
+      if(!a) return;
+      if(d && d.signedUrl){ a.href = d.signedUrl; a.removeAttribute('aria-disabled'); a.style.pointerEvents = ''; a.style.opacity = ''; }
+      else { a.textContent = 'Arquivo sumiu'; }
+    });
+  }
+}
+
+/* Grava a mesma lista em todas as linhas do grupo. */
+async function gravarNotasNoGrupoVF(id, novaLista){
+  for(const it of itensDoGrupoVF(id)){
+    const { data, error } = await sb.from('vendas_fornecedor')
+      .update({ notas_fiscais: novaLista }).eq('id', it.id).select().maybeSingle();
+    if(error) return error;
+    const idx = vendasFornecedor.findIndex(v=>v.id===it.id);
+    if(idx>-1 && data) vendasFornecedor[idx] = fromDbVendaFornecedor(data);
+  }
+  return null;
+}
+
+async function anexarNotasFiscaisVF(id, arquivos){
+  const statusEl = document.getElementById('nfStatus');
+  const botao = document.getElementById('btnAnexarNota');
+  if(!arquivos.length) return;
+  const ruins = arquivos.filter(f => !(TIPOS_NOTA.test(f.type) || /\.(pdf|jpe?g|png|heic|heif|webp)$/i.test(f.name)));
+  if(ruins.length){ statusEl.textContent = `"${ruins[0].name}" não é PDF nem foto. Envie a nota em PDF, JPG ou PNG.`; return; }
+  const grandes = arquivos.filter(f => f.size > TAMANHO_MAX_NOTA);
+  if(grandes.length){ statusEl.textContent = `"${grandes[0].name}" tem ${tamanhoLegivel(grandes[0].size)} — o limite é 10 MB por arquivo.`; return; }
+
+  const itens = itensDoGrupoVF(id);
+  const chave = itens[0].grupoVenda || itens[0].id;
+  const enviados = [];
+  botao.disabled = true;
+  statusEl.style.color = 'var(--ink-soft)';
+  for(let i=0; i<arquivos.length; i++){
+    const f = arquivos[i];
+    statusEl.textContent = arquivos.length > 1 ? `Enviando ${i+1} de ${arquivos.length}...` : 'Enviando...';
+    const path = `${empresaAtual.id}/${chave}/${Date.now()}-${nomeArquivoSeguro(f.name)}`;
+    const { error } = await sb.storage.from(BUCKET_NOTAS).upload(path, f, { contentType: f.type || undefined, upsert: false });
+    if(error){
+      statusEl.style.color = 'var(--warn)';
+      statusEl.textContent = mensagemErroNota(error, 'Erro ao enviar a nota');
+      if(enviados.length) try{ await sb.storage.from(BUCKET_NOTAS).remove(enviados.map(n=>n.path)); }catch(e){}
+      botao.disabled = false;
+      return;
+    }
+    enviados.push({ path, nome: f.name || 'nota', tipo: f.type || '', tamanho: f.size, enviado_em: new Date().toISOString() });
+  }
+  statusEl.textContent = 'Salvando...';
+  const erro = await gravarNotasNoGrupoVF(id, [...(itens[0].notasFiscais || []), ...enviados]);
+  if(erro){
+    // O arquivo subiu mas a venda não guardou a referência: apaga pra não ficar órfão.
+    try{ await sb.storage.from(BUCKET_NOTAS).remove(enviados.map(n=>n.path)); }catch(e){}
+    statusEl.style.color = 'var(--warn)';
+    statusEl.textContent = mensagemErroNota(erro, 'Erro ao salvar a nota');
+    botao.disabled = false;
+    return;
+  }
+  renderVendasFornecedor();
+  await abrirNotasFiscaisVF(id);
+  const st = document.getElementById('nfStatus');
+  if(st){ st.style.color = 'var(--green-dark)'; st.textContent = enviados.length > 1 ? `✓ ${enviados.length} notas anexadas` : '✓ Nota anexada'; }
+}
+
+async function removerNotaFiscalVF(id, indice){
+  const itens = itensDoGrupoVF(id);
+  const notas = itens.length ? (itens[0].notasFiscais || []) : [];
+  const nota = notas[indice];
+  if(!nota) return;
+  if(!confirm(`Remover "${nota.nome}"? O arquivo é apagado e não dá pra recuperar.`)) return;
+  const statusEl = document.getElementById('nfStatus');
+  if(statusEl){ statusEl.style.color = 'var(--ink-soft)'; statusEl.textContent = 'Removendo...'; }
+  const erro = await gravarNotasNoGrupoVF(id, notas.filter((_, i)=>i!==indice));
+  if(erro){ if(statusEl){ statusEl.style.color = 'var(--warn)'; statusEl.textContent = mensagemErroNota(erro, 'Erro ao remover'); } return; }
+  try{ await sb.storage.from(BUCKET_NOTAS).remove([nota.path]); }catch(e){ console.warn('Arquivo não removido do Storage:', e); }
+  renderVendasFornecedor();
+  await abrirNotasFiscaisVF(id);
 }
 
 function renderVendasFornecedor(){
@@ -5000,7 +5150,7 @@ function renderVendasFornecedor(){
       const marcaFrete = v.valorFrete > 0 ? ` <span class="tag" style="background:var(--tint-neutral);">+${money(v.valorFrete)} frete</span>` : '';
       const nota = (v.observacoes || '').trim();
       const notaHtml = nota ? `<div class="nota-interna" title="${esc(nota)}">${esc(nota)}</div>` : '';
-      tr.innerHTML = `<td>${v.dataVenda ? new Date(v.dataVenda).toLocaleString('pt-BR') : '—'}</td><td><span class="tag ${orcamento?'pendente':'pago'}">${orcamento?'Orçamento':'Vendido'}</span>${marcaFrete}</td><td>${esc(cliente ? cliente.nome : '—')}${notaHtml}</td><td data-col="telefone">${esc(v.telefone)}</td><td data-col="capacidade">${esc(v.capacidade||'—')}</td><td data-col="cor">${esc(v.cor||'—')}</td><td data-col="imei" class="mono" style="font-size:11.5px;">${esc(v.imei||'—')}</td><td data-col="envio">${ENVIO_LABEL[v.tipoEnvio]||v.tipoEnvio}</td><td><b>${money(v.valorVenda)}</b></td><td>${acaoSituacao}<span class="rm" onclick="iniciarEdicaoVF('${v.id}')">editar</span><span class="rm" onclick="abrirFreteObsVF('${v.id}')">frete e obs.</span><span class="rm" onclick="gerarPdfVendaFornecedor('${v.id}')">compartilhar PDF</span><span class="rm rm-zap" onclick="enviarWhatsappVendaFornecedor('${v.id}')">WhatsApp</span><span class="rm rm-perigo" onclick="apagarVendaFornecedor('${v.id}')">apagar</span></td>`;
+      tr.innerHTML = `<td>${v.dataVenda ? new Date(v.dataVenda).toLocaleString('pt-BR') : '—'}</td><td><span class="tag ${orcamento?'pendente':'pago'}">${orcamento?'Orçamento':'Vendido'}</span>${marcaFrete}</td><td>${esc(cliente ? cliente.nome : '—')}${notaHtml}</td><td data-col="telefone">${esc(v.telefone)}</td><td data-col="capacidade">${esc(v.capacidade||'—')}</td><td data-col="cor">${esc(v.cor||'—')}</td><td data-col="imei" class="mono" style="font-size:11.5px;">${esc(v.imei||'—')}</td><td data-col="envio">${ENVIO_LABEL[v.tipoEnvio]||v.tipoEnvio}</td><td><b>${money(v.valorVenda)}</b></td><td>${acaoSituacao}<span class="rm" onclick="iniciarEdicaoVF('${v.id}')">editar</span><span class="rm" onclick="abrirFreteObsVF('${v.id}')">frete e obs.</span><span class="rm" onclick="abrirNotasFiscaisVF('${v.id}')">${v.notasFiscais.length ? `nota fiscal (${v.notasFiscais.length})` : 'anexar nota fiscal'}</span><span class="rm" onclick="gerarPdfVendaFornecedor('${v.id}')">compartilhar PDF</span><span class="rm rm-zap" onclick="enviarWhatsappVendaFornecedor('${v.id}')">WhatsApp</span><span class="rm rm-perigo" onclick="apagarVendaFornecedor('${v.id}')">apagar</span></td>`;
     }
     tbody.appendChild(tr);
   });
