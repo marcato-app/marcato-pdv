@@ -4955,7 +4955,7 @@ async function apagarVendaFornecedor(id){
   const ultimaDoGrupo = alvo && itensDoGrupoVF(id).length <= 1;
   const { error } = await sb.from('vendas_fornecedor').delete().eq('id', id);
   if(error){ alert(mensagemDeErro(error, 'Erro ao apagar')); return; }
-  if(ultimaDoGrupo && alvo.notasFiscais.length){
+  if(ultimaDoGrupo && (alvo.notasFiscais||[]).length){
     // Sem nenhuma linha apontando pra eles, os arquivos virariam lixo pago no Storage.
     try{ await sb.storage.from(BUCKET_NOTAS).remove(alvo.notasFiscais.map(n=>n.path)); }catch(e){ console.warn('Notas não removidas:', e); }
   }
@@ -5150,7 +5150,7 @@ function renderVendasFornecedor(){
       const marcaFrete = v.valorFrete > 0 ? ` <span class="tag" style="background:var(--tint-neutral);">+${money(v.valorFrete)} frete</span>` : '';
       const nota = (v.observacoes || '').trim();
       const notaHtml = nota ? `<div class="nota-interna" title="${esc(nota)}">${esc(nota)}</div>` : '';
-      tr.innerHTML = `<td>${v.dataVenda ? new Date(v.dataVenda).toLocaleString('pt-BR') : '—'}</td><td><span class="tag ${orcamento?'pendente':'pago'}">${orcamento?'Orçamento':'Vendido'}</span>${marcaFrete}</td><td>${esc(cliente ? cliente.nome : '—')}${notaHtml}</td><td data-col="telefone">${esc(v.telefone)}</td><td data-col="capacidade">${esc(v.capacidade||'—')}</td><td data-col="cor">${esc(v.cor||'—')}</td><td data-col="imei" class="mono" style="font-size:11.5px;">${esc(v.imei||'—')}</td><td data-col="envio">${ENVIO_LABEL[v.tipoEnvio]||v.tipoEnvio}</td><td><b>${money(v.valorVenda)}</b></td><td>${acaoSituacao}<span class="rm" onclick="iniciarEdicaoVF('${v.id}')">editar</span><span class="rm" onclick="abrirFreteObsVF('${v.id}')">frete e obs.</span><span class="rm" onclick="abrirNotasFiscaisVF('${v.id}')">${v.notasFiscais.length ? `nota fiscal (${v.notasFiscais.length})` : 'anexar nota fiscal'}</span><span class="rm" onclick="gerarPdfVendaFornecedor('${v.id}')">compartilhar PDF</span><span class="rm rm-zap" onclick="enviarWhatsappVendaFornecedor('${v.id}')">WhatsApp</span><span class="rm rm-perigo" onclick="apagarVendaFornecedor('${v.id}')">apagar</span></td>`;
+      tr.innerHTML = `<td>${v.dataVenda ? new Date(v.dataVenda).toLocaleString('pt-BR') : '—'}</td><td><span class="tag ${orcamento?'pendente':'pago'}">${orcamento?'Orçamento':'Vendido'}</span>${marcaFrete}</td><td>${esc(cliente ? cliente.nome : '—')}${notaHtml}</td><td data-col="telefone">${esc(v.telefone)}</td><td data-col="capacidade">${esc(v.capacidade||'—')}</td><td data-col="cor">${esc(v.cor||'—')}</td><td data-col="imei" class="mono" style="font-size:11.5px;">${esc(v.imei||'—')}</td><td data-col="envio">${ENVIO_LABEL[v.tipoEnvio]||v.tipoEnvio}</td><td><b>${money(v.valorVenda)}</b></td><td>${acaoSituacao}<span class="rm" onclick="iniciarEdicaoVF('${v.id}')">editar</span><span class="rm" onclick="abrirFreteObsVF('${v.id}')">frete e obs.</span><span class="rm" onclick="abrirNotasFiscaisVF('${v.id}')">${(v.notasFiscais||[]).length ? `nota fiscal (${v.notasFiscais.length})` : 'anexar nota fiscal'}</span><span class="rm" onclick="gerarPdfVendaFornecedor('${v.id}')">compartilhar PDF</span><span class="rm rm-zap" onclick="enviarWhatsappVendaFornecedor('${v.id}')">WhatsApp</span><span class="rm rm-perigo" onclick="apagarVendaFornecedor('${v.id}')">apagar</span></td>`;
     }
     tbody.appendChild(tr);
   });
